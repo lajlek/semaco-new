@@ -1,0 +1,14 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    App\Wishlist\:
+        resource: '../../src/Wishlist/'
+        exclude:
+            - '../../src/Wishlist/Entity/'
+
+    App\Wishlist\Controller\:
+        resource: '../../src/Wishlist/Controller/'
+        tags: ['controller.service_arguments']

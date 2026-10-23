@@ -38,7 +38,7 @@
                         {% endif %}
                     </td>
                     <td valign="top" class="text-right pr-5" data-js-product-variant-price>{% include 'shop/product/common/price_value.html.twig' with { variant } %}</td>
-                    <td>{% hook 'semaco_shop.product.show.variant_actions' with { product, variant } %}</td>
+                    <td>{% hook 'variant_actions' with { product, variant } %}</td>
                 </tr>
             {% endif %}
         {% endfor %}

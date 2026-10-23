@@ -1,0 +1,23 @@
+{% extends '@SyliusShop/shared/layout/base.html.twig' %}
+
+{% block title %}{{ 'app.wishlist.title'|trans({}, 'wishlist') }} | {{ parent() }}{% endblock %}
+
+{% block metatags %}
+    {{ parent() }}
+    <meta name="robots" content="noindex, nofollow">
+{% endblock %}
+
+{% block content %}
+    {% set product = variant.product %}
+    <div class="page-content pt-10 pb-10">
+        <div class="container">
+            <h1 class="title title-simple text-left">{{ 'app.wishlist.confirm_title'|trans({}, 'wishlist') }}</h1>
+            <p>{{ product.name }}{% if variant.name %} – {{ variant.name }}{% endif %} ({{ semaco_order_code(variant) }})</p>
+            <form method="post" action="{{ path('app_shop_wishlist_add_variant_submit', {variantId: variant.id}) }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('wishlist') }}">
+                <button type="submit" class="btn btn-primary btn-rounded">{{ 'app.wishlist.add'|trans({}, 'wishlist') }}</button>
+                <a class="btn btn-link" href="{{ path('sylius_shop_product_show', {slug: product.slug}) }}">{{ 'app.wishlist.back_to_product'|trans({}, 'wishlist') }}</a>
+            </form>
+        </div>
+    </div>
+{% endblock %}

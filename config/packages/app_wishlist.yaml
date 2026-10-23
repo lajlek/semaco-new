@@ -1,0 +1,6 @@
+sylius_twig_hooks:
+    hooks:
+        'semaco_shop.product.show.summary.variant_actions':
+            wishlist:
+                template: 'shop/wishlist/_toggle.html.twig'
+                priority: 0

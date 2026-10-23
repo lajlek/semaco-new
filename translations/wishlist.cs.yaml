@@ -1,0 +1,14 @@
+app:
+    wishlist:
+        title: 'Oblíbené'
+        add: 'Přidat do oblíbených'
+        remove: 'Odebrat z oblíbených'
+        confirm_title: 'Přidat do oblíbených?'
+        back_to_product: 'Zpět na produkt'
+        empty: 'Váš seznam oblíbených je prázdný.'
+        product: 'Produkt'
+        variant: 'Varianta'
+        price: 'Cena'
+        quantity: 'Počet ks'
+        quantity_rule: 'Odběr po %step% ks, minimálně %minimum% ks.'
+        add_to_cart: 'Přidat do košíku'

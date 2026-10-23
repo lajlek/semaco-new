@@ -7,3 +7,8 @@ app:
             reply_sent: 'Zpráva byla doplněna.'
             answer_sent: 'Odpověď byla odeslána zákazníkovi.'
             answer_invalid: 'Odpověď nebyla odeslána – vyplňte text odpovědi.'
+    wishlist:
+        added: 'Produkt byl přidán do oblíbených.'
+        removed: 'Produkt byl odebrán z oblíbených.'
+        added_to_cart: 'Vybrané produkty byly přidány do košíku.'
+        nothing_to_add: 'Vyplňte počet kusů u produktů, které chcete přidat do košíku.'

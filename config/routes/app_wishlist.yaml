@@ -1,0 +1,5 @@
+app_wishlist_controllers:
+    resource:
+        path: ../../src/Wishlist/Controller/
+        namespace: App\Wishlist\Controller
+    type: attribute

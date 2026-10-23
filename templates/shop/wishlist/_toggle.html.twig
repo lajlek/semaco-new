@@ -1,0 +1,18 @@
+{% set variant = variant is defined ? variant : hookable_metadata.context.variant %}
+{% set in_wishlist = semaco_wishlist_has(variant) %}
+<a href="{{ path('app_shop_wishlist_add_variant', {variantId: variant.id}) }}"
+   class="btn-product-icon semaco-wishlist-toggle{{ in_wishlist ? ' added' : '' }}"
+   role="button"
+   rel="nofollow"
+   data-wishlist-toggle
+   data-variant-id="{{ variant.id }}"
+   data-in-wishlist="{{ in_wishlist ? '1' : '0' }}"
+   data-add-url="{{ path('app_shop_wishlist_add_variant_submit', {variantId: variant.id}) }}"
+   data-remove-url="{{ path('app_shop_wishlist_remove_variant', {variantId: variant.id}) }}"
+   data-label-add="{{ 'app.wishlist.add'|trans({}, 'wishlist') }}"
+   data-label-remove="{{ 'app.wishlist.remove'|trans({}, 'wishlist') }}"
+   aria-pressed="{{ in_wishlist ? 'true' : 'false' }}"
+   title="{{ (in_wishlist ? 'app.wishlist.remove' : 'app.wishlist.add')|trans({}, 'wishlist') }}">
+    <i class="{{ in_wishlist ? 'd-icon-heart-full' : 'd-icon-heart' }}" aria-hidden="true"></i>
+    <span class="sr-only visually-hidden">{{ (in_wishlist ? 'app.wishlist.remove' : 'app.wishlist.add')|trans({}, 'wishlist') }}</span>
+</a>

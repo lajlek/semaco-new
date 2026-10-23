@@ -1,4 +1,6 @@
-<a href="/wishlist" class="wishlist" aria-label="{{ 'app.shop.header.wishlist'|trans }}">
-    <i class="d-icon-heart" aria-hidden="true"><span class="heart-count">0</span></i>
+{% set wishlist = semaco_wishlist() %}
+<a href="{{ path('app_shop_wishlist_index') }}" class="wishlist" aria-label="{{ 'app.shop.header.wishlist'|trans }}" data-wishlist-token="{{ csrf_token('wishlist') }}">
+    <i class="d-icon-heart" aria-hidden="true"><span class="heart-count" data-wishlist-count>{{ wishlist ? wishlist.count : 0 }}</span></i>
 </a>
 <span class="divider"></span>
+{% include 'shop/wishlist/_script.html.twig' %}

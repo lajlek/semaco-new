@@ -1,0 +1,56 @@
+<script>
+    var semacoWishlistQueue = Promise.resolve();
+    document.addEventListener('click', function (event) {
+        var link = event.target.closest('[data-wishlist-toggle]');
+        var tokenHolder = document.querySelector('[data-wishlist-token]');
+        if (!link || !tokenHolder || !window.fetch) {
+            return;
+        }
+        event.preventDefault();
+
+        var variantId = link.getAttribute('data-variant-id');
+        var body = new URLSearchParams();
+        body.append('_token', tokenHolder.getAttribute('data-wishlist-token'));
+
+        var request = semacoWishlistQueue.then(function () {
+            var current = document.querySelector('[data-wishlist-toggle][data-variant-id="' + variantId + '"]') || link;
+            var inWishlist = current.getAttribute('data-in-wishlist') === '1';
+
+            return fetch(link.getAttribute(inWishlist ? 'data-remove-url' : 'data-add-url'), {
+                method: 'POST',
+                body: body,
+                credentials: 'same-origin',
+                headers: {'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest'}
+            });
+        });
+        semacoWishlistQueue = request.catch(function () {});
+
+        request.then(function (response) {
+            if (!response.ok) {
+                throw new Error(String(response.status));
+            }
+            return response.json();
+        }).then(function (data) {
+            document.querySelectorAll('[data-wishlist-toggle][data-variant-id="' + variantId + '"]').forEach(function (toggle) {
+                var label = toggle.getAttribute(data.inWishlist ? 'data-label-remove' : 'data-label-add');
+                toggle.setAttribute('data-in-wishlist', data.inWishlist ? '1' : '0');
+                toggle.setAttribute('aria-pressed', data.inWishlist ? 'true' : 'false');
+                toggle.setAttribute('title', label);
+                toggle.classList.toggle('added', data.inWishlist);
+                var icon = toggle.querySelector('i');
+                if (icon) {
+                    icon.className = data.inWishlist ? 'd-icon-heart-full' : 'd-icon-heart';
+                }
+                var text = toggle.querySelector('.sr-only');
+                if (text) {
+                    text.textContent = label;
+                }
+            });
+            document.querySelectorAll('[data-wishlist-count]').forEach(function (counter) {
+                counter.textContent = data.count;
+            });
+        }).catch(function () {
+            window.location.href = link.href;
+        });
+    });
+</script>

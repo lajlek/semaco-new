@@ -1,0 +1,86 @@
+{% extends '@SyliusShop/shared/layout/base.html.twig' %}
+
+{% block title %}{{ 'app.wishlist.title'|trans({}, 'wishlist') }} | {{ parent() }}{% endblock %}
+
+{% block metatags %}
+    {{ parent() }}
+    <meta name="robots" content="noindex, nofollow">
+{% endblock %}
+
+{% block content %}
+    <nav class="breadcrumb-nav" aria-label="{{ 'app.shop.breadcrumb'|trans }}">
+        <div class="container">
+            <ul class="breadcrumb">
+                <li><a href="{{ path('sylius_shop_homepage') }}" aria-label="{{ 'sylius.ui.home'|trans }}"><i class="d-icon-home" aria-hidden="true"></i></a></li>
+                <li>{{ 'app.wishlist.title'|trans({}, 'wishlist') }}</li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="page-content pt-10 pb-10 mb-2">
+        <div class="container">
+            <h1 class="sr-only visually-hidden">{{ 'app.wishlist.title'|trans({}, 'wishlist') }}</h1>
+            {% if wishlist.count == 0 %}
+                <div class="alert alert-info">{{ 'app.wishlist.empty'|trans({}, 'wishlist') }}</div>
+            {% else %}
+                <form method="post" action="{{ path('app_shop_wishlist_add_to_cart') }}" id="wishlist-form">
+                    <input type="hidden" name="_token" value="{{ csrf_token('wishlist') }}">
+                    <table class="shop-table wishlist-table mt-2 mb-4">
+                        <thead>
+                            <tr>
+                                <th class="product-name" colspan="2" scope="col"><span>{{ 'app.wishlist.product'|trans({}, 'wishlist') }}</span></th>
+                                <th scope="col"><span>{{ 'app.wishlist.variant'|trans({}, 'wishlist') }}</span></th>
+                                <th class="product-price" scope="col"><span>{{ 'app.wishlist.price'|trans({}, 'wishlist') }}</span></th>
+                                <th scope="col"><span>{{ 'app.wishlist.quantity'|trans({}, 'wishlist') }}</span></th>
+                                <th class="product-remove" scope="col"><span class="sr-only visually-hidden">{{ 'app.wishlist.remove'|trans({}, 'wishlist') }}</span></th>
+                            </tr>
+                        </thead>
+                        <tbody class="wishlist-items-wrapper" id="wishlist">
+                            {% for item in wishlist.items %}
+                                {% set variant = item.variant %}
+                                {% set product = variant.product %}
+                                {% set quantity_step = max(product.quantityStep, 1) %}
+                                {% set minimum_quantity = max(product.minimumQuantity, quantity_step) %}
+                                <tr>
+                                    <td class="product-thumbnail">
+                                        <a href="{{ path('sylius_shop_product_show', {slug: product.slug}) }}">
+                                            <figure>{% include 'shop/product/common/image.html.twig' with {product, filter: 'semaco_product_tiny_thumbnail', width: 100} %}</figure>
+                                        </a>
+                                    </td>
+                                    <td class="product-name">
+                                        <a href="{{ path('sylius_shop_product_show', {slug: product.slug}) }}">{{ product.name }}</a>
+                                    </td>
+                                    <td>
+                                        {{ variant.name|default(variant.descriptor) }}<br>
+                                        <small>{{ semaco_order_code(variant) }}</small>
+                                    </td>
+                                    <td class="product-price">
+                                        <span class="amount">{% include 'shop/product/common/price_value.html.twig' with {variant} %}</span>
+                                    </td>
+                                    <td class="product-quantity">
+                                        <label class="sr-only visually-hidden" for="wishlist-quantity-{{ variant.id }}">{{ 'app.wishlist.quantity'|trans({}, 'wishlist') }} – {{ product.name }}</label>
+                                        <input type="number" class="form-control" id="wishlist-quantity-{{ variant.id }}" name="quantity[{{ variant.id }}]"
+                                               value="0" min="0" step="{{ quantity_step }}" inputmode="numeric" style="max-width: 10rem;">
+                                        {% if quantity_step > 1 or minimum_quantity > 1 %}
+                                            <small class="d-block mt-1">{{ 'app.wishlist.quantity_rule'|trans({'%step%': quantity_step, '%minimum%': minimum_quantity}, 'wishlist') }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td class="product-remove">
+                                        <button type="submit" class="remove btn btn-link p-0" formaction="{{ path('app_shop_wishlist_remove_variant', {variantId: variant.id}) }}"
+                                                title="{{ 'app.wishlist.remove'|trans({}, 'wishlist') }}">
+                                            <i class="fas fa-times" aria-hidden="true"></i>
+                                            <span class="sr-only visually-hidden">{{ 'app.wishlist.remove'|trans({}, 'wishlist') }}: {{ product.name }}</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <button type="submit" class="btn btn-primary btn-rounded">
+                        <i class="d-icon-bag" aria-hidden="true"></i> {{ 'app.wishlist.add_to_cart'|trans({}, 'wishlist') }}
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
