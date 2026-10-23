@@ -1,0 +1,44 @@
+{% extends '@SyliusShop/shared/layout/base.html.twig' %}
+
+{% block title %}{{ 'app.search.title'|trans({}, 'search') }} | {{ parent() }}{% endblock %}
+
+{% block content %}
+    <nav class="breadcrumb-nav" aria-label="{{ 'sylius.ui.breadcrumb'|trans }}">
+        <div class="container">
+            <ul class="breadcrumb">
+                <li><a href="{{ path('sylius_shop_homepage') }}" aria-label="{{ 'sylius.ui.home'|trans }}"><i class="d-icon-home" aria-hidden="true"></i></a></li>
+                <li>{{ 'app.search.title'|trans({}, 'search') }}</li>
+            </ul>
+        </div>
+    </nav>
+    <div class="page-content mb-10">
+        <div class="container">
+            <h1 class="title title-simple text-left">
+                {{ 'app.search.title'|trans({}, 'search') }}{% if query %}: „{{ query }}“{% endif %}
+            </h1>
+            {% if results is null %}
+                <p>{{ 'app.search.too_short'|trans({}, 'search') }}</p>
+            {% elseif results.nbResults == 0 %}
+                <p>{{ 'app.search.no_results'|trans({}, 'search') }}</p>
+            {% else %}
+                <p class="mb-4">{{ 'app.search.count'|trans({'%count%': results.nbResults}, 'search') }}</p>
+                <div class="row cols-2 cols-sm-3 cols-md-4 product-wrapper equal-height" id="products">
+                    {% for product in results %}
+                        <div class="product-wrap">
+                            {% include 'shop/product/common/card.html.twig' with { product } %}
+                        </div>
+                    {% endfor %}
+                </div>
+                {% if results.haveToPaginate() %}
+                    <div class="d-flex justify-content-end mt-3">
+                        {{ pagerfanta(results, 'twig', {
+                            template: '@BabDevPagerfanta/twitter_bootstrap4.html.twig',
+                            prev_message: '← ' ~ 'app.shop.listing.previous'|trans,
+                            next_message: 'app.shop.listing.next'|trans ~ ' →',
+                        }) }}
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

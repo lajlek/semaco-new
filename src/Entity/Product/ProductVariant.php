@@ -12,6 +12,7 @@ use Sylius\Component\Product\Model\ProductVariantTranslationInterface;
 #[ORM\Table(name: 'sylius_product_variant')]
 #[ORM\Index(name: 'IDX_variant_regcis', columns: ['regcis'])]
 #[ORM\Index(name: 'IDX_variant_external_id', columns: ['external_identifier'])]
+#[ORM\Index(name: 'IDX_variant_regcis_compact', columns: ['regcis_compact'])]
 class ProductVariant extends BaseProductVariant
 {
     #[ORM\Column(name: 'external_identifier', type: 'string', length: 128, nullable: true)]
@@ -19,6 +20,9 @@ class ProductVariant extends BaseProductVariant
 
     #[ORM\Column(name: 'regcis', type: 'string', length: 64, nullable: true)]
     private ?string $regcis = null;
+
+    #[ORM\Column(name: 'regcis_compact', type: 'string', length: 64, nullable: true)]
+    private ?string $regcisCompact = null;
 
     #[ORM\Column(name: 'barcode', type: 'string', length: 64, nullable: true)]
     private ?string $barcode = null;
@@ -41,6 +45,12 @@ class ProductVariant extends BaseProductVariant
     public function setRegcis(?string $regcis): void
     {
         $this->regcis = $regcis;
+        $this->regcisCompact = $regcis === null ? null : (string) preg_replace('/\s+/', '', $regcis);
+    }
+
+    public function getRegcisCompact(): ?string
+    {
+        return $this->regcisCompact;
     }
 
     public function getBarcode(): ?string
