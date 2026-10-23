@@ -1,0 +1,29 @@
+{% extends 'knp_menu.html.twig' %}
+
+{% block root %}
+    <nav class="semaco-account-menu" aria-labelledby="account-menu-heading">
+        <h2 class="h4" id="account-menu-heading">{{ item.label|trans }}</h2>
+        {{ block('list') }}
+    </nav>
+{% endblock %}
+
+{% block list %}
+    <ul class="list-unstyled mb-0">
+        {% for item in item.children %}
+            {{ block('item') }}
+        {% endfor %}
+    </ul>
+{% endblock %}
+
+{% block item %}
+    {% set current_path = app.request.pathInfo %}
+    {% set is_current = item.uri == current_path or (item.uri != path('sylius_shop_account_dashboard') and current_path starts with item.uri) %}
+    <li>
+        <a class="d-flex align-items-center gap-2{{ is_current ? ' active' }}" href="{{ item.uri }}"{% if is_current %} aria-current="page"{% endif %}>
+            {%- if item.labelAttributes.icon is defined %}
+                {{ ux_icon(item.labelAttributes.icon, {'class': 'icon', 'aria-hidden': 'true'}) }}
+            {%- endif %}
+            {{ item.label|trans }}
+        </a>
+    </li>
+{% endblock %}

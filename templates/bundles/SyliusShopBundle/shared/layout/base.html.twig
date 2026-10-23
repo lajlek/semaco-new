@@ -37,9 +37,11 @@
                     {% endif %}
                 {% endblock %}
 
-                <div class="{% block content_class %}sylius-scope sylius-scope-page{% endblock %}">
-                    {% block content %}{% endblock %}
-                </div>
+                <main class="{% block content_class %}sylius-scope sylius-scope-page{% endblock %}" id="main-content">
+                    {% block main %}
+                        {% block content %}{% endblock %}
+                    {% endblock %}
+                </main>
             </div>
 
             <footer class="footer">

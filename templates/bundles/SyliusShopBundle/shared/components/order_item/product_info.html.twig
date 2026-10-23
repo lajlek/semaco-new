@@ -1,0 +1,33 @@
+{% set variant = item.variant %}
+{% set product = variant.product %}
+
+<div class="d-flex align-items-start gap-3 semaco-order-item">
+    <div class="flex-shrink-0" style="width: 6rem;">
+        {{ component('sylius_shop:main_image', {
+            product: variant.hasImages ? variant : product,
+            class: "w-100 h-auto",
+            filter: 'sylius_shop_product_small_thumbnail'
+        }) }}
+    </div>
+    <div>
+        <div class="semaco-order-item-name">
+            <a class="link-reset text-break" href="{{ path('sylius_shop_product_show', {'slug': product.slug, '_locale': product.translation.locale}) }}" {{ sylius_test_html_attribute('product-name', item.productName) }}>
+                {{ item.productName }}
+            </a>
+        </div>
+
+        {% if variant.name is not empty %}
+            <div class="semaco-order-item-variant">{{ variant.name }}</div>
+        {% endif %}
+
+        <small class="d-block" {{ sylius_test_html_attribute('product-variant-code', variant.code) }}>{{ 'app.shop.product.order_code'|trans }} {{ semaco_order_code(variant) }}</small>
+
+        {% if product.hasOptions() and variant.optionValues is not empty %}
+            <div class="semaco-order-item-options" {{ sylius_test_html_attribute('product-options') }}>
+                {% for optionValue in variant.optionValues %}
+                    <small {{ sylius_test_html_attribute('option-name', optionValue.name) }}>{{ optionValue.name }}: <span {{ sylius_test_html_attribute('option-value') }}>{{ optionValue.value }}</span></small>{% if not loop.last %}<span aria-hidden="true">, </span>{% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div>

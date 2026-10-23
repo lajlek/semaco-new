@@ -1,0 +1,30 @@
+{% extends '@SyliusShop/shared/layout/base.html.twig' %}
+
+{% set prefixes = prefixes|default([])|merge(['sylius_shop.checkout.common']) %}
+
+{% block content_class %}sylius-scope sylius-scope-page semaco-checkout{% endblock %}
+
+{% block main %}
+    {% set checkout_prefixes = prefixes|filter(hook => hook != generic_hook) %}
+    <div class="container">
+        {% if active_step|default(null) is not null and order is defined %}
+            {% include 'shop/checkout/steps.html.twig' with { order: order, active_step: active_step } %}
+        {% endif %}
+        {% set has_sidebar = active_step|default(null) != 'complete' %}
+        <div class="row{% if not has_sidebar %} justify-content-center{% endif %}">
+            <div class="col-12 {{ has_sidebar ? 'col-lg-7 mb-5 mb-lg-0' : 'col-lg-10' }}">
+                {% block content %}{% endblock %}
+            </div>
+            {% block sidebar %}
+                <aside class="col-12 col-lg-5 semaco-checkout-sidebar" aria-label="{{ 'sylius.ui.summary'|trans }}">
+                    {% if active_step|default(null) is not null %}
+                        {% set hooks = [active_step ~ '.sidebar'] %}
+                    {% endif %}
+                    <div class="semaco-checkout-summary">
+                        {% hook hooks|default([])|merge(['sidebar']) with { _prefixes: checkout_prefixes, order } %}
+                    </div>
+                </aside>
+            {% endblock %}
+        </div>
+    </div>
+{% endblock %}

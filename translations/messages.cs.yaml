@@ -1,5 +1,12 @@
 app:
     shop:
+        checkout:
+            steps: 'Kroky objednávky'
+        account:
+            login_title: 'Login zákazníka'
+            login_subtitle: 'Přihlaste se k vašemu účtu nebo vytvořte nový'
+            login_hint: 'Pokud máte účet, přihlaste se pomocí e-mailu.'
+            login_button: 'Přihlásit'
         title: 'SEMACO tools and software'
         breadcrumb: 'Drobečková navigace'
         header:
@@ -18,6 +25,11 @@ app:
             subtotal: 'Mezisoučet'
             view_and_edit: 'Zobrazit a upravit obsah košíku'
             checkout: 'Objednat'
+            items_total_without_tax: 'Celkem bez DPH'
+            taxes_total: 'DPH'
+            order_total_with_tax: 'Objednávka celkem včetně DPH'
+            you_may_also_like: 'Taky se ti může líbit'
+            remove_item: 'Odebrat %product% z košíku'
         price:
             without_vat: 'bez DPH'
             without_vat_long: 'cena bez DPH'

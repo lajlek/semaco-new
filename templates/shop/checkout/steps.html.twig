@@ -1,0 +1,26 @@
+{% set active_step = active_step|default('') %}
+{% set order_requires_shipping = sylius_is_shipping_required(order) %}
+{% set order_requires_payment = sylius_is_payment_required(order) %}
+{% set order_of_steps = ['address', 'select_shipping', 'select_payment', 'complete'] %}
+{% set active_index = order_of_steps|filter(step => step == active_step)|keys|first|default(0) %}
+
+{% set steps = [
+    { 'name': 'address', 'route': 'sylius_shop_checkout_address', 'label': 'sylius.ui.address'|trans, 'required': true, 'test_attribute': 'step-address' },
+    { 'name': 'select_shipping', 'route': 'sylius_shop_checkout_select_shipping', 'label': 'sylius.ui.shipping'|trans, 'required': order_requires_shipping, 'test_attribute': 'step-shipping' },
+    { 'name': 'select_payment', 'route': 'sylius_shop_checkout_select_payment', 'label': 'sylius.ui.payment'|trans, 'required': order_requires_payment, 'test_attribute': 'step-payment' },
+    { 'name': 'complete', 'route': 'sylius_shop_checkout_complete', 'label': 'sylius.ui.complete'|trans, 'required': true, 'test_attribute': 'step-complete' },
+] %}
+
+<nav class="step-by semaco-steps mb-5" aria-label="{{ 'app.shop.checkout.steps'|trans }}">
+    {% for index, step in steps|filter(step => step.required) %}
+        {% set position = order_of_steps|filter(name => name == step.name)|keys|first %}
+        {% set state = step.name == active_step ? 'active' : (position < active_index ? 'visited' : 'disabled') %}
+        <h2 class="title title-simple title-step {{ state }}">
+            {% if state == 'disabled' %}
+                <span>{{ step.label }}</span>
+            {% else %}
+                <a href="{{ path(step.route) }}" {% if state == 'active' %}aria-current="step"{% endif %} {{ sylius_test_html_attribute(step.test_attribute) }}>{{ step.label }}</a>
+            {% endif %}
+        </h2>
+    {% endfor %}
+</nav>

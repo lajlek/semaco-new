@@ -1,0 +1,15 @@
+{% import "@SyliusShop/shared/macro/money.html.twig" as money %}
+
+{% set cart = hookable_metadata.context.cart %}
+
+<ul class="list-unstyled semaco-summary-items">
+    {% for item in cart.items %}
+        <li class="hstack gap-3 align-items-start">
+            <span>
+                <span class="d-block text-dark">{{ item.variant.product.name }}</span>
+                {{ item.variant.name }} <span class="text-nowrap">×&nbsp;{{ item.quantity }}</span>
+            </span>
+            <span class="ms-auto text-end text-nowrap">{{ money.convertAndFormat(item.subtotal) }}</span>
+        </li>
+    {% endfor %}
+</ul>

@@ -1,0 +1,15 @@
+{% set form = hookable_metadata.context.form %}
+{% set messages = [] %}
+{% for item_form in form.items %}
+    {% for error in item_form.quantity.vars.errors %}
+        {% set messages = messages|merge([error.message]) %}
+    {% endfor %}
+{% endfor %}
+
+{% if messages is not empty %}
+    <div class="alert alert-danger" id="cart-item-errors" role="alert">
+        {% for message in messages|reduce((unique, message) => message in unique ? unique : unique|merge([message]), []) %}
+            <div>{{ message }}</div>
+        {% endfor %}
+    </div>
+{% endif %}

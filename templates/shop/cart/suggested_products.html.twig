@@ -1,0 +1,10 @@
+<section class="semaco-cart-suggestions" aria-labelledby="cart-suggestions-heading" {{ attributes }}>
+    <h2 class="title title-center" id="cart-suggestions-heading">{{ 'app.shop.cart.you_may_also_like'|trans }}</h2>
+    <div class="row product-wrapper equal-height">
+        {% for product in latest_products %}
+            <div class="col-md-3 col-6">
+                {% include 'shop/product/common/card.html.twig' with { product } %}
+            </div>
+        {% endfor %}
+    </div>
+</section>

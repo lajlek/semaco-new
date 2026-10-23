@@ -1,0 +1,9 @@
+{% set form = hookable_metadata.context.form %}
+{% set quantity_attr = {'aria-label': 'sylius.ui.quantity'|trans} %}
+{% if form.quantity.vars.errors|length > 0 %}
+    {% set quantity_attr = quantity_attr|merge({'aria-describedby': 'cart-item-errors', 'aria-invalid': 'true'}) %}
+{% endif %}
+
+<td>
+    {{ form_widget(form.quantity, sylius_test_form_attribute('cart-item-quantity')|sylius_merge_recursive({attr: quantity_attr})) }}
+</td>

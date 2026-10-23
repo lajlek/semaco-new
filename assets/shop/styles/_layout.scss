@@ -41,3 +41,22 @@ html {
 .text-lowercase {
     text-transform: lowercase !important;
 }
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin-bottom: 0;
+}
+
+body > .page-wrapper {
+    flex: 1 0 auto;
+}
+
+.footer {
+    position: static;
+    height: auto;
+    min-height: 22rem;
+    line-height: inherit;
+    padding: 4rem 0 2rem;
+}

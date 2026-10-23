@@ -211,6 +211,102 @@ sylius_twig_hooks:
                 template: 'shop/product/show/associations.html.twig'
                 priority: 0
 
+        'sylius_shop.account.login':
+            content:
+                template: 'shop/account/login/content.html.twig'
+
+        'sylius_shop.account.login.content':
+            login_container:
+                template: 'shop/account/login/login_container.html.twig'
+            register_container:
+                template: 'shop/account/login/register_container.html.twig'
+
+        'sylius_shop.account.login.content.login_container':
+            header:
+                template: 'shop/account/login/header.html.twig'
+            forgot_password:
+                enabled: false
+
+        'sylius_shop.account.login.content.login_container.form':
+            submit:
+                template: 'shop/account/login/submit.html.twig'
+
+        'sylius_shop.checkout.address.content':
+            steps:
+                enabled: false
+
+        'sylius_shop.checkout.select_shipping.content':
+            steps:
+                enabled: false
+
+        'sylius_shop.checkout.select_payment.content':
+            steps:
+                enabled: false
+
+        'sylius_shop.checkout.complete.content':
+            steps:
+                enabled: false
+
+        'sylius_shop.checkout.common.header':
+            logo:
+                enabled: false
+            account:
+                enabled: false
+
+        'sylius_shop.account.forgotten_password':
+            content:
+                template: 'shop/account/forgotten_password/content.html.twig'
+
+        'sylius_shop.account.forgotten_password.content':
+            form_container:
+                template: 'shop/account/forgotten_password/form_container.html.twig'
+            register_container:
+                enabled: false
+
+        'sylius_shop.account.forgotten_password.content.form_container':
+            header:
+                enabled: false
+            description:
+                enabled: false
+
+        'sylius_shop.account.forgotten_password.content.form_container.form':
+            submit:
+                template: 'shop/account/forgotten_password/submit.html.twig'
+
+        'sylius_shop.account.reset_password':
+            content:
+                template: 'shop/account/reset_password/content.html.twig'
+
+        'sylius_shop.account.reset_password.content':
+            header:
+                template: 'shop/account/reset_password/header.html.twig'
+
+        'sylius_shop.account.reset_password.content.form.general':
+            submit:
+                template: 'shop/account/reset_password/submit.html.twig'
+
+        'sylius_shop.cart.index.content':
+            suggested_products:
+                component: 'sylius_shop:product:list'
+                props:
+                    limit: 4
+                    template: 'shop/cart/suggested_products.html.twig'
+                priority: 0
+
+        'sylius_shop.cart.index.content.form.sections.general#left':
+            item_errors:
+                template: 'shop/cart/item_errors.html.twig'
+                priority: 300
+            coupon:
+                enabled: false
+            clear_cart:
+                enabled: false
+
+        'sylius_shop.cart.index.content.form.sections.general.summary':
+            items:
+                template: 'shop/cart/summary/items.html.twig'
+                priority: 600
+
 liip_imagine:
     filter_sets:
         semaco_product_tiny_thumbnail:
