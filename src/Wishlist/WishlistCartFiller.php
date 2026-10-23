@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Wishlist;
 
-use App\Entity\Product\Product;
+use App\Checkout\Quantity\QuantityRules;
 use App\Entity\Product\ProductVariant;
 use Doctrine\ORM\EntityManagerInterface;
 use Sylius\Bundle\OrderBundle\Factory\AddToCartCommandFactoryInterface;
@@ -36,16 +36,7 @@ final readonly class WishlistCartFiller
 
     public static function normalizeQuantity(ProductVariant $variant, int $quantity): int
     {
-        if ($quantity <= 0) {
-            return 0;
-        }
-
-        $product = $variant->getProduct();
-        $step = $product instanceof Product ? max(1, $product->getQuantityStep()) : 1;
-        $minimum = $product instanceof Product ? max($product->getMinimumQuantity(), $step) : 1;
-        $quantity = max($quantity, $minimum);
-
-        return (int) (ceil($quantity / $step) * $step);
+        return QuantityRules::forVariant($variant)->normalize($quantity);
     }
 
     /**

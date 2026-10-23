@@ -1,0 +1,3 @@
+app:
+    order_item:
+        quantity_rules: 'Produkt {{ product }} lze objednat jen po {{ step }} ks, minimálně {{ minimum }} ks.'
