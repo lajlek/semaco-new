@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Erp\Application\Sync;
 
 use App\Erp\Application\Catalog\AttributeGroupImporter;
+use App\Erp\Application\Catalog\ProductAssociationImporter;
 use App\Erp\Application\Catalog\ProductImporter;
 use App\Erp\Application\Catalog\TaxonImporter;
 use App\Erp\Application\Customer\OrganizationImporter;
@@ -30,7 +31,9 @@ final readonly class CatalogSyncService
 
     public const STEP_ORGANIZATIONS = 'organizations';
 
-    public const STEPS = [self::STEP_TAXONS, self::STEP_ATTRIBUTES, self::STEP_PRODUCTS, self::STEP_PRICES, self::STEP_STOCK, self::STEP_ORGANIZATIONS];
+    public const STEP_ASSOCIATIONS = 'associations';
+
+    public const STEPS = [self::STEP_TAXONS, self::STEP_ATTRIBUTES, self::STEP_PRODUCTS, self::STEP_ASSOCIATIONS, self::STEP_PRICES, self::STEP_STOCK, self::STEP_ORGANIZATIONS];
 
     public function __construct(
         private TaxonImporter $taxonImporter,
@@ -40,6 +43,7 @@ final readonly class CatalogSyncService
         private PriceImporter $priceImporter,
         private StockImporter $stockImporter,
         private OrganizationImporter $organizationImporter,
+        private ProductAssociationImporter $associationImporter,
         private SyncWatermarkRecorder $watermarks,
     ) {
     }
@@ -78,6 +82,10 @@ final readonly class CatalogSyncService
             );
             $this->watermarks->recordPullSuccess(ErpSyncWatermark::DOMAIN_PRODUCT, $maxModifiedAt, $runStartedAt, $since);
             $onStepFinished($result);
+        }
+
+        if (in_array(self::STEP_ASSOCIATIONS, $steps, true)) {
+            $onStepFinished($this->associationImporter->import());
         }
 
         if (in_array(self::STEP_PRICES, $steps, true)) {

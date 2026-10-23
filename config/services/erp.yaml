@@ -46,6 +46,7 @@ services:
     App\Erp\Port\Pricing\PriceLevelSyncInterface: '@App\Erp\Adapter\Helios\Pricing\HeliosPriceLevelSyncAdapter'
     App\Erp\Port\Pricing\PricingProviderInterface: '@App\Erp\Adapter\Helios\Pricing\HeliosPricingAdapter'
     App\Erp\Port\Inventory\InventoryProviderInterface: '@App\Erp\Adapter\Helios\Inventory\HeliosInventoryAdapter'
+    App\Erp\Port\Catalog\ProductAssociationSyncInterface: '@App\Erp\Adapter\Helios\Association\HeliosProductAssociationSyncAdapter'
     App\Erp\Port\Customer\OrganizationSyncInterface: '@App\Erp\Adapter\Helios\Organization\HeliosOrganizationSyncAdapter'
 
     App\Erp\Application\Catalog\TaxonImporter:
@@ -81,3 +82,9 @@ services:
         arguments:
             $priceLevelExternalIdentifiers: '%app.erp.price_levels%'
             $channelPriceLevelExternalIdentifier: '%app.erp.channel_price_level%'
+
+    App\Erp\Application\Catalog\ProductAssociationImporter:
+        arguments:
+            $associationTypeRepository: '@sylius.repository.product_association_type'
+            $associationTypeFactory: '@sylius.factory.product_association_type'
+            $associationFactory: '@sylius.factory.product_association'
