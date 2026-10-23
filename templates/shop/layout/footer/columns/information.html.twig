@@ -4,6 +4,7 @@
         <ul class="widget-body">
             {% include 'shop/layout/information_links.html.twig' %}
             <li><a href="{{ path('sylius_shop_contact_request') }}">{{ 'app.shop.footer.contact_form'|trans }}</a></li>
+            <li><a href="{{ path('app_shop_withdrawal') }}">{{ 'app.withdrawal.title'|trans({}, 'withdrawal') }}</a></li>
         </ul>
     </div>
 </div>

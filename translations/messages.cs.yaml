@@ -79,3 +79,5 @@ app:
         registration_requests: 'Žádosti o registraci'
         contact_message: 'Zpráva z kontaktního formuláře'
         contact_messages: 'Kontaktní formulář'
+        withdrawal_request: 'Odstoupení od smlouvy'
+        withdrawal_requests: 'Odstoupení od smlouvy'

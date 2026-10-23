@@ -1,0 +1,19 @@
+{% extends 'email/layout.html.twig' %}
+
+{% block subject %}Odstoupení od smlouvy – objednávka {{ withdrawal.orderNumber }}{% if not withdrawal.orderMatched %} (nespárováno){% endif %}{% endblock %}
+
+{% block content %}
+    <p>Zákazník podal online odstoupení od smlouvy dne {{ withdrawal.submittedAt|date('d. m. Y') }} v {{ withdrawal.submittedAt|date('H:i:s') }}.</p>
+    <p>{% if withdrawal.orderMatched %}Objednávka č. {{ withdrawal.order.number }} odpovídá e-mailu zákazníka.{% else %}Objednávku s tímto číslem a e-mailem se nepodařilo dohledat – ověřte ručně.{% endif %}</p>
+    <p>
+        Jméno: {{ withdrawal.fullName }}<br>
+        E-mail: {{ withdrawal.email }}<br>
+        Telefon: {{ withdrawal.phone ?: '—' }}<br>
+        Adresa: {{ withdrawal.address ?: '—' }}<br>
+        Číslo objednávky: {{ withdrawal.orderNumber }}<br>
+        Zboží převzato: {{ withdrawal.receivedOn ?: '—' }}<br>
+        Účet pro vrácení peněz: {{ withdrawal.bankAccount ?: '—' }}
+    </p>
+    <p>Zboží:<br>{{ withdrawal.items|nl2br }}</p>
+    {% if withdrawal.note %}<p>Poznámka:<br>{{ withdrawal.note|nl2br }}</p>{% endif %}
+{% endblock %}

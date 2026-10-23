@@ -1,0 +1,7 @@
+{% set order = hookable_metadata.context.order %}
+
+{% import '@SyliusShop/shared/buttons.html.twig' as buttons %}
+
+{% if order.checkoutCompletedAt is not null and order.state != constant('Sylius\\Component\\Core\\Model\\OrderInterface::STATE_CANCELLED') %}
+    {{ buttons.default(path('app_shop_withdrawal', {order: order.number}), 'app.withdrawal.button'|trans({}, 'withdrawal'), null, 'tabler:arrow-back-up', 'btn-outline-secondary') }}
+{% endif %}

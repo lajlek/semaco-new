@@ -1,0 +1,16 @@
+app_withdrawal_controllers:
+    resource:
+        path: ../../src/Withdrawal/Controller/
+        namespace: App\Withdrawal\Controller
+    type: attribute
+
+app_admin_withdrawal_request:
+    resource: |
+        alias: app.withdrawal_request
+        section: admin
+        templates: "@SyliusAdmin\\shared\\crud"
+        only: ['index', 'show']
+        grid: app_admin_withdrawal_request
+        permission: false
+    type: sylius.resource
+    prefix: /admin

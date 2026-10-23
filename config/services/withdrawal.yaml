@@ -1,0 +1,18 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    App\Withdrawal\:
+        resource: '../../src/Withdrawal/'
+        exclude:
+            - '../../src/Withdrawal/Entity/'
+
+    App\Withdrawal\Controller\:
+        resource: '../../src/Withdrawal/Controller/'
+        tags: ['controller.service_arguments']
+
+    App\Withdrawal\Mailer\WithdrawalMailer:
+        arguments:
+            $localeCode: '%app.erp.locale_code%'

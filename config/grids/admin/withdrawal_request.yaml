@@ -1,0 +1,52 @@
+sylius_grid:
+    grids:
+        app_admin_withdrawal_request:
+            driver:
+                name: doctrine/orm
+                options:
+                    class: App\Withdrawal\Entity\WithdrawalRequest
+            sorting:
+                submittedAt: desc
+            limits: [25, 50, 100]
+            fields:
+                submittedAt:
+                    type: datetime
+                    label: Podáno
+                    sortable: submittedAt
+                    options:
+                        format: 'd. m. Y H:i'
+                orderNumber:
+                    type: string
+                    label: Objednávka
+                    sortable: orderNumber
+                orderMatched:
+                    type: twig
+                    label: Spárováno
+                    options:
+                        template: '@SyliusAdmin/shared/grid/field/boolean.html.twig'
+                fullName:
+                    type: string
+                    label: Zákazník
+                    sortable: fullName
+                email:
+                    type: string
+                    label: E-mail
+                    sortable: email
+                handled:
+                    type: twig
+                    label: Vyřízeno
+                    options:
+                        template: '@SyliusAdmin/shared/grid/field/boolean.html.twig'
+            filters:
+                search:
+                    type: string
+                    label: sylius.ui.search
+                    options:
+                        fields: [orderNumber, fullName, email]
+                submittedAt:
+                    type: date
+                    label: Podáno
+            actions:
+                item:
+                    show:
+                        type: show

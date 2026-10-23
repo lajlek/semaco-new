@@ -1,0 +1,51 @@
+{% set withdrawal = hookable_metadata.context.resource %}
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row">
+            <div class="col-12 col-lg-8 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Odstoupení od smlouvy</h3>
+                        <div class="card-actions text-secondary">Podáno {{ withdrawal.submittedAt|date('d. m. Y H:i:s') }}</div>
+                    </div>
+                    <div class="card-body">
+                        {% include 'shop/withdrawal/_summary.html.twig' %}
+                    </div>
+                    <div class="card-footer text-secondary small">
+                        {% if withdrawal.ip %}IP {{ withdrawal.ip }}{% endif %}{% if withdrawal.userAgent %} · {{ withdrawal.userAgent }}{% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-4 mb-3">
+                <div class="card mb-3">
+                    <div class="card-header"><h3 class="card-title">Objednávka</h3></div>
+                    <div class="card-body">
+                        {% if withdrawal.order %}
+                            <a href="{{ path('sylius_admin_order_show', {id: withdrawal.order.id}) }}">#{{ withdrawal.order.number }}</a>
+                            <p class="text-secondary small mb-0">Číslo i e-mail odpovídají objednávce.</p>
+                        {% else %}
+                            <p class="mb-0">Nespárováno – číslo {{ withdrawal.orderNumber }} s e-mailem zákazníka nenalezeno. Ověřte ručně.</p>
+                        {% endif %}
+                        {% if withdrawal.customer %}
+                            <p class="mt-2 mb-0">Účet: <a href="{{ path('sylius_admin_customer_show', {id: withdrawal.customer.id}) }}">{{ withdrawal.customer.email }}</a></p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3 class="card-title">Stav</h3></div>
+                    <div class="card-body">
+                        {% if withdrawal.handled %}
+                            <span class="badge bg-green-lt">Vyřízeno {{ withdrawal.handledAt|date('d. m. Y H:i') }}</span>
+                        {% else %}
+                            <form method="post" action="{{ path('app_admin_withdrawal_request_handle', {id: withdrawal.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('withdrawal_handle_' ~ withdrawal.id) }}">
+                                <button type="submit" class="btn btn-primary">{{ ux_icon('tabler:check', {class: 'icon'}) }} Označit jako vyřízené</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

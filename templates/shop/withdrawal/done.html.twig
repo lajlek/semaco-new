@@ -1,0 +1,21 @@
+{% extends '@SyliusShop/shared/layout/base.html.twig' %}
+
+{% block title %}{{ 'app.withdrawal.title'|trans({}, 'withdrawal') }} | {{ parent() }}{% endblock %}
+
+{% block metatags %}
+    {{ parent() }}
+    <meta name="robots" content="noindex, nofollow">
+{% endblock %}
+
+{% block content %}
+    {% include 'shop/withdrawal/_header.html.twig' %}
+    <div class="page-content mt-10 pt-7 mb-10">
+        <div class="container">
+            <div class="alert alert-success" role="status">
+                {{ 'app.withdrawal.done_text'|trans({'%date%': withdrawal.submittedAt|date('d. m. Y'), '%time%': withdrawal.submittedAt|date('H:i:s')}, 'withdrawal') }}
+            </div>
+            <p>{{ 'app.withdrawal.done_email'|trans({'%email%': withdrawal.email}, 'withdrawal') }}</p>
+            <div class="card"><div class="card-body">{% include 'shop/withdrawal/_summary.html.twig' %}</div></div>
+        </div>
+    </div>
+{% endblock %}

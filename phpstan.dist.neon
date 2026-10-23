@@ -18,6 +18,7 @@ parameters:
                 - src/Cms/Entity/
                 - src/Inquiry/Entity/
                 - src/Wishlist/Entity/
+                - src/Withdrawal/Entity/
         -
             message: '#Interface .+RepositoryInterface extends generic interface Sylius\\Resource\\Doctrine\\Persistence\\RepositoryInterface but does not specify its types: T#'
             paths:

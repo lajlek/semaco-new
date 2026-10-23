@@ -1,0 +1,11 @@
+<dl class="row mb-0">
+    <dt class="col-sm-4">{{ 'app.withdrawal.field.full_name'|trans({}, 'withdrawal') }}</dt><dd class="col-sm-8">{{ withdrawal.fullName }}</dd>
+    <dt class="col-sm-4">{{ 'app.withdrawal.field.email'|trans({}, 'withdrawal') }}</dt><dd class="col-sm-8">{{ withdrawal.email }}</dd>
+    {% if withdrawal.phone %}<dt class="col-sm-4">{{ 'app.withdrawal.field.phone'|trans({}, 'withdrawal') }}</dt><dd class="col-sm-8">{{ withdrawal.phone }}</dd>{% endif %}
+    {% if withdrawal.address %}<dt class="col-sm-4">{{ 'app.withdrawal.field.address'|trans({}, 'withdrawal') }}</dt><dd class="col-sm-8">{{ withdrawal.address }}</dd>{% endif %}
+    <dt class="col-sm-4">{{ 'app.withdrawal.field.order_number'|trans({}, 'withdrawal') }}</dt><dd class="col-sm-8">{{ withdrawal.orderNumber }}</dd>
+    {% if withdrawal.receivedOn %}<dt class="col-sm-4">{{ 'app.withdrawal.field.received_on'|trans({}, 'withdrawal') }}</dt><dd class="col-sm-8">{{ withdrawal.receivedOn }}</dd>{% endif %}
+    <dt class="col-sm-4">{{ 'app.withdrawal.field.items'|trans({}, 'withdrawal') }}</dt><dd class="col-sm-8">{{ withdrawal.items|nl2br }}</dd>
+    {% if withdrawal.bankAccount %}<dt class="col-sm-4">{{ 'app.withdrawal.field.bank_account'|trans({}, 'withdrawal') }}</dt><dd class="col-sm-8">{{ withdrawal.bankAccount }}</dd>{% endif %}
+    {% if withdrawal.note %}<dt class="col-sm-4">{{ 'app.withdrawal.field.note'|trans({}, 'withdrawal') }}</dt><dd class="col-sm-8">{{ withdrawal.note|nl2br }}</dd>{% endif %}
+</dl>

@@ -1,0 +1,29 @@
+{% extends '@SyliusShop/shared/layout/base.html.twig' %}
+
+{% block title %}{{ 'app.withdrawal.title'|trans({}, 'withdrawal') }} | {{ parent() }}{% endblock %}
+
+{% block metatags %}
+    {{ parent() }}
+    <meta name="robots" content="noindex, nofollow">
+{% endblock %}
+
+{% block content %}
+    {% include 'shop/withdrawal/_header.html.twig' %}
+    <div class="page-content mt-10 pt-7 mb-10">
+        <div class="container">
+            <ol class="semaco-withdrawal-steps list-inline mb-4" aria-label="{{ 'app.withdrawal.steps'|trans({}, 'withdrawal') }}">
+                <li class="list-inline-item">1. {{ 'app.withdrawal.step_form'|trans({}, 'withdrawal') }}</li>
+                <li class="list-inline-item font-weight-bold" aria-current="step">2. {{ 'app.withdrawal.step_confirm'|trans({}, 'withdrawal') }}</li>
+                <li class="list-inline-item">3. {{ 'app.withdrawal.step_done'|trans({}, 'withdrawal') }}</li>
+            </ol>
+            <h2 class="h4">{{ 'app.withdrawal.confirm_title'|trans({}, 'withdrawal') }}</h2>
+            <p>{{ 'app.withdrawal.confirm_text'|trans({}, 'withdrawal') }}</p>
+            <div class="card mb-4"><div class="card-body">{% include 'shop/withdrawal/_summary.html.twig' %}</div></div>
+            <form method="post" action="{{ path('app_shop_withdrawal_confirm') }}" class="d-inline">
+                <input type="hidden" name="_token" value="{{ csrf_token('withdrawal_confirm') }}">
+                <button type="submit" class="btn btn-primary btn-rounded">{{ 'app.withdrawal.confirm_button'|trans({}, 'withdrawal') }}</button>
+            </form>
+            <a class="btn btn-link" href="{{ path('app_shop_withdrawal') }}">{{ 'app.withdrawal.edit'|trans({}, 'withdrawal') }}</a>
+        </div>
+    </div>
+{% endblock %}

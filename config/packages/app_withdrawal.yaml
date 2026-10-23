@@ -1,0 +1,27 @@
+sylius_resource:
+    resources:
+        app.withdrawal_request:
+            driver: doctrine/orm
+            classes:
+                model: App\Withdrawal\Entity\WithdrawalRequest
+
+sylius_mailer:
+    emails:
+        app_withdrawal_customer:
+            subject: 'Potvrzení přijetí odstoupení od smlouvy'
+            template: 'email/withdrawal/customer.html.twig'
+        app_withdrawal_admin:
+            subject: 'Odstoupení od smlouvy'
+            template: 'email/withdrawal/admin.html.twig'
+
+sylius_twig_hooks:
+    hooks:
+        'sylius_admin.withdrawal_request.show.content':
+            detail:
+                template: 'admin/withdrawal/show.html.twig'
+                priority: 0
+
+        'sylius_shop.account.order.show.content.main.header.buttons':
+            withdrawal:
+                template: 'shop/withdrawal/account_order_button.html.twig'
+                priority: -10

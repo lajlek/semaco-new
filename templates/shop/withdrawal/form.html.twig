@@ -1,0 +1,52 @@
+{% extends '@SyliusShop/shared/layout/base.html.twig' %}
+
+{% form_theme form '@SyliusShop/form/theme.html.twig' %}
+
+{% block title %}{{ 'app.withdrawal.title'|trans({}, 'withdrawal') }} | {{ parent() }}{% endblock %}
+
+{% block content %}
+    {% include 'shop/withdrawal/_header.html.twig' %}
+    <div class="page-content mt-10 pt-7 mb-10">
+        <div class="container">
+            <ol class="semaco-withdrawal-steps list-inline mb-4" aria-label="{{ 'app.withdrawal.steps'|trans({}, 'withdrawal') }}">
+                <li class="list-inline-item font-weight-bold" aria-current="step">1. {{ 'app.withdrawal.step_form'|trans({}, 'withdrawal') }}</li>
+                <li class="list-inline-item">2. {{ 'app.withdrawal.step_confirm'|trans({}, 'withdrawal') }}</li>
+                <li class="list-inline-item">3. {{ 'app.withdrawal.step_done'|trans({}, 'withdrawal') }}</li>
+            </ol>
+            <div class="row">
+                <div class="col-lg-8 mb-4">
+                    {{ form_start(form, {attr: {id: 'withdrawal_form', novalidate: 'novalidate'}}) }}
+                        {{ form_errors(form) }}
+                        <div class="row">
+                            <div class="col-md-6">{{ form_row(form.fullName) }}</div>
+                            <div class="col-md-6">{{ form_row(form.email) }}</div>
+                            <div class="col-md-6">{{ form_row(form.phone) }}</div>
+                            <div class="col-md-6">{{ form_row(form.address) }}</div>
+                            <div class="col-md-6">{{ form_row(form.orderNumber) }}</div>
+                            <div class="col-md-6">{{ form_row(form.receivedOn) }}</div>
+                            <div class="col-12">{{ form_row(form.items) }}</div>
+                            <div class="col-md-6">{{ form_row(form.bankAccount) }}</div>
+                            <div class="col-12">{{ form_row(form.note) }}</div>
+                        </div>
+                        <div class="d-none" aria-hidden="true">{{ form_row(form.website) }}</div>
+                        {% if recaptcha_site_key %}
+                            <button class="g-recaptcha btn btn-dark btn-rounded" data-sitekey="{{ recaptcha_site_key }}" data-callback="semacoWithdrawalSubmit">{{ 'app.withdrawal.continue'|trans({}, 'withdrawal') }}</button>
+                            <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+                            <script>function semacoWithdrawalSubmit() { document.getElementById('withdrawal_form').requestSubmit(); }</script>
+                        {% else %}
+                            <button type="submit" class="btn btn-dark btn-rounded">{{ 'app.withdrawal.continue'|trans({}, 'withdrawal') }}</button>
+                        {% endif %}
+                    {{ form_end(form) }}
+                </div>
+                <aside class="col-lg-4 mb-4">
+                    <div class="grey-section p-4">
+                        <h2 class="h4">{{ 'app.withdrawal.info_title'|trans({}, 'withdrawal') }}</h2>
+                        <p>{{ 'app.withdrawal.info_right'|trans({}, 'withdrawal') }}</p>
+                        <p>{{ 'app.withdrawal.info_process'|trans({}, 'withdrawal') }}</p>
+                        <p class="mb-0"><a href="{{ path('app_shop_cms_page_show', {slug: 'obchodni-podminky'}) }}">{{ 'app.withdrawal.terms_link'|trans({}, 'withdrawal') }}</a></p>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </div>
+{% endblock %}

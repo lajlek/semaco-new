@@ -61,6 +61,12 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Wishlist/Entity'
                 prefix: 'App\Wishlist\Entity'
                 alias: Wishlist
+            Withdrawal:
+                is_bundle: false
+                type: attribute
+                dir: '%kernel.project_dir%/src/Withdrawal/Entity'
+                prefix: 'App\Withdrawal\Entity'
+                alias: Withdrawal
 
 when@prod: &doctrine_prod
     doctrine:

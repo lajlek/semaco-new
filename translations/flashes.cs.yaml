@@ -12,3 +12,6 @@ app:
         removed: 'Produkt byl odebrán z oblíbených.'
         added_to_cart: 'Vybrané produkty byly přidány do košíku.'
         nothing_to_add: 'Vyplňte počet kusů u produktů, které chcete přidat do košíku.'
+    withdrawal:
+        expired: 'Platnost formuláře vypršela, potvrďte prosím odstoupení znovu.'
+        handled: 'Odstoupení bylo označeno jako vyřízené.'

@@ -1,0 +1,23 @@
+{% extends 'email/layout.html.twig' %}
+
+{% block subject %}Potvrzení přijetí odstoupení od smlouvy – objednávka {{ withdrawal.orderNumber }}{% endblock %}
+
+{% block content %}
+    <p>Dobrý den,</p>
+    <p>potvrzujeme, že jsme dne {{ withdrawal.submittedAt|date('d. m. Y') }} v {{ withdrawal.submittedAt|date('H:i:s') }} přijali Vaše odstoupení od smlouvy s tímto obsahem:</p>
+    <table cellpadding="4" cellspacing="0" style="border-collapse: collapse;">
+        <tr><td>Jméno a příjmení:</td><td>{{ withdrawal.fullName }}</td></tr>
+        <tr><td>E-mail:</td><td>{{ withdrawal.email }}</td></tr>
+        {% if withdrawal.phone %}<tr><td>Telefon:</td><td>{{ withdrawal.phone }}</td></tr>{% endif %}
+        {% if withdrawal.address %}<tr><td>Adresa:</td><td>{{ withdrawal.address }}</td></tr>{% endif %}
+        <tr><td>Číslo objednávky:</td><td>{{ withdrawal.orderNumber }}</td></tr>
+        {% if withdrawal.receivedOn %}<tr><td>Zboží převzato:</td><td>{{ withdrawal.receivedOn }}</td></tr>{% endif %}
+        <tr><td style="vertical-align: top;">Zboží:</td><td>{{ withdrawal.items|nl2br }}</td></tr>
+        {% if withdrawal.bankAccount %}<tr><td>Účet pro vrácení peněz:</td><td>{{ withdrawal.bankAccount }}</td></tr>{% endif %}
+        {% if withdrawal.note %}<tr><td style="vertical-align: top;">Poznámka:</td><td>{{ withdrawal.note|nl2br }}</td></tr>{% endif %}
+    </table>
+    {% set billing = channel.shopBillingData|default(null) %}
+    <p>Zboží nám prosím zašlete zpět{% if billing %} na adresu {{ billing.company }}, {{ billing.street }}, {{ billing.postcode }} {{ billing.city }}{% endif %}. O dalším postupu Vás budeme informovat.</p>
+    <p>Pěkný den</p>
+    <p>Tým SEMACO</p>
+{% endblock %}
