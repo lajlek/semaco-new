@@ -31,6 +31,12 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Erp/Watermark/Entity'
                 prefix: 'App\Erp\Watermark\Entity'
                 alias: ErpWatermark
+            Redirect:
+                is_bundle: false
+                type: attribute
+                dir: '%kernel.project_dir%/src/Redirect/Entity'
+                prefix: 'App\Redirect\Entity'
+                alias: Redirect
 
 when@prod: &doctrine_prod
     doctrine:

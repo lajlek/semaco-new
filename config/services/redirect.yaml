@@ -1,0 +1,13 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    App\Redirect\:
+        resource: '../../src/Redirect/'
+        exclude:
+            - '../../src/Redirect/Entity/'
+            - '../../src/Redirect/Repository/'
+
+    App\Redirect\Repository\RedirectRepositoryInterface: '@app.repository.redirect'

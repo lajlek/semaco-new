@@ -1,0 +1,7 @@
+sylius_resource:
+    resources:
+        app.redirect:
+            driver: doctrine/orm
+            classes:
+                model: App\Redirect\Entity\Redirect
+                repository: App\Redirect\Repository\RedirectRepository

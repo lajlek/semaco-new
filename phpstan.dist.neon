@@ -13,8 +13,10 @@ parameters:
                 - src/B2B/Entity/
                 - src/Entity/
                 - src/Erp/Watermark/Entity/
+                - src/Redirect/Entity/
         -
             message: '#Interface .+RepositoryInterface extends generic interface Sylius\\Resource\\Doctrine\\Persistence\\RepositoryInterface but does not specify its types: T#'
             paths:
                 - src/B2B/Repository/
                 - src/Erp/Watermark/Repository/
+                - src/Redirect/Repository/
