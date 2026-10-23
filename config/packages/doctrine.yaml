@@ -19,6 +19,18 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Entity'
                 prefix: 'App\Entity'
                 alias: App
+            B2B:
+                is_bundle: false
+                type: attribute
+                dir: '%kernel.project_dir%/src/B2B/Entity'
+                prefix: 'App\B2B\Entity'
+                alias: B2B
+            ErpWatermark:
+                is_bundle: false
+                type: attribute
+                dir: '%kernel.project_dir%/src/Erp/Watermark/Entity'
+                prefix: 'App\Erp\Watermark\Entity'
+                alias: ErpWatermark
 
 when@prod: &doctrine_prod
     doctrine:

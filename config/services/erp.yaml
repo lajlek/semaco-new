@@ -1,0 +1,83 @@
+parameters:
+    app.erp.channel_code: 'SEMACO'
+    app.erp.locale_code: 'cs_CZ'
+    app.erp.currency_code: 'EUR'
+    app.erp.tax_category_code: 'standard'
+    app.erp.price_levels: ['1', '4']
+    app.erp.channel_price_level: '4'
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+        bind:
+            string $channelCode: '%app.erp.channel_code%'
+            string $localeCode: '%app.erp.locale_code%'
+            string $currencyCode: '%app.erp.currency_code%'
+            string $taxCategoryCode: '%app.erp.tax_category_code%'
+
+    App\Erp\:
+        resource: '../../src/Erp/'
+        exclude:
+            - '../../src/Erp/Port/**/Dto/'
+            - '../../src/Erp/Watermark/Entity/'
+            - '../../src/Erp/Watermark/Repository/'
+            - '../../src/Erp/Adapter/Helios/Infrastructure/ReadOnly/'
+
+    App\Erp\Watermark\Repository\ErpSyncWatermarkRepositoryInterface: '@app.repository.erp_sync_watermark'
+
+    App\Erp\Adapter\Helios\Infrastructure\HeliosConnectionFactory:
+        arguments:
+            $host: '%env(HELIOS_HOST)%'
+            $port: '%env(int:HELIOS_PORT)%'
+            $database: '%env(HELIOS_DATABASE)%'
+            $user: '%env(HELIOS_USER)%'
+            $password: '%env(HELIOS_PASSWORD)%'
+            $writeEnabled: '%env(bool:HELIOS_WRITE_ENABLED)%'
+
+    App\Erp\Adapter\Helios\Infrastructure\HeliosRateLimiter:
+        arguments:
+            $factory: '@limiter.helios'
+
+    App\Erp\Port\Catalog\TaxonSyncInterface: '@App\Erp\Adapter\Helios\Taxon\HeliosTaxonSyncAdapter'
+    App\Erp\Port\Catalog\AttributeGroupSyncInterface: '@App\Erp\Adapter\Helios\Attribute\HeliosAttributeGroupSyncAdapter'
+    App\Erp\Port\Catalog\ProductSyncInterface: '@App\Erp\Adapter\Helios\Product\HeliosProductSyncAdapter'
+    App\Erp\Port\Pricing\PriceLevelSyncInterface: '@App\Erp\Adapter\Helios\Pricing\HeliosPriceLevelSyncAdapter'
+    App\Erp\Port\Pricing\PricingProviderInterface: '@App\Erp\Adapter\Helios\Pricing\HeliosPricingAdapter'
+    App\Erp\Port\Inventory\InventoryProviderInterface: '@App\Erp\Adapter\Helios\Inventory\HeliosInventoryAdapter'
+    App\Erp\Port\Customer\OrganizationSyncInterface: '@App\Erp\Adapter\Helios\Organization\HeliosOrganizationSyncAdapter'
+
+    App\Erp\Application\Catalog\TaxonImporter:
+        arguments:
+            $taxonRepository: '@sylius.repository.taxon'
+            $taxonFactory: '@sylius.factory.taxon'
+            $channelRepository: '@sylius.repository.channel'
+
+    App\Erp\Application\Catalog\AttributeGroupImporter:
+        arguments:
+            $attributeRepository: '@sylius.repository.product_attribute'
+            $attributeFactory: '@sylius.factory.product_attribute'
+            $optionRepository: '@sylius.repository.product_option'
+            $optionFactory: '@sylius.factory.product_option'
+            $optionValueFactory: '@sylius.factory.product_option_value'
+
+    App\Erp\Application\Catalog\ProductImporter:
+        arguments:
+            $productRepository: '@sylius.repository.product'
+            $productFactory: '@sylius.factory.product'
+            $variantRepository: '@sylius.repository.product_variant'
+            $variantFactory: '@sylius.factory.product_variant'
+            $productTaxonFactory: '@sylius.factory.product_taxon'
+            $attributeValueFactory: '@sylius.factory.product_attribute_value'
+            $taxonRepository: '@sylius.repository.taxon'
+            $attributeRepository: '@sylius.repository.product_attribute'
+            $optionRepository: '@sylius.repository.product_option'
+            $channelRepository: '@sylius.repository.channel'
+            $taxCategoryRepository: '@sylius.repository.tax_category'
+            $brandRepository: '@app.repository.brand'
+
+    App\Erp\Application\Pricing\PriceImporter:
+        arguments:
+            $priceLevelExternalIdentifiers: '%app.erp.price_levels%'
+            $channelPriceLevelExternalIdentifier: '%app.erp.channel_price_level%'

@@ -6,3 +6,15 @@ parameters:
         - public/
         - src/
         - tests/
+    ignoreErrors:
+        -
+            message: '#Property .+::\$id \(int\|null\) is never assigned int so it can be removed from the property type\.#'
+            paths:
+                - src/B2B/Entity/
+                - src/Entity/
+                - src/Erp/Watermark/Entity/
+        -
+            message: '#Interface .+RepositoryInterface extends generic interface Sylius\\Resource\\Doctrine\\Persistence\\RepositoryInterface but does not specify its types: T#'
+            paths:
+                - src/B2B/Repository/
+                - src/Erp/Watermark/Repository/

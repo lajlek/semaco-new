@@ -1,0 +1,22 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    App\B2B\:
+        resource: '../../src/B2B/'
+        exclude:
+            - '../../src/B2B/Entity/'
+            - '../../src/B2B/Repository/'
+
+    App\B2B\Repository\OrganizationRepositoryInterface: '@app.repository.organization'
+    App\B2B\Repository\PriceLevelRepositoryInterface: '@app.repository.price_level'
+    App\B2B\Repository\ProductPriceRepositoryInterface: '@app.repository.product_price'
+
+    App\B2B\Context\ActiveOrganizationResolverInterface: '@App\B2B\Context\CustomerOrganizationResolver'
+
+    App\B2B\Pricing\OrganizationProductVariantPricesCalculator:
+        decorates: 'sylius.calculator.product_variant_price'
+        arguments:
+            $decorated: '@.inner'

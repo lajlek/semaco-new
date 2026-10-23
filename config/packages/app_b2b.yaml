@@ -1,0 +1,26 @@
+sylius_resource:
+    resources:
+        app.organization:
+            driver: doctrine/orm
+            classes:
+                model: App\B2B\Entity\Organization
+                repository: App\B2B\Repository\OrganizationRepository
+        app.price_level:
+            driver: doctrine/orm
+            classes:
+                model: App\B2B\Entity\PriceLevel
+                repository: App\B2B\Repository\PriceLevelRepository
+        app.product_price:
+            driver: doctrine/orm
+            classes:
+                model: App\B2B\Entity\ProductPrice
+                repository: App\B2B\Repository\ProductPriceRepository
+        app.brand:
+            driver: doctrine/orm
+            classes:
+                model: App\Entity\Product\Brand
+        app.erp_sync_watermark:
+            driver: doctrine/orm
+            classes:
+                model: App\Erp\Watermark\Entity\ErpSyncWatermark
+                repository: App\Erp\Watermark\Repository\ErpSyncWatermarkRepository
