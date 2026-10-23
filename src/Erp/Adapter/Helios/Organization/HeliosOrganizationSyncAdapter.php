@@ -68,6 +68,28 @@ final readonly class HeliosOrganizationSyncAdapter implements OrganizationSyncIn
         }
     }
 
+    public function pullByIds(array $externalIdentifiers): iterable
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $externalIdentifiers), static fn (int $id): bool => $id > 0)));
+        foreach (array_chunk($ids, self::BATCH_SIZE) as $chunk) {
+            $this->rateLimiter->consume();
+            $rows = $this->runWithRetry(fn () => $this->connections->getConnection()->fetchAllAssociative(
+                sprintf('SELECT %s FROM hvw_SapertaTabSapCisOrg WHERE fakturacni = 1 AND id IN (:ids) ORDER BY id ASC', self::COLUMNS),
+                ['ids' => $chunk],
+                ['ids' => ArrayParameterType::INTEGER],
+            ));
+
+            $children = $this->loadDescendants(array_values(array_filter(array_map(
+                static fn (array $row): ?int => HeliosRow::int($row, 'id'),
+                $rows,
+            ))));
+
+            foreach ($rows as $row) {
+                yield $this->map($row, $children);
+            }
+        }
+    }
+
     /**
      * @param array<string, mixed> $row
      * @param array<int, list<array<string, mixed>>> $children

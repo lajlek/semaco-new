@@ -1,0 +1,30 @@
+parameters:
+    app.checkout.free_shipping_method: 'free_shipping'
+    app.checkout.payment_methods_by_customer_group:
+        '1': ['10']
+        '2': ['12']
+        'sales': '*'
+    app.checkout.payment_methods_without_group: ['12']
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    App\Checkout\:
+        resource: '../../src/Checkout/'
+
+    App\Checkout\Payment\CustomerGroupPaymentMethodsResolver:
+        arguments:
+            $channelBasedResolver: '@sylius.resolver.payment_methods.channel_based'
+            $methodsByCustomerGroup: '%app.checkout.payment_methods_by_customer_group%'
+            $methodsWithoutGroup: '%app.checkout.payment_methods_without_group%'
+        tags:
+            - { name: 'sylius.payment_method_resolver', type: 'customer_group', label: 'Customer group', priority: 10 }
+
+    App\Checkout\Shipping\FreeShippingEligibilityChecker:
+        arguments:
+            $freeShippingMethodCode: '%app.checkout.free_shipping_method%'
+        tags:
+            - { name: 'sylius.shipping_method_eligibility_checker' }

@@ -28,10 +28,22 @@ final readonly class OrganizationImporter
 
     public function importChangedSince(\DateTimeInterface $since, ?\DateTimeImmutable &$maxModifiedAt = null): ImportResult
     {
+        return $this->importSnapshots($this->organizationSync->pullChangedSince($since), $maxModifiedAt);
+    }
+
+    /** @param list<string> $externalIdentifiers */
+    public function importByIds(array $externalIdentifiers): ImportResult
+    {
+        return $this->importSnapshots($this->organizationSync->pullByIds($externalIdentifiers));
+    }
+
+    /** @param iterable<OrganizationSnapshot> $snapshots */
+    private function importSnapshots(iterable $snapshots, ?\DateTimeImmutable &$maxModifiedAt = null): ImportResult
+    {
         $result = new ImportResult('organizations');
         $processed = 0;
 
-        foreach ($this->organizationSync->pullChangedSince($since) as $snapshot) {
+        foreach ($snapshots as $snapshot) {
             if ($maxModifiedAt === null || $snapshot->modifiedAt > $maxModifiedAt) {
                 $maxModifiedAt = $snapshot->modifiedAt;
             }

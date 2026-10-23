@@ -8,7 +8,9 @@ use App\Erp\Application\ImportResult;
 use App\Migration\OldShop\OldShopConnectionFactory;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
 
+#[AsTaggedItem(priority: 200)]
 final readonly class SlugMigrationStep implements MigrationStepInterface
 {
     public function __construct(

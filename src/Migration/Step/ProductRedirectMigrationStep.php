@@ -9,7 +9,9 @@ use App\Migration\OldShop\OldShopConnectionFactory;
 use App\Redirect\Entity\Redirect;
 use App\Redirect\Repository\RedirectRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
 
+#[AsTaggedItem(priority: 190)]
 final readonly class ProductRedirectMigrationStep implements MigrationStepInterface
 {
     public function __construct(

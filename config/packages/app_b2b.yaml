@@ -24,3 +24,7 @@ sylius_resource:
             classes:
                 model: App\Erp\Watermark\Entity\ErpSyncWatermark
                 repository: App\Erp\Watermark\Repository\ErpSyncWatermarkRepository
+        app.sales_representative:
+            driver: doctrine/orm
+            classes:
+                model: App\B2B\Entity\SalesRepresentative

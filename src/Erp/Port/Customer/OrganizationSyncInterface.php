@@ -10,4 +10,11 @@ interface OrganizationSyncInterface
 {
     /** @return iterable<OrganizationSnapshot> */
     public function pullChangedSince(\DateTimeInterface $since): iterable;
+
+    /**
+     * @param list<string> $externalIdentifiers
+     *
+     * @return iterable<OrganizationSnapshot>
+     */
+    public function pullByIds(array $externalIdentifiers): iterable;
 }

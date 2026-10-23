@@ -69,34 +69,49 @@ when@dev:
                         options:
                             custom:
                                 gls:
-                                    code: 'gls'
+                                    code: '3'
                                     name: 'per GLS'
                                     zone: 'CZ'
                                     channels: ['SEMACO']
                                     enabled: true
+                                    calculator:
+                                        type: 'flat_rate'
+                                        configuration:
+                                            SEMACO:
+                                                amount: 650
                                 gls_cod:
-                                    code: 'gls_cod'
+                                    code: '10'
                                     name: 'per GLS záloha'
                                     zone: 'CZ'
                                     channels: ['SEMACO']
-                                    enabled: true
+                                    enabled: false
+                                    calculator:
+                                        type: 'flat_rate'
+                                        configuration:
+                                            SEMACO:
+                                                amount: 650
                                 free_shipping:
                                     code: 'free_shipping'
                                     name: 'Doprava zdarma'
                                     zone: 'CZ'
                                     channels: ['SEMACO']
                                     enabled: true
+                                    calculator:
+                                        type: 'flat_rate'
+                                        configuration:
+                                            SEMACO:
+                                                amount: 0
 
                     payment_method:
                         options:
                             custom:
                                 bank_transfer:
-                                    code: 'bank_transfer'
+                                    code: '10'
                                     name: 'Platebním příkazem'
                                     channels: ['SEMACO']
                                     enabled: true
                                 prepayment:
-                                    code: 'prepayment'
+                                    code: '12'
                                     name: 'Zálohově'
                                     channels: ['SEMACO']
                                     enabled: true
