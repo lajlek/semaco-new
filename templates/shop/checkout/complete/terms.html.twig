@@ -1,0 +1,7 @@
+{% set form = hookable_metadata.context.form %}
+
+<fieldset class="semaco-checkout-terms mb-4">
+    <legend class="visually-hidden sr-only">{{ 'app.checkout.terms_legend'|trans({}, 'checkout') }}</legend>
+    {{ form_row(form.acceptTerms) }}
+    {{ form_row(form.acceptPrivacy) }}
+</fieldset>
