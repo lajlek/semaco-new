@@ -1,0 +1,14 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+        bind:
+            string $localeCode: '%app.erp.locale_code%'
+
+    App\Migration\:
+        resource: '../../src/Migration/'
+
+    App\Migration\OldShop\OldShopConnectionFactory:
+        arguments:
+            $databaseUrl: '%env(OLD_SHOP_DATABASE_URL)%'
