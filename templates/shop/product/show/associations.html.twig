@@ -1,0 +1,16 @@
+{% set product = hookable_metadata.context.product %}
+{% for association in product.associations %}
+    {% set associated_products = association.associatedProducts|filter(p => p.enabled) %}
+    {% if associated_products|length > 0 %}
+        <section class="pt-3 mt-10">
+            <h2 class="title">{{ association.type.name }}</h2>
+            <div class="row product-wrapper equal-height">
+                {% for associated_product in associated_products %}
+                    <div class="col-md-2 col-3">
+                        {% include 'shop/product/common/card.html.twig' with { product: associated_product } %}
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+{% endfor %}

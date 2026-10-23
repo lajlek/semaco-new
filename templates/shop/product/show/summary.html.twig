@@ -1,0 +1,6 @@
+{# Rendered with \Sylius\Bundle\ShopBundle\Twig\Component\Product\SummaryComponent #}
+<div class="col-md-6" {{ attributes }}>
+    <div class="product-details">
+        {% hook 'summary' with { product, variant } %}
+    </div>
+</div>

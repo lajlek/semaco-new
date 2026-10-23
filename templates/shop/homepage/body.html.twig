@@ -1,0 +1,18 @@
+<div class="page-content mb-10 pb-3">
+    <div class="container">
+        <div class="row gutter-lg">
+            <div class="col-lg-3 sidebar-fixed shop-sidebar sticky-sidebar-wrapper">
+                <a href="#" class="sidebar-toggle" aria-label="{{ 'app.shop.homepage.categories'|trans }}"><i class="fas fa-chevron-right" aria-hidden="true"></i></a>
+                <a class="sidebar-close" href="#" aria-label="{{ 'app.shop.cart.close'|trans }}"><i class="d-icon-times" aria-hidden="true"></i></a>
+                <div class="sidebar-content">
+                    <div class="sticky-sidebar">
+                        {% hook 'sidebar' %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-9">
+                {% hook 'main' %}
+            </div>
+        </div>
+    </div>
+</div>

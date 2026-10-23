@@ -1,0 +1,20 @@
+{# Rendered with \Sylius\Bundle\ShopBundle\Twig\Component\Common\TaxonMenuComponent #}
+<div {{ attributes }}>
+    {% if taxons|length > 0 %}
+        <ul class="nav menu mod-list">
+            {% for taxon in taxons %}
+                {% set children = taxon.enabledChildren %}
+                <li{% if children|length > 0 %} class="deeper parent"{% endif %}>
+                    <a href="{{ path('semaco_shop_product_list', {'slug': taxon.slug, '_locale': taxon.translation.locale}) }}">{{ taxon.name }}</a>
+                    {% if children|length > 0 %}
+                        <ul class="nav-child unstyled small">
+                            {% for child in children %}
+                                <li><a href="{{ path('semaco_shop_product_list', {'slug': child.slug, '_locale': child.translation.locale}) }}">{{ child.name }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>

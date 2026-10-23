@@ -1,0 +1,13 @@
+{% set resources = hookable_metadata.context.resources %}
+
+{% if resources.data|length > 0 %}
+    <div class="row cols-2 cols-sm-3 cols-md-4 product-wrapper equal-height" id="products">
+        {% for product in resources.data %}
+            <div class="product-wrap">
+                {% include 'shop/product/common/card.html.twig' with { product } %}
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p class="mt-4">{{ 'app.shop.listing.no_results'|trans }}</p>
+{% endif %}

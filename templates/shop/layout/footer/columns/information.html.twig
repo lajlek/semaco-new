@@ -1,0 +1,9 @@
+<div class="col-lg-4 col-md-6">
+    <div class="widget widget-info">
+        <h4 class="widget-title">{{ 'app.shop.information.title'|trans }}</h4>
+        <ul class="widget-body">
+            {% include 'shop/layout/information_links.html.twig' %}
+            <li><a href="{{ path('sylius_shop_contact_request') }}">{{ 'app.shop.footer.contact_form'|trans }}</a></li>
+        </ul>
+    </div>
+</div>

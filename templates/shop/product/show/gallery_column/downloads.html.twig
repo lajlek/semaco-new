@@ -1,0 +1,9 @@
+{% set product = hookable_metadata.context.product %}
+{% if product.documents is defined and product.documents|length > 0 %}
+    <h2 class="title">{{ 'app.shop.product.downloads'|trans }}</h2>
+    <ul class="downloads-list">
+        {% for document in product.documents %}
+            <li><i class="fas fa-file-pdf" aria-hidden="true"></i> <a href="{{ document.url|default('/media/image/' ~ document.path) }}" target="_blank" rel="noopener">{{ document.title|default('app.shop.product.cutting_conditions'|trans) }}</a></li>
+        {% endfor %}
+    </ul>
+{% endif %}

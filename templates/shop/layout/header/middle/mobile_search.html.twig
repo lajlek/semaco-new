@@ -1,0 +1,11 @@
+<div class="header-search hs-toggle mobile-search">
+    <a href="#" class="search-toggle" aria-label="{{ 'app.shop.header.search'|trans }}">
+        <i class="d-icon-search" aria-hidden="true"></i>
+    </a>
+    <form method="get" action="/{{ app.request.locale }}/search" class="input-wrapper" role="search">
+        <input type="search" class="form-control" name="bitbag_elasticsearch_search[box][query]" autocomplete="off" placeholder="{{ 'app.shop.header.search_placeholder'|trans }}" aria-label="{{ 'app.shop.header.search_placeholder'|trans }}" required/>
+        <button class="btn btn-search" type="submit" aria-label="{{ 'app.shop.header.search'|trans }}">
+            <i class="d-icon-search" aria-hidden="true"></i>
+        </button>
+    </form>
+</div>

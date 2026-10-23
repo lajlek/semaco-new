@@ -1,0 +1,52 @@
+{% set resources = hookable_metadata.context.resources %}
+{% set route = app.request.attributes.get('_route') %}
+{% set route_params = app.request.attributes.get('_route_params')|merge(app.request.query.all) %}
+{% set sort_options = [
+    { title: 'app.shop.listing.sort.newest', sorting: { createdAt: 'desc' } },
+    { title: 'app.shop.listing.sort.oldest', sorting: { createdAt: 'asc' } },
+    { title: 'app.shop.listing.sort.most_expensive', sorting: { price: 'desc' } },
+    { title: 'app.shop.listing.sort.cheapest', sorting: { price: 'asc' } },
+] %}
+
+<div class="toolbox-wrap">
+    <aside class="sidebar sidebar-fixed shop-sidebar closed">
+        <div class="sidebar-overlay"></div>
+        <a class="sidebar-close" href="#" aria-label="{{ 'app.shop.cart.close'|trans }}"><i class="d-icon-times" aria-hidden="true"></i></a>
+        <div class="sidebar-content">
+            <form method="get" class="mb-0 mb-lg-4">
+                <div class="filter-actions">
+                    <a href="#" class="sidebar-toggle-btn toggle-remain btn btn-sm btn-outline btn-rounded btn-primary">{{ 'app.shop.listing.filter_en'|trans }}<i class="d-icon-arrow-left" aria-hidden="true"></i></a>
+                </div>
+                <div class="row cols-lg-4 filter-attributes-area">
+                    {% hook 'filters' %}
+                </div>
+                <div class="row">
+                    <button type="submit" class="btn-primary btn btn-icon w-100">{{ 'app.shop.listing.apply_filter'|trans }}</button>
+                </div>
+            </form>
+        </div>
+    </aside>
+    <div class="toolbox">
+        <div class="toolbox-left">
+            <a href="#" class="toolbox-item left-sidebar-toggle btn btn-outline btn-primary btn-rounded btn-icon-left font-primary"><i class="d-icon-filter-2" aria-hidden="true"></i>{{ 'app.shop.listing.filter'|trans }}</a>
+        </div>
+        <div class="toolbox-right">
+            <div class="dropdown">
+                <button type="button" class="btn btn-secondary p-10">{{ 'app.shop.listing.sorting'|trans }}</button>
+                <ul class="dropdown-box w-100">
+                    {% for option in sort_options %}
+                        <li><a class="item" href="{{ path(route, route_params|merge({sorting: option.sorting, page: 1})) }}">{{ option.title|trans }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="dropdown">
+                <button type="button" class="btn btn-secondary p-10">{{ 'app.shop.listing.per_page'|trans }}</button>
+                <ul class="dropdown-box w-100">
+                    {% for limit in resources.definition.limits %}
+                        <li><a class="item" href="{{ path(route, route_params|merge({limit: limit, page: 1})) }}">{{ limit }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,23 @@
+{% set billing = sylius.channel.shopBillingData %}
+<div class="col-lg-4 col-md-6">
+    <div class="widget widget-info">
+        <h4 class="widget-title">{{ 'app.shop.footer.your_store'|trans }}</h4>
+        <ul class="widget-body">
+            {% if billing is not null %}
+                <li class="text-white">{{ billing.company }}</li>
+                {% if billing.street or billing.city %}
+                    <li class="text-white">{{ billing.street }}{{ billing.street and billing.city ? ', ' }}{{ billing.postcode }} {{ billing.city }}</li>
+                {% endif %}
+            {% endif %}
+            <li class="text-white">
+                {% if sylius.channel.contactPhoneNumber %}
+                    {{ 'app.shop.footer.phone'|trans }} <a href="tel:{{ sylius.channel.contactPhoneNumber|replace({' ': ''}) }}">{{ sylius.channel.contactPhoneNumber }}</a>,
+                {% endif %}
+                {% if sylius.channel.contactEmail %}
+                    {{ 'app.shop.footer.email'|trans }} <a href="mailto:{{ sylius.channel.contactEmail }}">{{ sylius.channel.contactEmail }}</a>
+                {% endif %}
+            </li>
+            <li class="text-white">{{ 'app.shop.footer.company_ids'|trans }}</li>
+        </ul>
+    </div>
+</div>

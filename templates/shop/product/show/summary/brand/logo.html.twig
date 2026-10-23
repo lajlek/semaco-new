@@ -1,0 +1,4 @@
+{% set product = hookable_metadata.context.product %}
+{% if product.brand is defined and product.brand is not null and product.brand.logoPath %}
+    <img src="{{ product.brand.logoPath|imagine_filter('semaco_product_thumbnail') }}" alt="{{ product.brand.name }}" />
+{% endif %}

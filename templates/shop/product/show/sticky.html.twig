@@ -1,0 +1,30 @@
+{% set product = hookable_metadata.context.product %}
+{% set variant = product.enabledVariants.empty() ? null : product|sylius_resolve_variant %}
+{% set sticky_image = product.images.first %}
+
+<div class="sticky-content fix-top product-sticky-content" data-semaco-product-sticky>
+    <div class="container">
+        <div class="sticky-product-details w-100">
+            <div class="d-flex w-100 pt-3">
+                {% if sticky_image %}
+                    <figure class="product-image p-2">
+                        <img class="h-auto" src="{{ sticky_image.path|imagine_filter('semaco_product_thumbnail') }}" alt="{{ product.name }}" />
+                    </figure>
+                {% endif %}
+                <h4 class="product-title p-2">
+                    {{ product.name }}
+                    {% if variant is not null and not product.simple %}
+                        <div class="title-wrapper title-cross title-center"><p class="title" id="current-variant-name-sticky" data-semaco-sticky-source="#current-variant-name">{{ variant.name|default(variant.descriptor) }}</p></div>
+                    {% endif %}
+                </h4>
+                <div class="product-info p-2 ml-auto">
+                    {% if variant is not null and variant.getChannelPricingForChannel(sylius.channel) is not null %}
+                        <div class="product-price" data-js-product-price-sticky data-semaco-sticky-source="[data-js-product-price]">
+                            {% include 'shop/product/common/price_value.html.twig' with { variant } %} <small class="product-price-vat">{{ 'app.shop.price.without_vat'|trans }}</small>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

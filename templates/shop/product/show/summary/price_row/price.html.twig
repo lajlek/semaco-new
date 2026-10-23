@@ -1,0 +1,21 @@
+{% import '@SyliusShop/shared/macro/money.html.twig' as money %}
+{% set variant = hookable_metadata.context.variant %}
+
+{% if variant is not null and variant.getChannelPricingForChannel(sylius.channel) is not null %}
+    {% set price_amount = variant|sylius_calculate_price({'channel': sylius.channel}) %}
+    <div class="product-price" data-js-product-price>
+        {% if price_amount > 0 %}
+            {{ money.convertAndFormat(price_amount) }} <small class="product-price-vat">{{ 'app.shop.price.without_vat'|trans }}</small>
+        {% else %}
+            {{ 'app.shop.price.on_request'|trans }}
+        {% endif %}
+    </div>
+    {% set orientational_amount = price_amount > 0 ? semaco_orientational_price(price_amount, sylius.channel.baseCurrency.code, 'CZK') : null %}
+    {% if orientational_amount is not null and sylius.currencyCode != 'CZK' %}
+        <div class="product-price-currency" data-js-product-price-currency>
+            <span id="product-price-currency">{{ money.format(orientational_amount, 'CZK') }}</span>
+            <br/>
+            <small class="text-muted">{{ 'app.shop.price.czk_orientational'|trans }}</small>
+        </div>
+    {% endif %}
+{% endif %}

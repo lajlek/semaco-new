@@ -1,0 +1,24 @@
+{% extends '@SyliusShop/shared/layout/base.html.twig' %}
+
+{% set prefixes = ['sylius_shop.product.show'] %}
+
+{% block title %}{{ product.name }} | {{ parent() }}{% endblock %}
+
+{% block content_class %}{% endblock %}
+
+{% block content %}
+    <main class="main single-product">
+        <div class="page-content mb-10 pb-6">
+            <div class="container">
+                <div class="product product-single row">
+                    <div class="col-md-12">
+                        <div class="product-navigation"></div>
+                    </div>
+                    {% hook 'semaco_shop.product.show' with { product, configuration } %}
+                </div>
+                {% hook 'semaco_shop.product.show.sticky' with { product } %}
+                {% hook 'semaco_shop.product.show.associations' with { product } %}
+            </div>
+        </div>
+    </main>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% set selected_variant = form.cartItem.vars.value.variant %}
+
+<table class="table" id="sylius-product-variants">
+    <thead>
+        <tr>
+            <th class="border-0 h6"><span class="sr-only">{{ 'app.shop.product.select_variant'|trans }}</span></th>
+            <th class="border-0 h6">{{ 'app.shop.product.order_code_short'|trans }}</th>
+            <th class="border-0 h6">{{ 'app.shop.product.variant'|trans }}</th>
+            <th class="border-0 h6">{{ 'app.shop.product.price'|trans }}</th>
+            <th class="border-0 h6"></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for key, variant in product.enabledVariants %}
+            {% if variant.getChannelPricingForChannel(sylius.channel) is not null %}
+                {% set radio = form.cartItem.variant[key] %}
+                {% set is_active = selected_variant is not null and variant.code == selected_variant.code %}
+                <tr data-variant-name="{{ variant.name }}" data-variant-id="{{ variant.id }}" data-reg-cis="{{ semaco_order_code(variant) }}"{% if is_active %} class="active"{% endif %}>
+                    <td class="text-right">
+                        <div class="custom-control custom-radio">
+                            <div class="form-check">
+                                {{ form_widget(radio, {'attr': {'class': 'custom-control-input form-check-input'}}) }}
+                                <label class="form-check-label" for="{{ radio.vars.id }}"><span class="sr-only">{{ variant.name|default(variant.descriptor) }}</span></label>
+                            </div>
+                        </div>
+                    </td>
+                    <td valign="top">{{ semaco_order_code(variant) }}</td>
+                    <td valign="top">
+                        {{ variant.name|default(variant.descriptor) }}
+                        {% if product.hasOptions() %}
+                            <div class="tech-details">
+                                {% for option_value in variant.optionValues %}
+                                    {{ option_value.name }}:
+                                    <span class="pr-1">{{ option_value.value }}</span>
+                                    {% if loop.index is divisible by(2) %}<br/>{% endif %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </td>
+                    <td valign="top" class="text-right pr-5" data-js-product-variant-price>{% include 'shop/product/common/price_value.html.twig' with { variant } %}</td>
+                    <td>{% hook 'semaco_shop.product.show.variant_actions' with { product, variant } %}</td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+    </tbody>
+</table>

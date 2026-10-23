@@ -1,0 +1,236 @@
+sylius_twig_hooks:
+    hooks:
+        'sylius_shop.base#metatags':
+            metatags:
+                template: 'shop/layout/metatags.html.twig'
+
+        'sylius_shop.base#stylesheets':
+            styles:
+                enabled: false
+
+        'sylius_shop.base.header':
+            top_bar:
+                enabled: false
+            content:
+                enabled: false
+            navbar:
+                enabled: false
+            flashes:
+                enabled: false
+            semaco_top:
+                template: 'shop/layout/header/top.html.twig'
+                priority: 300
+            semaco_middle:
+                template: 'shop/layout/header/middle.html.twig'
+                priority: 200
+            semaco_bottom:
+                template: 'shop/layout/header/bottom.html.twig'
+                priority: 100
+
+        'sylius_shop.base.header.middle_left':
+            mobile_menu_toggle:
+                template: 'shop/layout/header/middle/mobile_menu_toggle.html.twig'
+                priority: 300
+            logo:
+                template: 'shop/layout/header/middle/logo.html.twig'
+                priority: 200
+            search:
+                template: 'shop/layout/header/middle/search.html.twig'
+                priority: 100
+
+        'sylius_shop.base.header.middle_right':
+            security:
+                template: 'shop/layout/header/middle/security.html.twig'
+                priority: 400
+            wishlist:
+                template: 'shop/layout/header/middle/wishlist.html.twig'
+                priority: 300
+            cart:
+                component: 'sylius_shop:cart:widget'
+                props:
+                    template: 'shop/layout/header/middle/cart.html.twig'
+                priority: 200
+            mobile_search:
+                template: 'shop/layout/header/middle/mobile_search.html.twig'
+                priority: 100
+
+        'sylius_shop.base.header.bottom_left':
+            menu:
+                component: 'sylius_shop:common:taxon_menu'
+                props:
+                    template: 'shop/layout/header/bottom/menu.html.twig'
+                priority: 0
+
+        'sylius_shop.base.header.bottom_right':
+            information:
+                template: 'shop/layout/header/bottom/information.html.twig'
+                priority: 0
+
+        'sylius_shop.base.footer':
+            content:
+                enabled: false
+            semaco_content:
+                template: 'shop/layout/footer/content.html.twig'
+                priority: 0
+
+        'sylius_shop.base.footer.columns':
+            store:
+                template: 'shop/layout/footer/columns/store.html.twig'
+                priority: 300
+            information:
+                template: 'shop/layout/footer/columns/information.html.twig'
+                priority: 200
+            account:
+                template: 'shop/layout/footer/columns/account.html.twig'
+                priority: 100
+
+        'sylius_shop.base.offcanvas':
+            cart:
+                enabled: false
+            mobile_menu:
+                component: 'sylius_shop:common:taxon_menu'
+                props:
+                    template: 'shop/layout/mobile_menu.html.twig'
+                priority: 0
+
+        'semaco_shop.homepage':
+            banner:
+                template: 'shop/homepage/banner.html.twig'
+                priority: 200
+            body:
+                template: 'shop/homepage/body.html.twig'
+                priority: 100
+
+        'semaco_shop.homepage.sidebar':
+            categories:
+                component: 'sylius_shop:common:taxon_menu'
+                props:
+                    template: 'shop/homepage/sidebar/categories.html.twig'
+                priority: 0
+
+        'semaco_shop.homepage.main':
+            category_tiles:
+                component: 'sylius_shop:common:taxon_menu'
+                props:
+                    template: 'shop/homepage/main/category_tiles.html.twig'
+                priority: 200
+            recommended:
+                component: 'sylius_shop:product:list'
+                props:
+                    limit: 9
+                    template: 'shop/homepage/main/recommended.html.twig'
+                priority: 100
+
+        'semaco_shop.product.index':
+            breadcrumbs:
+                component: 'sylius_shop:product:show:breadcrumbs'
+                props:
+                    template: 'shop/product/index/breadcrumbs.html.twig'
+                priority: 200
+            body:
+                template: 'shop/product/index/body.html.twig'
+                priority: 100
+
+        'semaco_shop.product.index.sidebar':
+            taxonomy:
+                component: 'sylius_shop:product:show:taxonomy'
+                props:
+                    template: 'shop/product/index/sidebar/taxonomy.html.twig'
+                priority: 0
+
+        'semaco_shop.product.index.main':
+            toolbox:
+                template: 'shop/product/index/main/toolbox.html.twig'
+                priority: 300
+            products:
+                template: 'shop/product/index/main/products.html.twig'
+                priority: 200
+            pagination:
+                template: 'shop/product/index/main/pagination.html.twig'
+                priority: 100
+
+        'semaco_shop.product.show':
+            gallery_column:
+                template: 'shop/product/show/gallery_column.html.twig'
+                priority: 200
+            summary:
+                component: 'sylius_shop:product:summary'
+                props:
+                    product: '@=_context.product'
+                    template: 'shop/product/show/summary.html.twig'
+                priority: 100
+
+        'semaco_shop.product.show.gallery_column':
+            images:
+                template: 'shop/product/show/gallery_column/images.html.twig'
+                priority: 200
+            downloads:
+                template: 'shop/product/show/gallery_column/downloads.html.twig'
+                priority: 100
+
+        'semaco_shop.product.show.summary':
+            header:
+                template: 'shop/product/show/summary/header.html.twig'
+                priority: 500
+            meta:
+                template: 'shop/product/show/summary/meta.html.twig'
+                priority: 400
+            price_row:
+                template: 'shop/product/show/summary/price_row.html.twig'
+                priority: 300
+            short_description:
+                template: 'shop/product/show/summary/short_description.html.twig'
+                priority: 200
+            add_to_cart:
+                component: 'sylius_shop:product:add_to_cart_form'
+                props:
+                    product: '@=_context.product'
+                    template: 'shop/product/show/summary/add_to_cart.html.twig'
+                priority: 100
+
+        'semaco_shop.product.show.summary.price_row':
+            price:
+                template: 'shop/product/show/summary/price_row/price.html.twig'
+                priority: 200
+            stock:
+                template: 'shop/product/show/summary/price_row/stock.html.twig'
+                priority: 100
+
+        'semaco_shop.product.show.summary.brand':
+            logo:
+                template: 'shop/product/show/summary/brand/logo.html.twig'
+                priority: 0
+
+        'semaco_shop.product.show.sticky':
+            sticky:
+                template: 'shop/product/show/sticky.html.twig'
+                priority: 0
+
+        'semaco_shop.product.show.associations':
+            associations:
+                template: 'shop/product/show/associations.html.twig'
+                priority: 0
+
+liip_imagine:
+    filter_sets:
+        semaco_product_tiny_thumbnail:
+            filters:
+                thumbnail: { size: [64, 64], mode: inset }
+        semaco_product_small_thumbnail:
+            filters:
+                thumbnail: { size: [150, 112], mode: inset }
+        semaco_product_thumbnail:
+            filters:
+                thumbnail: { size: [260, 260], mode: inset }
+        semaco_product_large_thumbnail:
+            filters:
+                thumbnail: { size: [550, 412], mode: inset }
+        semaco_taxon_thumbnail:
+            filters:
+                thumbnail: { size: [400, 400], mode: outbound }
+                background: { size: [400, 400], position: center, color: '#000000' }
+
+sylius_grid:
+    grids:
+        sylius_shop_product:
+            limits: [12, 24, 36]

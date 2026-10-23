@@ -1,0 +1,25 @@
+{% import '@SyliusShop/shared/macro/money.html.twig' as money %}
+{% set product_url = path('sylius_shop_product_show', {'slug': product.slug, '_locale': product.translation.locale}) %}
+
+<div class="product product-variable text-center shadow-media cart-full">
+    <figure class="product-media">
+        <a href="{{ product_url }}">
+            {% include 'shop/product/common/image.html.twig' with { product, filter: 'semaco_product_thumbnail', width: 380 } %}
+        </a>
+        <div class="product-action-vertical"></div>
+    </figure>
+    <div class="product-details">
+        <h3 class="product-name">
+            <a href="{{ product_url }}">{{ product.name }}</a>
+        </h3>
+        {% if not product.enabledVariants.empty() %}
+            {% set card_variant = product|sylius_resolve_variant %}
+            {% if card_variant is not null and card_variant.getChannelPricingForChannel(sylius.channel) is not null %}
+                <div class="product-price">
+                    <ins class="new-price">{% include 'shop/product/common/price_value.html.twig' with { variant: card_variant } %}</ins>
+                </div>
+            {% endif %}
+        {% endif %}
+        <a href="{{ product_url }}" class="btn-product btn-cart" title="{{ 'app.shop.product.show'|trans }}"><span>{{ 'app.shop.product.show'|trans }}</span></a>
+    </div>
+</div>

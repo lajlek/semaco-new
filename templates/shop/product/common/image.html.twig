@@ -1,0 +1,6 @@
+{% set main_image = product.imagesByType('main').first ?: product.images.first %}
+{% if main_image %}
+    <img src="{{ main_image.path|imagine_filter(filter|default('semaco_product_thumbnail')) }}" alt="{{ product.name }}"{% if width is defined %} width="{{ width }}" height="{{ height|default(width) }}"{% endif %} />
+{% else %}
+    <img src="{{ asset('bundles/syliusui/images/400x300.png') }}" alt="{{ product.name }}"{% if width is defined %} width="{{ width }}" height="{{ height|default(width) }}"{% endif %} />
+{% endif %}

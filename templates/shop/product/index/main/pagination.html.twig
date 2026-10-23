@@ -1,0 +1,11 @@
+{% set paginator = hookable_metadata.context.resources.data %}
+
+{% if paginator.haveToPaginate() %}
+    <div class="d-flex justify-content-end mt-3">
+        {{ pagerfanta(paginator, 'twig', {
+            template: '@BabDevPagerfanta/twitter_bootstrap4.html.twig',
+            prev_message: '← ' ~ 'app.shop.listing.previous'|trans,
+            next_message: 'app.shop.listing.next'|trans ~ ' →',
+        }) }}
+    </div>
+{% endif %}

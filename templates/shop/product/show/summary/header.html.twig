@@ -1,0 +1,9 @@
+{% set product = hookable_metadata.context.product %}
+{% set variant = hookable_metadata.context.variant %}
+
+<h1 class="product-name">
+    {{ product.name }}
+    {% if variant is not null and not product.simple %}
+        <div class="title-wrapper title-cross title-center"><p class="title" id="current-variant-name">{{ variant.name|default(variant.descriptor) }}</p></div>
+    {% endif %}
+</h1>

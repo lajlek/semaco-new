@@ -1,0 +1,14 @@
+{% if is_granted('ROLE_USER') %}
+    <a class="user_link" href="{{ path('sylius_shop_account_dashboard') }}">
+        <i class="d-icon-user" aria-hidden="true"></i>
+        <span>&nbsp;{{ 'app.shop.header.my_account'|trans }}&nbsp;</span>
+        &nbsp;
+    </a>
+{% else %}
+    <a class="user_link" href="{{ path('sylius_shop_login') }}">
+        <i class="d-icon-user" aria-hidden="true"></i>
+        <span>&nbsp;{{ 'app.shop.header.login'|trans }}&nbsp;</span>
+        &nbsp;
+    </a>
+{% endif %}
+<span class="divider"></span>

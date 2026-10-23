@@ -1,0 +1,23 @@
+semaco_shop_product_list:
+    path: /{_locale}/products-list/{slug}
+    methods: [GET]
+    defaults:
+        _controller: sylius.controller.product::indexAction
+        _sylius:
+            template: "@SyliusShop/product/index.html.twig"
+            grid: sylius_shop_product
+    requirements:
+        _locale: ^[A-Za-z]{2,4}(_([A-Za-z]{4}|[0-9]{3}))?(_([A-Za-z]{2}|[0-9]{3}))?$
+        slug: .+(?<!/)
+
+semaco_shop_taxon_redirect:
+    path: /{_locale}/taxons/{slug}
+    methods: [GET]
+    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::redirectAction
+    defaults:
+        route: semaco_shop_product_list
+        permanent: true
+        keepQueryParams: true
+    requirements:
+        _locale: ^[A-Za-z]{2,4}(_([A-Za-z]{4}|[0-9]{3}))?(_([A-Za-z]{2}|[0-9]{3}))?$
+        slug: .+(?<!/)

@@ -1,0 +1,11 @@
+{# Rendered with \Sylius\Bundle\ShopBundle\Twig\Component\Product\BreadcrumbComponent #}
+<div class="widget" {{ attributes }}>
+    <h3 class="widget-title">{{ taxon.name }}</h3>
+    {% if taxon.enabledChildren|length > 0 %}
+        <ul class="widget-body filter-items search-ul">
+            {% for child in taxon.enabledChildren %}
+                <li><a href="{{ path('semaco_shop_product_list', {'slug': child.slug, '_locale': child.translation.locale}) }}" class="list-group-item list-group-item-action">{{ child.name }}</a></li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>

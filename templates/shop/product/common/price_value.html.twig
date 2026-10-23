@@ -1,0 +1,7 @@
+{% import '@SyliusShop/shared/macro/money.html.twig' as money %}
+{%- set price_amount = variant|sylius_calculate_price({'channel': sylius.channel}) -%}
+{%- if price_amount > 0 -%}
+    {{ money.convertAndFormat(price_amount) }}
+{%- else -%}
+    {{ 'app.shop.price.on_request'|trans }}
+{%- endif -%}

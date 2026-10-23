@@ -1,0 +1,8 @@
+<div class="header-search hs-simple" id="products-search-header">
+    <form method="get" action="/{{ app.request.locale }}/search" class="input-wrapper" role="search">
+        <input type="search" name="bitbag_elasticsearch_search[box][query]" required="required" placeholder="{{ 'app.shop.header.search_placeholder'|trans }}" aria-label="{{ 'app.shop.header.search_placeholder'|trans }}" class="form-control" />
+        <button class="btn btn-search" type="submit" aria-label="{{ 'app.shop.header.search'|trans }}">
+            <i class="d-icon-search" aria-hidden="true"></i>
+        </button>
+    </form>
+</div>

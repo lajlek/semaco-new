@@ -1,0 +1,24 @@
+{# Rendered with \Sylius\Bundle\ShopBundle\Twig\Component\Product\AddToCartFormComponent #}
+{% form_theme form 'form_div_layout.html.twig' %}
+
+<div class="card" {{ attributes }}>
+    <div class="card-body">
+        {% if product.enabledVariants.empty() or product.simple and not sylius_inventory_is_available(product.enabledVariants.first) %}
+            <div class="alert alert-warning">{{ 'app.shop.product.out_of_stock'|trans }}</div>
+        {% else %}
+            {{ form_start(form, {'attr': {'id': 'sylius-product-adding-to-cart', 'novalidate': 'novalidate', 'data-action': 'live#action:prevent live#$render', 'data-live-action-param': 'addToCart'}}) }}
+            {% if not form.vars.valid %}
+                <div class="alert alert-danger">{{ form_errors(form) }}{{ form_errors(form.cartItem) }}{{ form_errors(form.cartItem.quantity) }}</div>
+            {% endif %}
+
+            {% if not product.simple %}
+                {% include 'shop/product/show/summary/add_to_cart/variants.html.twig' %}
+            {% endif %}
+
+            {% include 'shop/product/show/summary/add_to_cart/quantity.html.twig' %}
+
+            {{ form_row(form._token) }}
+            {{ form_end(form, {'render_rest': false}) }}
+        {% endif %}
+    </div>
+</div>

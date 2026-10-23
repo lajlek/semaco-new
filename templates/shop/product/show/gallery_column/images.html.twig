@@ -1,0 +1,31 @@
+{% set product = hookable_metadata.context.product %}
+{% set images = product.images %}
+
+<div class="product-gallery product-gallery-vertical">
+    <div class="product-single-carousel owl-carousel owl-theme owl-nav-inner row cols-1" id="product-detail-images">
+        {% for image in images %}
+            <figure class="product-image">
+                <img src="{{ image.path|imagine_filter('semaco_product_large_thumbnail') }}" alt="{{ product.name }}" style="max-width: 800px">
+            </figure>
+        {% else %}
+            <figure class="product-image">
+                <img src="{{ asset('bundles/syliusui/images/400x300.png') }}" alt="{{ product.name }}">
+            </figure>
+        {% endfor %}
+    </div>
+    {% if images|length > 0 %}
+        <div class="product-thumbs-wrap">
+            <div class="product-thumbs">
+                {% for image in images %}
+                    {% set class_name = 'active-image' ~ (image.type ? ' type-' ~ image.type : '') %}
+                    {% for image_variant in image.productVariants %}
+                        {% set class_name = class_name ~ ' product-variant-image variant-' ~ image_variant.id %}
+                    {% endfor %}
+                    <div class="product-thumb">
+                        <img class="{{ class_name }}" data-image-id="{{ image.id }}" src="{{ image.path|imagine_filter('semaco_product_small_thumbnail') }}" alt="{{ product.name }}" width="109" height="122">
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+</div>

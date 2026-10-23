@@ -1,0 +1,15 @@
+{# Rendered with \Sylius\Bundle\ShopBundle\Twig\Component\Common\TaxonMenuComponent #}
+<div {{ attributes }}>
+    {% if taxons|length > 0 %}
+        <div class="widget">
+            <h3 class="widget-title">{{ 'app.shop.homepage.categories'|trans }}</h3>
+            <ul class="widget-body filter-items search-ul">
+                {% for taxon in taxons %}
+                    <li>
+                        <a class="list-group-item list-group-item-action" href="{{ path('semaco_shop_product_list', {'slug': taxon.slug, '_locale': taxon.translation.locale}) }}">{{ taxon.name }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+</div>

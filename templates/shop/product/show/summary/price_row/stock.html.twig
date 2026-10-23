@@ -1,0 +1,12 @@
+{% set variant = hookable_metadata.context.variant %}
+{% if variant is not null %}
+    <div class="product-meta mt-2">
+        <span class="product-brand" id="product-stock-text">
+            {%- if variant.onHand > 0 -%}
+                {{ 'app.shop.product.in_stock'|trans }}
+            {%- else -%}
+                {{ 'app.shop.product.delivery_time'|trans }}
+            {%- endif -%}
+        </span>
+    </div>
+{% endif %}

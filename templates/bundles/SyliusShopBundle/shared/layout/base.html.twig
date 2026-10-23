@@ -1,0 +1,58 @@
+{% set generic_hook = 'sylius_shop.base' %}
+{% set prefixes = prefixes|default([])|merge([generic_hook]) %}
+
+<!DOCTYPE html>
+
+<html lang="{{ app.request.locale|slice(0, 2) }}">
+    <head>
+        {% block metatags %}
+            {% hook '#metatags' with { _prefixes: prefixes } %}
+        {% endblock %}
+
+        <title>{% block title %}{{ 'app.shop.title'|trans }}{% endblock %}</title>
+
+        {% block stylesheets %}
+            {% hook '#stylesheets' with { _prefixes: prefixes } %}
+        {% endblock %}
+
+        {% hook 'head' with { _prefixes: prefixes } %}
+    </head>
+
+    <body data-route="{{ app.request.get('_route') }}">
+        {% block body %}
+            <div class="page-wrapper">
+                <header class="header">
+                    {% block header %}
+                        {% hook 'header' with { _prefixes: prefixes } %}
+                    {% endblock %}
+                </header>
+
+                {% block flashes %}
+                    {% if app.session is not null and app.session.started and app.session.flashbag.peekAll is not empty %}
+                        <div class="sylius-scope">
+                            <div class="container">
+                                {% include '@SyliusShop/shared/flashes.html.twig' %}
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endblock %}
+
+                <div class="{% block content_class %}sylius-scope sylius-scope-page{% endblock %}">
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+
+            <footer class="footer">
+                {% block footer %}
+                    {% hook 'footer' with { _prefixes: prefixes } %}
+                {% endblock %}
+            </footer>
+
+            {% hook 'offcanvas' with { _prefixes: prefixes } %}
+        {% endblock %}
+
+        {% block javascripts %}
+            {% hook '#javascripts' with { _prefixes: prefixes } %}
+        {% endblock %}
+    </body>
+</html>

@@ -1,0 +1,11 @@
+{# Rendered with \Sylius\Bundle\ShopBundle\Twig\Component\Product\ListComponent #}
+<section class="mt-10" {{ attributes }}>
+    <h2 class="title title-center">{{ 'app.shop.homepage.recommended'|trans }}</h2>
+    <div class="row product-wrapper equal-height">
+        {% for product in latest_products %}
+            <div class="col-md-3 col-6">
+                {% include 'shop/product/common/card.html.twig' with { product } %}
+            </div>
+        {% endfor %}
+    </div>
+</section>

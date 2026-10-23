@@ -1,0 +1,27 @@
+{# Rendered with \Sylius\Bundle\ShopBundle\Twig\Component\Common\TaxonMenuComponent #}
+<div class="mobile-menu-wrapper" {{ attributes }}>
+    <div class="mobile-menu-overlay"></div>
+    <a class="mobile-menu-close" href="#" aria-label="{{ 'app.shop.cart.close'|trans }}"><i class="d-icon-times" aria-hidden="true"></i></a>
+    <div class="mobile-menu-container scrollable">
+        <form method="get" action="/{{ app.request.locale }}/search" class="input-wrapper" role="search">
+            <input type="search" class="form-control" name="bitbag_elasticsearch_search[box][query]" autocomplete="off" placeholder="{{ 'app.shop.header.search_placeholder'|trans }}" aria-label="{{ 'app.shop.header.search_placeholder'|trans }}" required />
+            <button class="btn btn-search" type="submit" aria-label="{{ 'app.shop.header.search'|trans }}"><i class="d-icon-search" aria-hidden="true"></i></button>
+        </form>
+        <ul class="mobile-menu mmenu-anim">
+            {% for taxon in taxons %}
+                {% set children = taxon.enabledChildren %}
+                <li>
+                    <a href="{{ path('semaco_shop_product_list', {'slug': taxon.slug, '_locale': taxon.translation.locale}) }}">{{ taxon.name }}</a>
+                    {% if children|length > 0 %}
+                        <ul>
+                            {% for child in children %}
+                                <li><a href="{{ path('semaco_shop_product_list', {'slug': child.slug, '_locale': child.translation.locale}) }}">{{ child.name }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </li>
+            {% endfor %}
+            {% include 'shop/layout/information_links.html.twig' %}
+        </ul>
+    </div>
+</div>

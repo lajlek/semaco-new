@@ -1,0 +1,14 @@
+<div class="header-bottom d-lg-show">
+    <div class="container">
+        <div class="header-left">
+            <div class="main-menu d-none d-lg-block">
+                <nav aria-label="{{ 'app.shop.header.main_menu'|trans }}">
+                    {% hook 'bottom_left' %}
+                </nav>
+            </div>
+        </div>
+        <div class="header-right">
+            {% hook 'bottom_right' %}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,12 @@
+{# Rendered with \Sylius\Bundle\ShopBundle\Twig\Component\Product\BreadcrumbComponent #}
+<nav class="breadcrumb-nav" aria-label="{{ 'app.shop.breadcrumb'|trans }}" {{ attributes }}>
+    <div class="container">
+        <ul class="breadcrumb">
+            <li><a href="{{ path('sylius_shop_homepage') }}" aria-label="{{ 'app.shop.homepage.title'|trans }}"><i class="d-icon-home" aria-hidden="true"></i></a></li>
+            {% for ancestor in taxon.ancestors|reverse|filter(a => not a.isRoot()) %}
+                <li><a href="{{ path('semaco_shop_product_list', {'slug': ancestor.slug, '_locale': ancestor.translation.locale}) }}">{{ ancestor.name }}</a></li>
+            {% endfor %}
+            <li>{{ taxon.name }}</li>
+        </ul>
+    </div>
+</nav>

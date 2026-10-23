@@ -1,0 +1,11 @@
+{% set prefixes = ['sylius_shop.homepage.index'] %}
+
+{% extends '@SyliusShop/shared/layout/base.html.twig' %}
+
+{% block content_class %}{% endblock %}
+
+{% block content %}
+    <main class="main">
+        {% hook 'semaco_shop.homepage' %}
+    </main>
+{% endblock %}

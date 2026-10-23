@@ -1,0 +1,54 @@
+{# Rendered with \Sylius\Bundle\ShopBundle\Twig\Component\Cart\WidgetComponent #}
+{% import '@SyliusShop/shared/macro/money.html.twig' as money %}
+
+<div class="dropdown cart-dropdown type2 cart-offcanvas mr-0 mr-lg-2" {{ attributes }}>
+    <a href="{{ path('sylius_shop_cart_summary') }}" class="cart-toggle label-block link">
+        <div class="cart-label d-lg-show">
+            <span class="cart-name">{{ 'app.shop.cart.title'|trans }}:</span>
+            <span class="cart-price">{{ money.convertAndFormat(cart is not null ? cart.itemsSubtotal : 0) }}</span>
+            <small class="small text-lowercase">{{ 'app.shop.price.without_vat_long'|trans }}</small>
+        </div>
+        <i class="d-icon-bag" aria-hidden="true"><span class="cart-count">{{ cart is not null ? cart.items|length : 0 }}</span></i>
+    </a>
+    <div class="cart-overlay"></div>
+    <div class="dropdown-box">
+        <div class="cart-header">
+            <h4 class="cart-title">{{ 'app.shop.cart.title'|trans }}</h4>
+            <a href="#" class="btn btn-dark btn-link btn-icon-right btn-close">{{ 'app.shop.cart.close'|trans }}<i class="d-icon-arrow-right" aria-hidden="true"></i></a>
+        </div>
+        <div class="products scrollable">
+            {% if cart is null or cart.empty %}
+                <div class="card-body text-center">
+                    {{ 'app.shop.cart.empty'|trans }}
+                </div>
+            {% else %}
+                {% for item in cart.items %}
+                    {% set item_product = item.variant.product %}
+                    {% set item_url = path('sylius_shop_product_show', {'slug': item_product.slug, '_locale': item_product.translation.locale}) %}
+                    <div class="product product-cart">
+                        <figure class="product-media">
+                            <a href="{{ item_url }}">
+                                {% include 'shop/product/common/image.html.twig' with { product: item_product, filter: 'semaco_product_tiny_thumbnail' } %}
+                            </a>
+                        </figure>
+                        <div class="product-detail">
+                            <a href="{{ item_url }}" class="product-name">{{ item.productName }}</a>
+                            <div class="price-box">
+                                <span class="product-quantity">{{ item.quantity }}</span>
+                                <span class="product-price">{{ money.convertAndFormat(item.unitPrice) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+        <div class="cart-total">
+            <label>{{ 'app.shop.cart.subtotal'|trans }}:</label>
+            <span class="price">{{ money.convertAndFormat(cart is not null ? cart.itemsSubtotal : 0) }} <small class="small text-lowercase">{{ 'app.shop.price.without_vat'|trans }}</small></span><br />
+        </div>
+        <div class="cart-action">
+            <a href="{{ path('sylius_shop_cart_summary') }}" class="btn btn-dark btn-link">{{ 'app.shop.cart.view_and_edit'|trans }}</a>
+            <a href="{{ path('sylius_shop_checkout_start') }}" class="btn btn-dark"><span>{{ 'app.shop.cart.checkout'|trans }}</span></a>
+        </div>
+    </div>
+</div>
