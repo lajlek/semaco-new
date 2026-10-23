@@ -1,0 +1,25 @@
+parameters:
+    app.currency.cnb_daily_rates_url: 'https://www.cnb.cz/cs/financni-trhy/devizovy-trh/kurzy-devizoveho-trhu/kurzy-devizoveho-trhu/denni_kurz.txt'
+    app.currency.cnb_source_currencies: ['EUR', 'USD']
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    App\Currency\:
+        resource: '../../src/Currency/'
+
+    App\Currency\Port\ExchangeRateProviderInterface: '@App\Currency\Adapter\CnbExchangeRateProvider'
+
+    App\Currency\Adapter\CnbExchangeRateProvider:
+        arguments:
+            $dailyRatesUrl: '%app.currency.cnb_daily_rates_url%'
+
+    App\Currency\Service\ExchangeRateUpdater:
+        arguments:
+            $exchangeRateRepository: '@sylius.repository.exchange_rate'
+            $exchangeRateFactory: '@sylius.factory.exchange_rate'
+            $currencyRepository: '@sylius.repository.currency'
+            $sourceCurrencies: '%app.currency.cnb_source_currencies%'
