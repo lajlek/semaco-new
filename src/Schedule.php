@@ -29,6 +29,7 @@ final readonly class Schedule implements ScheduleProviderInterface
             ->lock($this->lockFactory->createLock('app-schedule'))
             ->add(
                 RecurringMessage::every('10 minutes', new RunCommandMessage('app:erp:sync --no-debug')),
+                RecurringMessage::every('2 minutes', new RunCommandMessage('app:erp:push-orders --no-debug')),
                 RecurringMessage::cron('50 14 * * 1-5', new RunCommandMessage('app:exchange-rates:import'), new \DateTimeZone('Europe/Prague')),
             );
     }

@@ -5,6 +5,17 @@ parameters:
     app.erp.tax_category_code: 'standard'
     app.erp.price_levels: ['1', '4']
     app.erp.channel_price_level: '4'
+    app.erp.helios_shop_id: '1'
+    app.erp.order_price_type: 'A'
+    app.erp.order_vat_rate: 21
+    app.erp.order_export_since: '%env(ERP_ORDER_EXPORT_SINCE)%'
+    app.erp.payment_methods:
+        '10': 'Platebním příkazem'
+        '12': 'Zálohově'
+    app.erp.shipping_methods:
+        '3': 'per GLS'
+        '10': 'per GLS záloha'
+        'free_shipping': ~
 
 services:
     _defaults:
@@ -47,6 +58,7 @@ services:
     App\Erp\Port\Pricing\PricingProviderInterface: '@App\Erp\Adapter\Helios\Pricing\HeliosPricingAdapter'
     App\Erp\Port\Inventory\InventoryProviderInterface: '@App\Erp\Adapter\Helios\Inventory\HeliosInventoryAdapter'
     App\Erp\Port\Catalog\ProductAssociationSyncInterface: '@App\Erp\Adapter\Helios\Association\HeliosProductAssociationSyncAdapter'
+    App\Erp\Port\Order\OrderSyncInterface: '@App\Erp\Adapter\Helios\Order\HeliosOrderSyncAdapter'
     App\Erp\Port\Customer\OrganizationSyncInterface: '@App\Erp\Adapter\Helios\Organization\HeliosOrganizationSyncAdapter'
 
     App\Erp\Application\Catalog\TaxonImporter:
