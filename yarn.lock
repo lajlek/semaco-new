@@ -1002,7 +1002,7 @@
     "@babel/preset-env" "^7.25.8"
     "@hotwired/stimulus" "^3.0.0"
     "@popperjs/core" "^2.11.8"
-    "@sylius/admin-bundle" "file:../../home/sylius/.cache/yarn/v6/npm-@sylius-ui-admin-2.0.0-82ffda4d-cbb2-4e55-a058-c7d0d3ca0ca3-1792784846942/node_modules/@sylius-ui/admin/Resources/assets"
+    "@sylius/admin-bundle" "file:../../home/sylius/.cache/yarn/v6/npm-@sylius-ui-admin-2.0.0-06a1f409-d445-47f7-93b9-9a0e704e52fa-1792798548082/node_modules/@sylius-ui/admin/Resources/assets"
     "@symfony/stimulus-bridge" "^3.2.0"
     "@symfony/webpack-encore" "^5.0.1"
     "@tabler/core" "~1.3.0"
@@ -1026,7 +1026,7 @@
     "@babel/preset-env" "^7.25.8"
     "@hotwired/stimulus" "^3.0.0"
     "@popperjs/core" "^2.11.8"
-    "@sylius/shop-bundle" "file:../../home/sylius/.cache/yarn/v6/npm-@sylius-ui-shop-2.0.0-ab5959aa-4f24-4f74-8fa3-428b68c08d2c-1792784849684/node_modules/@sylius-ui/shop/Resources/assets"
+    "@sylius/shop-bundle" "file:../../home/sylius/.cache/yarn/v6/npm-@sylius-ui-shop-2.0.0-638cba35-14c1-45de-9c10-ea6126714cee-1792798548205/node_modules/@sylius-ui/shop/Resources/assets"
     "@symfony/stimulus-bridge" "^3.2.0"
     "@symfony/webpack-encore" "^5.0.1"
     bootstrap "^5.3.3"
@@ -2234,6 +2234,11 @@ jest-worker@^30.0.5:
     jest-util "30.5.1"
     merge-stream "^2.0.0"
     supports-color "^8.1.1"
+
+jodit@4.17.1:
+  version "4.17.1"
+  resolved "https://registry.yarnpkg.com/jodit/-/jodit-4.17.1.tgz#987bfa0a73666bd539ce6c776a24ae162a0de68a"
+  integrity sha512-iWtFB//szGRdPKybBwW5rIAlhKSX8jgMWB0rV78gAunZ3y2OJR2ZnRvOUCgYnOsomTyBD/GdQ0YO7DEw4e3fBw==
 
 js-tokens@^4.0.0:
   version "4.0.0"

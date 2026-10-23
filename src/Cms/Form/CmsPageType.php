@@ -31,9 +31,9 @@ final class CmsPageType extends AbstractType
                 'constraints' => [new NotBlank(), new Length(max: 128), new Regex(pattern: '/^[a-z0-9-]+$/', message: 'Jen malá písmena, čísla a pomlčky.')],
             ])
             ->add('content', TextareaType::class, [
-                'label' => 'Obsah (HTML)',
+                'label' => 'Obsah',
                 'required' => false,
-                'attr' => ['rows' => 20],
+                'attr' => ['rows' => 20, 'data-wysiwyg' => 'true'],
             ])
             ->add('metaTitle', TextType::class, ['label' => 'Titulek pro vyhledávače', 'required' => false])
             ->add('metaDescription', TextareaType::class, [
