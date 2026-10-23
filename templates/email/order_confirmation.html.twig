@@ -1,0 +1,55 @@
+{% extends 'email/layout.html.twig' %}
+
+{% block subject %}Potvrzení objednávky č. {{ order.number }}{% endblock %}
+
+{% block content %}
+    {% import '@SyliusShop/shared/macro/money.html.twig' as money %}
+    {% set currency = order.currencyCode %}
+    <p>Vážený zákazníku,</p>
+    <p>děkujeme za Vaši objednávku č. {{ order.number }}, která se vyřizuje. O dalším průběhu Vás budeme informovat.</p>
+    <p>V případě platby na zálohovou fakturu, prosím vyčkejte na její doručení.</p>
+
+    <p>Shrnutí objednávky:</p>
+    <table width="100%" cellpadding="4" cellspacing="0" style="border-collapse: collapse;">
+        <tr style="border-bottom: 1px solid #dddddd;">
+            <th align="left">Produkt</th>
+            <th align="right">Cena za ks</th>
+            <th align="center">Počet ks</th>
+            <th align="right">Cena celkem</th>
+        </tr>
+        {% for item in order.items %}
+            {% set variant = item.variant %}
+            <tr style="border-bottom: 1px solid #eeeeee;">
+                <td valign="top">
+                    <strong>{{ semaco_order_code(variant) }}</strong>
+                    {% if variant.product %}
+                        <a href="{{ sylius_channel_url(path('sylius_shop_product_show', {slug: variant.product.slug, _locale: order.localeCode}), order.channel) }}">{{ item.productName }}</a>
+                    {% else %}
+                        {{ item.productName }}
+                    {% endif %}
+                    {% if item.variantName %}<br>{{ item.variantName }}{% endif %}
+                </td>
+                <td valign="top" align="right">{{ money.format(item.unitPrice, currency) }}</td>
+                <td valign="top" align="center">{{ item.quantity }}</td>
+                <td valign="top" align="right">{{ money.format(item.subtotal, currency) }}</td>
+            </tr>
+        {% endfor %}
+        <tr><td colspan="3" align="right">Doprava</td><td align="right">{{ money.format(order.shippingTotal, currency) }}</td></tr>
+        <tr><td colspan="3" align="right">DPH</td><td align="right">{{ money.format(order.taxTotal, currency) }}</td></tr>
+        <tr><td colspan="3" align="right"><strong>Celkem</strong></td><td align="right"><strong>{{ money.format(order.total, currency) }}</strong></td></tr>
+    </table>
+
+    <p>Fakturační adresa:<br>{% include 'email/_address.html.twig' with {address: order.billingAddress} %}</p>
+    <p>Doručovací adresa:<br>{% include 'email/_address.html.twig' with {address: order.shippingAddress} %}</p>
+    <p>Platba:<br>{% for payment in order.payments %}{{ payment.method }}<br>{% endfor %}</p>
+    <p>Doručení:<br>{% for shipment in order.shipments %}{{ shipment.method }}<br>{% endfor %}</p>
+    {% if order.notes %}<p>Poznámka:<br>{{ order.notes|nl2br }}</p>{% endif %}
+    {% set billing = order.channel.shopBillingData %}
+    {% if billing %}
+        <p>Dodavatel:<br>{{ billing.company }}<br>{{ billing.street }}<br>{{ billing.postcode }} {{ billing.city }}</p>
+    {% endif %}
+    <p>O odeslání zboží Vás budeme informovat.</p>
+    <p>Děkujeme za Vaši důvěru a v případě jakékoli nesrovnalosti nás prosím kontaktujte s číslem objednávky na mail obchod@semaco.cz nebo na telefonu +420 458 584 520.</p>
+    <p>Pokud jste spotřebitel, můžete od smlouvy odstoupit online: <a href="{{ sylius_channel_url(path('app_shop_withdrawal', {_locale: order.localeCode, order: order.number}), order.channel) }}">Odstoupit od smlouvy</a>.</p>
+    <p>S přáním pěkného dne obchodní tým SEMACO</p>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends 'email/layout.html.twig' %}
+
+{% block subject %}Registrace v e-shopu{% endblock %}
+
+{% block content %}
+    <p>Vážený zákazníku,</p>
+    <p>děkujeme za registraci v našem internetovém obchodě.</p>
+    <p>Po přihlášení získáte přístup ke svým předchozím objednávkám, dokladům a dalším podrobnostem. Své registrační údaje můžete kdykoliv upravit ve svém profilu.</p>
+    <p>Přihlašovací jméno: {{ user.username }}</p>
+    <p><a href="{{ sylius_channel_url(path('sylius_shop_homepage', {_locale: localeCode}), channel) }}">přejít na SEMACO.CZ</a></p>
+{% endblock %}

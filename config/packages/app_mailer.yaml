@@ -1,0 +1,16 @@
+sylius_mailer:
+    emails:
+        order_confirmation:
+            template: 'email/order_confirmation.html.twig'
+        password_reset:
+            template: 'email/password_reset.html.twig'
+        reset_password_token:
+            template: 'email/password_reset.html.twig'
+        user_registration:
+            template: 'email/user_registration.html.twig'
+        verification_token:
+            template: 'email/verification.html.twig'
+        order_confirmation_resent:
+            template: 'email/order_confirmation.html.twig'
+        account_verification:
+            template: 'email/verification.html.twig'
