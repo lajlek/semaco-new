@@ -60,6 +60,7 @@ services:
     App\Erp\Port\Catalog\ProductAssociationSyncInterface: '@App\Erp\Adapter\Helios\Association\HeliosProductAssociationSyncAdapter'
     App\Erp\Port\Order\OrderSyncInterface: '@App\Erp\Adapter\Helios\Order\HeliosOrderSyncAdapter'
     App\Erp\Port\Customer\OrganizationSyncInterface: '@App\Erp\Adapter\Helios\Organization\HeliosOrganizationSyncAdapter'
+    App\Erp\Port\Customer\SalesRepresentativeSyncInterface: '@App\Erp\Adapter\Helios\SalesRepresentative\HeliosSalesRepresentativeSyncAdapter'
 
     App\Erp\Application\Catalog\TaxonImporter:
         arguments:

@@ -9,6 +9,7 @@ use App\Erp\Application\Catalog\ProductAssociationImporter;
 use App\Erp\Application\Catalog\ProductImporter;
 use App\Erp\Application\Catalog\TaxonImporter;
 use App\Erp\Application\Customer\OrganizationImporter;
+use App\Erp\Application\Customer\SalesRepresentativeImporter;
 use App\Erp\Application\ImportResult;
 use App\Erp\Application\Inventory\StockImporter;
 use App\Erp\Application\Pricing\PriceImporter;
@@ -33,7 +34,9 @@ final readonly class CatalogSyncService
 
     public const STEP_ASSOCIATIONS = 'associations';
 
-    public const STEPS = [self::STEP_TAXONS, self::STEP_ATTRIBUTES, self::STEP_PRODUCTS, self::STEP_ASSOCIATIONS, self::STEP_PRICES, self::STEP_STOCK, self::STEP_ORGANIZATIONS];
+    public const STEP_SALES_REPRESENTATIVES = 'sales_representatives';
+
+    public const STEPS = [self::STEP_TAXONS, self::STEP_ATTRIBUTES, self::STEP_PRODUCTS, self::STEP_ASSOCIATIONS, self::STEP_PRICES, self::STEP_STOCK, self::STEP_ORGANIZATIONS, self::STEP_SALES_REPRESENTATIVES];
 
     public function __construct(
         private TaxonImporter $taxonImporter,
@@ -44,6 +47,7 @@ final readonly class CatalogSyncService
         private StockImporter $stockImporter,
         private OrganizationImporter $organizationImporter,
         private ProductAssociationImporter $associationImporter,
+        private SalesRepresentativeImporter $salesRepresentativeImporter,
         private SyncWatermarkRecorder $watermarks,
     ) {
     }
@@ -130,6 +134,10 @@ final readonly class CatalogSyncService
             $result = $this->organizationImporter->importChangedSince($since, $maxModifiedAt);
             $this->watermarks->recordPullSuccess(ErpSyncWatermark::DOMAIN_ORGANIZATION, $maxModifiedAt, $runStartedAt, $since);
             $onStepFinished($result);
+        }
+
+        if (in_array(self::STEP_SALES_REPRESENTATIVES, $steps, true)) {
+            $onStepFinished($this->salesRepresentativeImporter->import());
         }
     }
 
