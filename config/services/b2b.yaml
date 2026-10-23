@@ -1,3 +1,6 @@
+parameters:
+    app.b2b.sales_representative_group: 'sales'
+
 services:
     _defaults:
         autowire: true
@@ -14,7 +17,11 @@ services:
     App\B2B\Repository\PriceLevelRepositoryInterface: '@app.repository.price_level'
     App\B2B\Repository\ProductPriceRepositoryInterface: '@app.repository.product_price'
 
-    App\B2B\Context\ActiveOrganizationResolverInterface: '@App\B2B\Context\CustomerOrganizationResolver'
+    App\B2B\Context\ActiveOrganizationResolverInterface: '@App\B2B\Context\SalesRepresentativeAwareOrganizationResolver'
+
+    App\B2B\Controller\:
+        resource: '../../src/B2B/Controller/'
+        tags: ['controller.service_arguments']
 
     App\B2B\Pricing\OrganizationProductVariantPricesCalculator:
         decorates: 'sylius.calculator.product_variant_price'

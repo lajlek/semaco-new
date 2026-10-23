@@ -1,0 +1,22 @@
+{% set switcher = semaco_sales_representative_switcher() %}
+{% if switcher is not null %}
+    {% set returnPath = app.request.requestUri %}
+    <div class="sales-representative-switcher">
+        <label for="sales-organization" class="sr-only">{{ 'app.shop.sales_representative.organization'|trans({}, 'b2b') }}</label>
+        <select id="sales-organization" class="form-control form-control-sm" onchange="if (this.value) { window.location = this.value; }">
+            <option value="">{{ 'app.shop.sales_representative.choose_organization'|trans({}, 'b2b') }}</option>
+            {% for organization in switcher.organizations %}
+                <option value="{{ path('app_set_organization_action', {id: organization.id, return: returnPath}) }}"{% if switcher.activeOrganization is not null and switcher.activeOrganization.id == organization.id %} selected{% endif %}>{{ organization.name }}{% if organization.orgNumber %} ({{ organization.orgNumber }}){% endif %}</option>
+            {% endfor %}
+        </select>
+        {% if switcher.customers is not empty %}
+            <label for="sales-organization-customer" class="sr-only">{{ 'app.shop.sales_representative.person'|trans({}, 'b2b') }}</label>
+            <select id="sales-organization-customer" class="form-control form-control-sm" onchange="if (this.value) { window.location = this.value; }">
+                <option value="">{{ 'app.shop.sales_representative.choose_person'|trans({}, 'b2b') }}</option>
+                {% for customer in switcher.customers %}
+                    <option value="{{ path('app_set_organization_customer_action', {id: customer.id, return: returnPath}) }}"{% if switcher.activeCustomer is not null and switcher.activeCustomer.id == customer.id %} selected{% endif %}>{{ customer.fullName ?: customer.email }}</option>
+                {% endfor %}
+            </select>
+        {% endif %}
+    </div>
+{% endif %}

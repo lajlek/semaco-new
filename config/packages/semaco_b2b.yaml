@@ -1,0 +1,5 @@
+sylius_twig_hooks:
+    hooks:
+        'sylius_shop.base.header.top_left':
+            sales_representative:
+                template: 'shop/sales_representative/top_bar.html.twig'

@@ -143,3 +143,18 @@ when@dev:
                                     last_name: 'Zákazník'
                                     password: 'semaco-dev'
                                     enabled: true
+
+            semaco_test_sales_representative:
+                listeners:
+                    logger: ~
+
+                fixtures:
+                    shop_user:
+                        options:
+                            custom:
+                                -
+                                    email: 'obchodnik@semaco.test'
+                                    first_name: 'Testovací'
+                                    last_name: 'Obchodník'
+                                    password: 'semaco-dev'
+                                    enabled: true

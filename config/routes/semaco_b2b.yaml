@@ -1,0 +1,5 @@
+semaco_b2b_controllers:
+    resource:
+        path: ../../src/B2B/Controller/
+        namespace: App\B2B\Controller
+    type: attribute

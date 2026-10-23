@@ -52,6 +52,8 @@ sylius_core:
     # causing filesort on large tables when the primary sort direction is DESC.
     # See: https://github.com/Sylius/Sylius/pull/18956
     order_by_identifier: false
+    telemetry:
+        enabled: false
     
     resources:
         avatar_image:

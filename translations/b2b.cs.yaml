@@ -1,0 +1,7 @@
+app:
+    shop:
+        sales_representative:
+            organization: 'Organizace'
+            choose_organization: 'Organizace'
+            person: 'Osoba'
+            choose_person: 'Osoba'
