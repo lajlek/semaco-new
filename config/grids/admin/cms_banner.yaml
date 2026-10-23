@@ -1,0 +1,42 @@
+sylius_grid:
+    grids:
+        app_admin_cms_banner:
+            driver:
+                name: doctrine/orm
+                options:
+                    class: App\Cms\Entity\Banner
+            sorting:
+                code: asc
+            fields:
+                image:
+                    type: twig
+                    label: Obrázek
+                    path: .
+                    options:
+                        template: 'admin/cms/grid/banner_image.html.twig'
+                code:
+                    type: string
+                    label: Kód
+                    sortable: code
+                alt:
+                    type: string
+                    label: Popis
+                enabled:
+                    type: twig
+                    label: Zobrazit na webu
+                    options:
+                        template: '@SyliusAdmin/shared/grid/field/boolean.html.twig'
+                updatedAt:
+                    type: datetime
+                    label: Upraveno
+                    options:
+                        format: 'd. m. Y H:i'
+            actions:
+                main:
+                    create:
+                        type: create
+                item:
+                    update:
+                        type: update
+                    delete:
+                        type: delete

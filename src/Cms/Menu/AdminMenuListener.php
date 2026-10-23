@@ -19,5 +19,10 @@ final class AdminMenuListener
             ->addChild('app_admin_cms_page', ['route' => 'app_admin_cms_page_index'])
             ->setLabel('Stránky (CMS)')
             ->setLabelAttribute('icon', 'tabler:file-text');
+
+        $content
+            ->addChild('app_admin_cms_banner', ['route' => 'app_admin_cms_banner_index'])
+            ->setLabel('Bannery')
+            ->setLabelAttribute('icon', 'tabler:photo');
     }
 }

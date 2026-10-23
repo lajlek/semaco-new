@@ -1,4 +1,7 @@
-<div class="page-header mb-10 homepage-banner" style="background-image: url('{{ asset('bootstrap-theme/img/banner.jpeg') }}'); background-color: #f2f2f3;">
+{% set banner = semaco_banner('homepage') %}
+{% set banner_url = banner ? asset('media/image/' ~ banner.path) ~ '?v=' ~ banner.updatedAt|date('U') : asset('bootstrap-theme/img/banner.jpeg') %}
+<div class="page-header mb-10 homepage-banner" style="background-image: url('{{ banner_url }}'); background-color: #f2f2f3;"{% if banner and banner.alt %} role="img" aria-label="{{ banner.alt }}"{% endif %}>
+    {% if banner and banner.link %}<a class="stretched-link" href="{{ banner.link }}"><span class="sr-only">{{ banner.alt ?: 'app.shop.title'|trans }}</span></a>{% endif %}
     <div class="container">
         <h1 class="page-title ls-m text-white"><span class="sr-only">{{ 'app.shop.title'|trans }}</span></h1>
     </div>

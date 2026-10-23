@@ -17,3 +17,17 @@ app_shop_cms:
         path: ../../src/Cms/Controller/
         namespace: App\Cms\Controller
     type: attribute
+
+app_admin_cms_banner:
+    resource: |
+        alias: app.cms_banner
+        section: admin
+        templates: "@SyliusAdmin\\shared\\crud"
+        except: ['show']
+        redirect: update
+        grid: app_admin_cms_banner
+        form:
+            type: App\Cms\Form\BannerType
+        permission: false
+    type: sylius.resource
+    prefix: /admin

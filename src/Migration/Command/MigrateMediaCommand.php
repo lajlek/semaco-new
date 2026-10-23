@@ -13,7 +13,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-#[AsCommand(name: 'app:migrate:media', description: 'Převezme obrázky, dokumenty a loga značek ze starého e-shopu (soubory z lokální kopie public/media).')]
+#[AsCommand(name: 'app:migrate:media', description: 'Převezme obrázky, dokumenty, loga značek a bannery ze starého e-shopu (soubory z lokální kopie public/media).')]
 final class MigrateMediaCommand extends Command
 {
     public function __construct(private readonly MediaMigrator $mediaMigrator)
@@ -47,6 +47,7 @@ final class MigrateMediaCommand extends Command
             $this->mediaMigrator->migrateImages($source, $dryRun),
             $this->mediaMigrator->migrateDocuments($source, $dryRun),
             $this->mediaMigrator->migrateBrandLogos($source, $dryRun),
+            $this->mediaMigrator->migrateBanners($source, $dryRun),
         ] as $result) {
             $this->report($io, $result, $limit);
         }

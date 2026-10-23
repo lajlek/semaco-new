@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Migration\Media;
 
+use App\Cms\Entity\Banner;
 use App\Entity\Product\Brand;
 use App\Entity\Product\Product;
 use App\Entity\Product\ProductDocument;
@@ -177,6 +178,45 @@ final readonly class MediaMigrator
 
             $brand->setLogoPath($row['path']);
             $result->updated();
+        }
+
+        if (!$dryRun) {
+            $this->entityManager->flush();
+        }
+
+        return $result;
+    }
+
+    public function migrateBanners(string $sourceDirectory, bool $dryRun): ImportResult
+    {
+        $result = new ImportResult('banners');
+
+        /** @var list<array{code: string, path: string|null}> $rows */
+        $rows = $this->oldShop->getConnection()->fetchAllAssociative(
+            "SELECT code, path FROM bitbag_cms_media WHERE type = 'image' AND enabled = 1",
+        );
+
+        foreach ($rows as $row) {
+            $code = $row['code'] === 'banner' ? 'homepage' : $row['code'];
+            $path = $row['path'] === null ? null : preg_replace('#^/?media/image/#', '', $row['path']);
+            if ($path === null || $path === '' || $this->entityManager->getRepository(Banner::class)->findOneBy(['code' => $code]) instanceof Banner) {
+                $result->skipped();
+
+                continue;
+            }
+
+            if (!$this->copyFile($sourceDirectory, $path, $dryRun)) {
+                $result->warn(sprintf('Chybí soubor banneru %s', $path));
+                $result->skipped();
+
+                continue;
+            }
+
+            $banner = new Banner();
+            $banner->setCode($code);
+            $banner->setPath($path);
+            $this->entityManager->persist($banner);
+            $result->created();
         }
 
         if (!$dryRun) {

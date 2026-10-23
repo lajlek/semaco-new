@@ -1,0 +1,5 @@
+{% if data.path %}
+    <img src="{{ data.path|imagine_filter('sylius_admin_product_thumbnail') }}" alt="{{ data.alt }}" style="max-height: 4rem;">
+{% else %}
+    —
+{% endif %}

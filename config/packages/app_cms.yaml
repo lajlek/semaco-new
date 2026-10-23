@@ -10,3 +10,8 @@ sylius_resource:
                 model: App\Cms\Entity\CmsPage
                 repository: App\Cms\Repository\CmsPageRepository
                 form: App\Cms\Form\CmsPageType
+        app.cms_banner:
+            driver: doctrine/orm
+            classes:
+                model: App\Cms\Entity\Banner
+                form: App\Cms\Form\BannerType
