@@ -1,0 +1,34 @@
+{% set selected = app.request.query.all('criteria')['attributes'] ?? {} %}
+{% for facet in semaco_taxon_facets(app.request.attributes.get('slug')) %}
+    {% set field_id = 'filter_' ~ facet.code %}
+    {% set current = selected[facet.code] ?? [] %}
+    {% set current = current is iterable ? current : [current] %}
+    <div class="widget">
+        {% if facet.filterType == 4 %}
+            <fieldset>
+                <legend class="widget-title">{{ facet.name }}</legend>
+                {% for key, label in facet.values %}
+                    <div class="form-checkbox">
+                        <input type="checkbox" id="{{ field_id }}_{{ loop.index }}" name="criteria[attributes][{{ facet.code }}][]" class="custom-checkbox" value="{{ key }}"{% if key in current %} checked{% endif %}>
+                        <label for="{{ field_id }}_{{ loop.index }}" class="form-control-label ls-s">{{ label }}</label>
+                    </div>
+                {% endfor %}
+            </fieldset>
+        {% else %}
+            <label for="{{ field_id }}" class="widget-title d-block">{{ facet.name }}</label>
+            <select id="{{ field_id }}" name="criteria[attributes][{{ facet.code }}][]" class="form-control">
+                <option value=""></option>
+                {% for key, label in facet.values %}
+                    <option value="{{ key }}"{% if key in current %} selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        {% endif %}
+    </div>
+{% endfor %}
+{% for name, value in app.request.query.all|filter((value, name) => name in ['sorting', 'limit']) %}
+    {% if value is iterable %}
+        {% for key, item in value %}<input type="hidden" name="{{ name }}[{{ key }}]" value="{{ item }}">{% endfor %}
+    {% else %}
+        <input type="hidden" name="{{ name }}" value="{{ value }}">
+    {% endif %}
+{% endfor %}
