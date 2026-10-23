@@ -128,3 +128,18 @@ when@dev:
                                     locale_code: 'cs_CZ'
                                     first_name: 'Admin'
                                     last_name: 'Semaco'
+
+            semaco_test_customers:
+                listeners:
+                    logger: ~
+
+                fixtures:
+                    shop_user:
+                        options:
+                            custom:
+                                -
+                                    email: 'zakaznik@semaco.test'
+                                    first_name: 'Testovací'
+                                    last_name: 'Zákazník'
+                                    password: 'semaco-dev'
+                                    enabled: true
