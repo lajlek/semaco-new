@@ -1,0 +1,16 @@
+parameters:
+    app.partners.user_agent: 'SemacoCatalogBot/0.1 (+https://eshop.semaco.cz; obchod@semaco.cz)'
+    app.partners.min_delay_seconds: 10
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    App\Partner\:
+        resource: '../../src/Partner/'
+        exclude:
+            - '../../src/Partner/Entity/'
+            - '../../src/Partner/Dto/'
+            - '../../src/Partner/Fetch/RobotsPolicy.php'

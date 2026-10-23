@@ -37,6 +37,12 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Redirect/Entity'
                 prefix: 'App\Redirect\Entity'
                 alias: Redirect
+            Partner:
+                is_bundle: false
+                type: attribute
+                dir: '%kernel.project_dir%/src/Partner/Entity'
+                prefix: 'App\Partner\Entity'
+                alias: Partner
 
 when@prod: &doctrine_prod
     doctrine:
