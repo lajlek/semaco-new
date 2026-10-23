@@ -1,0 +1,5 @@
+app_checkout_controllers:
+    resource:
+        path: ../../src/Checkout/ShippingPayment/
+        namespace: App\Checkout\ShippingPayment
+    type: attribute

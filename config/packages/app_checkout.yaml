@@ -4,3 +4,19 @@ sylius_twig_hooks:
             terms:
                 template: 'shop/checkout/complete/terms.html.twig'
                 priority: 50
+
+        'sylius_shop.order.thank_you.content.buttons#guest':
+            change_payment_method:
+                enabled: false
+            create_account:
+                enabled: false
+
+sylius_shop:
+    checkout_resolver:
+        route_map:
+            addressed:
+                route: app_shop_checkout_select_shipping_payment
+            shipping_selected:
+                route: app_shop_checkout_select_shipping_payment
+            shipping_skipped:
+                route: app_shop_checkout_select_shipping_payment

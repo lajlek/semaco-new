@@ -1,0 +1,32 @@
+{% extends '@SyliusShop/checkout/common/layout.html.twig' %}
+
+{% import '@SyliusShop/shared/macro/navigation_buttons.html.twig' as navigation %}
+
+{% form_theme form '@SyliusShop/form/theme.html.twig' %}
+
+{% set active_step = 'select_shipping_payment' %}
+{% set prefixes = ['sylius_shop.checkout'] %}
+
+{% block title %}{{ 'app.checkout.shipping_payment'|trans({}, 'checkout') }} | {{ parent() }}{% endblock %}
+
+{% block content %}
+    {{ form_start(form, {action: path('app_shop_checkout_select_shipping_payment'), attr: {novalidate: 'novalidate', id: 'semaco-shipping-payment'}}) }}
+        {{ form_errors(form) }}
+
+        {% if sylius_is_shipping_required(order) %}
+            <section class="mb-4" aria-labelledby="checkout-shipping-heading">
+                <h2 class="h4" id="checkout-shipping-heading">{{ 'app.checkout.shipping'|trans({}, 'checkout') }}</h2>
+                {% hook 'sylius_shop.checkout.select_shipping.content.form.shipments' with { form, order } %}
+            </section>
+        {% endif %}
+
+        {% if sylius_is_payment_required(order) %}
+            <section class="mb-4" aria-labelledby="checkout-payment-heading">
+                <h2 class="h4" id="checkout-payment-heading">{{ 'app.checkout.payment'|trans({}, 'checkout') }}</h2>
+                {% hook 'sylius_shop.shared.form.select_payment' with { form, order } %}
+            </section>
+        {% endif %}
+
+        {{ navigation.default('sylius.ui.change_address'|trans, path('sylius_shop_checkout_address')) }}
+    {{ form_end(form, {render_rest: false}) }}
+{% endblock %}

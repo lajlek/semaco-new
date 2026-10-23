@@ -3,3 +3,6 @@ app:
         terms_legend: 'Souhlasy'
         accept_terms: 'Souhlasím s <a href="%url%" target="_blank" rel="noopener">obchodními podmínkami</a>'
         accept_privacy: 'Souhlas se zpracováním osobních údajů podle <a href="%url%" target="_blank" rel="noopener">GDPR</a>'
+        shipping_payment: 'Doprava a platba'
+        shipping: 'Doprava'
+        payment: 'Platba'

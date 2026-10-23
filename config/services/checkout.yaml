@@ -28,3 +28,6 @@ services:
             $freeShippingMethodCode: '%app.checkout.free_shipping_method%'
         tags:
             - { name: 'sylius.shipping_method_eligibility_checker' }
+
+    App\Checkout\ShippingPayment\SelectShippingPaymentController:
+        tags: ['controller.service_arguments']
