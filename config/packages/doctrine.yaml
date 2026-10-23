@@ -43,6 +43,12 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Partner/Entity'
                 prefix: 'App\Partner\Entity'
                 alias: Partner
+            Cms:
+                is_bundle: false
+                type: attribute
+                dir: '%kernel.project_dir%/src/Cms/Entity'
+                prefix: 'App\Cms\Entity'
+                alias: Cms
 
 when@prod: &doctrine_prod
     doctrine:

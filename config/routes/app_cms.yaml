@@ -1,0 +1,19 @@
+app_admin_cms_page:
+    resource: |
+        alias: app.cms_page
+        section: admin
+        templates: "@SyliusAdmin\\shared\\crud"
+        except: ['show']
+        redirect: update
+        grid: app_admin_cms_page
+        form:
+            type: App\Cms\Form\CmsPageType
+        permission: false
+    type: sylius.resource
+    prefix: /admin
+
+app_shop_cms:
+    resource:
+        path: ../../src/Cms/Controller/
+        namespace: App\Cms\Controller
+    type: attribute

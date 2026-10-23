@@ -1,0 +1,27 @@
+{% extends '@SyliusShop/shared/layout/base.html.twig' %}
+
+{% block title %}{{ page.metaTitle ?: page.title }} | {{ parent() }}{% endblock %}
+
+{% block metatags %}
+    {{ parent() }}
+    {% if page.metaDescription %}<meta name="description" content="{{ page.metaDescription }}">{% endif %}
+{% endblock %}
+
+{% block content %}
+    <nav class="breadcrumb-nav" aria-label="{{ 'sylius.ui.breadcrumb'|trans }}">
+        <div class="container">
+            <ul class="breadcrumb">
+                <li><a href="{{ path('sylius_shop_homepage') }}" aria-label="{{ 'sylius.ui.home'|trans }}"><i class="d-icon-home" aria-hidden="true"></i></a></li>
+                <li>{{ page.title }}</li>
+            </ul>
+        </div>
+    </nav>
+    <div class="page-content mt-6 mb-10">
+        <div class="container">
+            <h1 class="title title-simple text-left">{{ page.title }}</h1>
+            <div class="cms-page-content">
+                {{ page.content|raw }}
+            </div>
+        </div>
+    </div>
+{% endblock %}

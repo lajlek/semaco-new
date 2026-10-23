@@ -1,0 +1,50 @@
+sylius_grid:
+    grids:
+        app_admin_cms_page:
+            driver:
+                name: doctrine/orm
+                options:
+                    class: App\Cms\Entity\CmsPage
+            sorting:
+                position: asc
+            limits: [25, 50, 100]
+            fields:
+                title:
+                    type: string
+                    label: Název
+                    sortable: title
+                slug:
+                    type: string
+                    label: Adresa (slug)
+                    sortable: slug
+                position:
+                    type: string
+                    label: Pořadí
+                    sortable: position
+                enabled:
+                    type: twig
+                    label: Zobrazit na webu
+                    sortable: enabled
+                    options:
+                        template: '@SyliusAdmin/shared/grid/field/boolean.html.twig'
+                updatedAt:
+                    type: datetime
+                    label: Upraveno
+                    sortable: updatedAt
+                    options:
+                        format: 'd. m. Y H:i'
+            filters:
+                search:
+                    type: string
+                    label: sylius.ui.search
+                    options:
+                        fields: [title, slug]
+            actions:
+                main:
+                    create:
+                        type: create
+                item:
+                    update:
+                        type: update
+                    delete:
+                        type: delete

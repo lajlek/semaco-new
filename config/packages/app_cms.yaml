@@ -1,0 +1,11 @@
+imports:
+    - { resource: '../grids/admin/*.yaml' }
+
+sylius_resource:
+    resources:
+        app.cms_page:
+            driver: doctrine/orm
+            classes:
+                model: App\Cms\Entity\CmsPage
+                repository: App\Cms\Repository\CmsPageRepository
+                form: App\Cms\Form\CmsPageType

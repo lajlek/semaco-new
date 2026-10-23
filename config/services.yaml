@@ -44,6 +44,7 @@ services:
             - '../src/Checkout/'
             - '../src/Currency/'
             - '../src/Partner/'
+            - '../src/Cms/'
             - '../src/Kernel.php'
 
     # Controllers are imported separately to make sure services can be injected

@@ -1,0 +1,13 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    App\Cms\:
+        resource: '../../src/Cms/'
+        exclude:
+            - '../../src/Cms/Entity/'
+            - '../../src/Cms/Repository/'
+
+    App\Cms\Repository\CmsPageRepositoryInterface: '@app.repository.cms_page'
