@@ -1,0 +1,115 @@
+when@dev:
+    sylius_fixtures:
+        suites:
+            semaco:
+                listeners:
+                    orm_purger: ~
+                    logger: ~
+
+                fixtures:
+                    locale:
+                        options:
+                            locales: ['cs_CZ']
+                            load_default_locale: false
+
+                    currency:
+                        options:
+                            currencies: ['EUR', 'CZK']
+
+                    geographical:
+                        options:
+                            countries: ['CZ', 'SK', 'DE', 'AT', 'PL']
+                            zones:
+                                CZ:
+                                    name: 'Česká republika'
+                                    countries: ['CZ']
+                                EU:
+                                    name: 'EU mimo ČR'
+                                    countries: ['SK', 'DE', 'AT', 'PL']
+
+                    channel:
+                        options:
+                            custom:
+                                semaco:
+                                    code: 'SEMACO'
+                                    name: 'E-shop Semaco'
+                                    hostname: 'localhost'
+                                    enabled: true
+                                    locales: ['cs_CZ']
+                                    default_locale: 'cs_CZ'
+                                    currencies: ['EUR', 'CZK']
+                                    base_currency: 'EUR'
+                                    default_tax_zone: 'CZ'
+                                    tax_calculation_strategy: 'order_items_based'
+                                    contact_email: 'obchod@semaco.cz'
+                                    contact_phone_number: '+420 737 283 750'
+                                    shop_billing_data:
+                                        company: 'SEMACO s.r.o.'
+                                        country_code: 'CZ'
+
+                    tax_category:
+                        options:
+                            custom:
+                                standard:
+                                    code: 'standard'
+                                    name: 'Základní sazba'
+
+                    tax_rate:
+                        options:
+                            custom:
+                                vat_21:
+                                    code: 'vat_21'
+                                    name: 'DPH 21 %'
+                                    zone: 'CZ'
+                                    category: 'standard'
+                                    amount: 0.21
+                                    included_in_price: false
+
+                    shipping_method:
+                        options:
+                            custom:
+                                gls:
+                                    code: 'gls'
+                                    name: 'per GLS'
+                                    zone: 'CZ'
+                                    channels: ['SEMACO']
+                                    enabled: true
+                                gls_cod:
+                                    code: 'gls_cod'
+                                    name: 'per GLS záloha'
+                                    zone: 'CZ'
+                                    channels: ['SEMACO']
+                                    enabled: true
+                                free_shipping:
+                                    code: 'free_shipping'
+                                    name: 'Doprava zdarma'
+                                    zone: 'CZ'
+                                    channels: ['SEMACO']
+                                    enabled: true
+
+                    payment_method:
+                        options:
+                            custom:
+                                bank_transfer:
+                                    code: 'bank_transfer'
+                                    name: 'Platebním příkazem'
+                                    channels: ['SEMACO']
+                                    enabled: true
+                                prepayment:
+                                    code: 'prepayment'
+                                    name: 'Zálohově'
+                                    channels: ['SEMACO']
+                                    enabled: true
+
+                    admin_user:
+                        name: 'admin_user'
+                        options:
+                            custom:
+                                -
+                                    email: 'admin@semaco.test'
+                                    username: 'admin'
+                                    password: 'admin'
+                                    enabled: true
+                                    locale_code: 'cs_CZ'
+                                    first_name: 'Admin'
+                                    last_name: 'Semaco'
