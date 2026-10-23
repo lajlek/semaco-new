@@ -1,0 +1,7 @@
+sylius_grid:
+    grids:
+        sylius_shop_account_order:
+            fields:
+                checkoutCompletedAt:
+                    options:
+                        format: 'd. m. Y'

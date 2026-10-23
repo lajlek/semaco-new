@@ -1,5 +1,6 @@
 imports:
     - { resource: '../grids/admin/*.yaml' }
+    - { resource: '../grids/shop/*.yaml' }
 
 sylius_resource:
     resources:
