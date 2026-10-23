@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Entity\Product;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Sylius\Component\Core\Model\Product as BaseProduct;
 use Sylius\Component\Product\Model\ProductTranslationInterface;
@@ -31,6 +33,17 @@ class Product extends BaseProduct
     #[ORM\ManyToOne(targetEntity: Brand::class)]
     #[ORM\JoinColumn(name: 'brand_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
     private ?Brand $brand = null;
+
+    /** @var Collection<int, ProductDocument> */
+    #[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductDocument::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\OrderBy(['position' => 'ASC'])]
+    private Collection $documents;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->documents = new ArrayCollection();
+    }
 
     public function getExternalIdentifier(): ?string
     {
@@ -90,6 +103,24 @@ class Product extends BaseProduct
     public function setBrand(?Brand $brand): void
     {
         $this->brand = $brand;
+    }
+
+    /** @return Collection<int, ProductDocument> */
+    public function getDocuments(): Collection
+    {
+        return $this->documents;
+    }
+
+    public function addDocument(ProductDocument $document): void
+    {
+        if (!$this->documents->contains($document)) {
+            $this->documents->add($document);
+        }
+    }
+
+    public function removeDocument(ProductDocument $document): void
+    {
+        $this->documents->removeElement($document);
     }
 
     protected function createTranslation(): ProductTranslationInterface
