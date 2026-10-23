@@ -1,0 +1,55 @@
+sylius_grid:
+    grids:
+        app_admin_contact_message:
+            driver:
+                name: doctrine/orm
+                options:
+                    class: App\Inquiry\Entity\ContactMessage
+            sorting:
+                createdAt: desc
+            limits: [25, 50, 100]
+            fields:
+                createdAt:
+                    type: datetime
+                    label: Odesláno
+                    sortable: createdAt
+                    options:
+                        format: 'd. m. Y H:i'
+                senderName:
+                    type: string
+                    label: Od
+                email:
+                    type: string
+                    label: E-mail
+                    sortable: email
+                phone:
+                    type: string
+                    label: Telefon
+                message:
+                    type: twig
+                    label: Zpráva
+                    options:
+                        template: 'admin/inquiry/grid/excerpt.html.twig'
+                answers:
+                    type: twig
+                    label: Odpovědí
+                    options:
+                        template: 'admin/inquiry/grid/count.html.twig'
+            filters:
+                search:
+                    type: string
+                    label: sylius.ui.search
+                    options:
+                        fields: [email, firstName, lastName, phone, message]
+                createdAt:
+                    type: date
+                    label: Odesláno
+            actions:
+                item:
+                    show:
+                        type: show
+                    delete:
+                        type: delete
+                bulk:
+                    delete:
+                        type: delete

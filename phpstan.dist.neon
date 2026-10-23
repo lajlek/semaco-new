@@ -16,6 +16,7 @@ parameters:
                 - src/Redirect/Entity/
                 - src/Partner/Entity/
                 - src/Cms/Entity/
+                - src/Inquiry/Entity/
         -
             message: '#Interface .+RepositoryInterface extends generic interface Sylius\\Resource\\Doctrine\\Persistence\\RepositoryInterface but does not specify its types: T#'
             paths:
@@ -23,3 +24,4 @@ parameters:
                 - src/Erp/Watermark/Repository/
                 - src/Redirect/Repository/
                 - src/Cms/Repository/
+                - src/Inquiry/Repository/

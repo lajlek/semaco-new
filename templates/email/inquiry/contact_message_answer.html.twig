@@ -1,0 +1,9 @@
+{% extends 'email/layout.html.twig' %}
+
+{% block subject %}Nová odpověď{% endblock %}
+
+{% block content %}
+    <p>{{ answer.message|nl2br }}</p>
+    <p style="color: #777777;">Vaše zpráva ze dne {{ contactMessage.createdAt|date('d. m. Y') }}:<br>{{ contactMessage.message|nl2br }}</p>
+    <p>Tým SEMACO</p>
+{% endblock %}

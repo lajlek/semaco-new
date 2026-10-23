@@ -46,6 +46,7 @@ services:
             - '../src/Partner/'
             - '../src/Cms/'
             - '../src/Search/'
+            - '../src/Inquiry/'
             - '../src/Kernel.php'
 
     # Controllers are imported separately to make sure services can be injected

@@ -24,3 +24,20 @@ sylius_shop_request_password_reset_token_redirect:
     defaults:
         route: sylius_shop_request_password_reset_token
         permanent: false
+
+sylius_shop_contact_request:
+    path: /{_locale}/contact/
+    methods: [GET, POST]
+    controller: App\Inquiry\Controller\ContactController::request
+    requirements:
+        _locale: ^[A-Za-z]{2,4}(_([A-Za-z]{4}|[0-9]{3}))?(_([A-Za-z]{2}|[0-9]{3}))?$
+
+sylius_shop_register:
+    path: /{_locale}/register
+    methods: [GET, POST]
+    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::redirectAction
+    defaults:
+        route: app_shop_registration_request
+        permanent: true
+    requirements:
+        _locale: ^[A-Za-z]{2,4}(_([A-Za-z]{4}|[0-9]{3}))?(_([A-Za-z]{2}|[0-9]{3}))?$

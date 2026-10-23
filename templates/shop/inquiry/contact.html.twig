@@ -1,0 +1,57 @@
+{% extends '@SyliusShop/shared/layout/base.html.twig' %}
+
+{% form_theme form '@SyliusShop/form/theme.html.twig' %}
+
+{% set channel = sylius.channel %}
+{% set billing = channel.shopBillingData %}
+
+{% block title %}{{ 'app.inquiry.contact.title'|trans({}, 'inquiry') }} | {{ parent() }}{% endblock %}
+
+{% block content %}
+    <div class="page-header" style="background-color: #285da8;">
+        <h1 class="page-title">{{ 'app.inquiry.contact.title'|trans({}, 'inquiry') }}</h1>
+    </div>
+    <div class="page-content mt-10 pt-7">
+        <section class="contact-section">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-3 col-md-4 col-sm-6 ls-m mb-4">
+                        <div class="grey-section d-flex align-items-center h-100">
+                            <address class="mb-0">
+                                {% if billing %}
+                                    <h2 class="h4 mb-2">{{ billing.company }}</h2>
+                                    <p>{{ billing.street }}<br>{{ billing.city }} {{ billing.postcode }}</p>
+                                {% endif %}
+                                <h2 class="h4 mb-2">{{ 'app.inquiry.contact.contacts'|trans({}, 'inquiry') }}</h2>
+                                <p>
+                                    {% if channel.contactPhoneNumber %}
+                                        <a href="tel:{{ channel.contactPhoneNumber|replace({' ': ''}) }}">{{ channel.contactPhoneNumber }}</a><br>
+                                    {% endif %}
+                                    {% if channel.contactEmail %}
+                                        <a href="mailto:{{ channel.contactEmail }}">{{ channel.contactEmail }}</a><br>
+                                    {% endif %}
+                                </p>
+                            </address>
+                        </div>
+                    </div>
+                    <div class="col-lg-9 col-md-8 col-sm-6 d-flex align-items-center mb-4">
+                        <div class="w-100">
+                            <h2 class="h4 ls-m font-weight-bold">{{ 'app.inquiry.contact.form_title'|trans({}, 'inquiry') }}</h2>
+                            {{ form_start(form, {attr: {id: 'contact_form', class: 'pl-lg-2'}}) }}
+                                {{ form_errors(form) }}
+                                <div class="row mb-2">
+                                    <div class="col-md-6 mb-4">{{ form_row(form.firstName) }}</div>
+                                    <div class="col-md-6 mb-4">{{ form_row(form.lastName) }}</div>
+                                    <div class="col-md-6 mb-4">{{ form_row(form.email) }}</div>
+                                    <div class="col-md-6 mb-4">{{ form_row(form.phone) }}</div>
+                                    <div class="col-12">{{ form_row(form.message) }}</div>
+                                </div>
+                                {% include 'shop/inquiry/_form_footer.html.twig' with {form_id: 'contact_form'} %}
+                            {{ form_end(form) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+{% endblock %}

@@ -41,10 +41,14 @@ when@dev:
                                     base_currency: 'EUR'
                                     default_tax_zone: 'CZ'
                                     tax_calculation_strategy: 'order_items_based'
-                                    contact_email: 'obchod@semaco.cz'
+                                    contact_email: 'info@semaco.cz'
                                     contact_phone_number: '+420 737 283 750'
                                     shop_billing_data:
-                                        company: 'SEMACO s.r.o.'
+                                        company: 'SEMACO tools and software, s.r.o.'
+                                        tax_id: 'CZ64619338'
+                                        street: 'B. Němcové 787'
+                                        city: 'Jeseník'
+                                        postcode: '790 01'
                                         country_code: 'CZ'
 
                     tax_category:

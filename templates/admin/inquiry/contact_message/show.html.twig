@@ -1,0 +1,45 @@
+{% set message = hookable_metadata.context.resource %}
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row">
+            <div class="col-12 col-lg-4 mb-3">
+                <div class="card">
+                    <div class="card-header"><h3 class="card-title">Odesílatel</h3></div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-5">Jméno</dt><dd class="col-7">{{ message.fullName ?: '—' }}</dd>
+                            <dt class="col-5">E-mail</dt><dd class="col-7"><a href="mailto:{{ message.email }}">{{ message.email }}</a></dd>
+                            <dt class="col-5">Telefon</dt><dd class="col-7">{% if message.phone %}<a href="tel:{{ message.phone|replace({' ': ''}) }}">{{ message.phone }}</a>{% else %}—{% endif %}</dd>
+                            <dt class="col-5">Zákaznický účet</dt><dd class="col-7">{% if message.customer %}<a href="{{ path('sylius_admin_customer_show', {id: message.customer.id}) }}">{{ message.customer.email }}</a>{% else %}—{% endif %}</dd>
+                        </dl>
+                    </div>
+                    <div class="card-footer text-secondary small">
+                        {% if message.ip %}IP {{ message.ip }}{% endif %}{% if message.userAgent %} · {{ message.userAgent }}{% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-8 mb-3">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h3 class="card-title">Zpráva</h3>
+                        <div class="card-actions text-secondary">{{ message.createdAt|date('d. m. Y H:i') }}</div>
+                    </div>
+                    <div class="card-body">{{ message.message|nl2br }}</div>
+                </div>
+                {% for answer in message.answers %}
+                    <div class="card mb-3 {{ answer.fromAdmin ? 'border-primary ms-lg-5' : '' }}">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                {% if answer.fromAdmin %}Odpověď obchodu{% if answer.adminUser %} ({{ answer.adminUser.username }}){% endif %}{% else %}Doplnění od zákazníka{% endif %}
+                            </h3>
+                            <div class="card-actions text-secondary">{{ answer.createdAt|date('d. m. Y H:i') }}</div>
+                        </div>
+                        <div class="card-body">{{ answer.message|nl2br }}</div>
+                    </div>
+                {% endfor %}
+                {{ render(controller('App\\Inquiry\\Controller\\Admin\\ContactMessageAnswerController::form', {id: message.id})) }}
+            </div>
+        </div>
+    </div>
+</div>

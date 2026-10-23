@@ -1,0 +1,35 @@
+app:
+    inquiry:
+        field:
+            company_name: 'Název společnosti'
+            identification_number: 'IČ'
+            street: 'Ulice'
+            street_number: 'Č.p.'
+            city: 'Město'
+            postcode: 'PSČ'
+            email: 'E-mail'
+            phone: 'Telefon'
+            first_name: 'Jméno'
+            last_name: 'Příjmení'
+            note: 'Poznámka'
+            message: 'Zpráva'
+            answer: 'Odpověď'
+        registration_request:
+            title: 'Registrace'
+            form_title: 'Pošlete nám žádost o registraci'
+        contact:
+            title: 'Kontaktní formulář'
+            form_title: 'Napište nám zprávu'
+            contacts: 'Kontakty'
+        account:
+            title: 'Moje zprávy'
+            thread: 'Vlákno zprávy'
+            empty: 'Zatím jste nám neposlali žádnou zprávu.'
+            sent_at: 'Odesláno'
+            answers: 'Odpovědí'
+            your_message: 'Vaše zpráva'
+            shop_answer: 'Odpověď SEMACO'
+            reply: 'Doplnit zprávu'
+        error:
+            recaptcha: 'Ověření reCAPTCHA se nezdařilo, zkuste to prosím znovu.'
+            too_many: 'Odeslali jste příliš mnoho zpráv za krátkou dobu. Zkuste to prosím za několik minut.'

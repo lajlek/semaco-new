@@ -1,0 +1,21 @@
+{% extends 'email/layout.html.twig' %}
+
+{% block subject %}Nová registrace – {{ registrationRequest.companyName ?: registrationRequest.email }}{% endblock %}
+
+{% block content %}
+    <p>
+        Název společnosti: {{ registrationRequest.companyName }}<br>
+        IČ: {{ registrationRequest.identificationNumber }}<br>
+        Jméno: {{ registrationRequest.fullName }}<br>
+        E-mail: {{ registrationRequest.email }}<br>
+        Telefon: {{ registrationRequest.phone }}
+    </p>
+    <p>
+        Adresa:<br>
+        {{ registrationRequest.street }} {{ registrationRequest.streetNumber }}<br>
+        {{ registrationRequest.postcode }} {{ registrationRequest.city }}
+    </p>
+    {% if registrationRequest.message %}
+        <p>Poznámka:<br>{{ registrationRequest.message|nl2br }}</p>
+    {% endif %}
+{% endblock %}

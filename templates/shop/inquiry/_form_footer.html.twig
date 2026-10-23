@@ -1,0 +1,12 @@
+<div class="d-none" aria-hidden="true">{{ form_row(form.website) }}</div>
+{% if recaptcha_site_key %}
+    <button class="g-recaptcha btn btn-dark btn-rounded" data-sitekey="{{ recaptcha_site_key }}" data-callback="semacoInquirySubmit">{{ 'sylius.ui.send'|trans }}</button>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script>
+        function semacoInquirySubmit() {
+            document.getElementById('{{ form_id }}').requestSubmit();
+        }
+    </script>
+{% else %}
+    <button type="submit" class="btn btn-dark btn-rounded">{{ 'sylius.ui.send'|trans }}</button>
+{% endif %}

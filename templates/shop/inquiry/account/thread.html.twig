@@ -1,0 +1,33 @@
+{% form_theme hookable_metadata.context.form '@SyliusShop/form/theme.html.twig' %}
+
+{% set message = hookable_metadata.context.message %}
+{% set form = hookable_metadata.context.form %}
+
+<ol class="list-unstyled">
+    <li class="card mb-3">
+        <div class="card-body">
+            <p class="small text-muted mb-2">{{ 'app.inquiry.account.your_message'|trans({}, 'inquiry') }} · {{ message.createdAt|date('d. m. Y H:i') }}</p>
+            <div>{{ message.message|nl2br }}</div>
+        </div>
+    </li>
+    {% for answer in message.answers %}
+        <li class="card mb-3 {{ answer.fromAdmin ? 'border-primary ms-md-5' : '' }}">
+            <div class="card-body">
+                <p class="small text-muted mb-2">
+                    {{ (answer.fromAdmin ? 'app.inquiry.account.shop_answer' : 'app.inquiry.account.your_message')|trans({}, 'inquiry') }} · {{ answer.createdAt|date('d. m. Y H:i') }}
+                </p>
+                <div>{{ answer.message|nl2br }}</div>
+            </div>
+        </li>
+    {% endfor %}
+</ol>
+
+<section class="card" aria-labelledby="contact-message-reply">
+    <div class="card-body">
+        <h2 class="h5" id="contact-message-reply">{{ 'app.inquiry.account.reply'|trans({}, 'inquiry') }}</h2>
+        {{ form_start(form) }}
+            {{ form_row(form.message) }}
+            <button type="submit" class="btn btn-primary">{{ 'sylius.ui.send'|trans }}</button>
+        {{ form_end(form) }}
+    </div>
+</section>

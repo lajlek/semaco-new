@@ -49,6 +49,12 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Cms/Entity'
                 prefix: 'App\Cms\Entity'
                 alias: Cms
+            Inquiry:
+                is_bundle: false
+                type: attribute
+                dir: '%kernel.project_dir%/src/Inquiry/Entity'
+                prefix: 'App\Inquiry\Entity'
+                alias: Inquiry
 
 when@prod: &doctrine_prod
     doctrine:

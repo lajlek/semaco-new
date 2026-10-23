@@ -1,0 +1,17 @@
+{% extends 'email/layout.html.twig' %}
+
+{% block subject %}{{ answer is defined ? 'Doplnění zprávy' : 'Zpráva' }} od {{ contactMessage.senderName }}{% endblock %}
+
+{% block content %}
+    <p>
+        Od: {{ contactMessage.fullName ?: '—' }}<br>
+        E-mail: {{ contactMessage.email }}<br>
+        Telefon: {{ contactMessage.phone ?: '—' }}
+    </p>
+    {% if answer is defined %}
+        <p>Zákazník doplnil zprávu:<br>{{ answer.message|nl2br }}</p>
+        <p style="color: #777777;">Původní zpráva:<br>{{ contactMessage.message|nl2br }}</p>
+    {% else %}
+        <p>{{ contactMessage.message|nl2br }}</p>
+    {% endif %}
+{% endblock %}

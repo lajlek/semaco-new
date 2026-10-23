@@ -1,0 +1,30 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    App\Inquiry\:
+        resource: '../../src/Inquiry/'
+        exclude:
+            - '../../src/Inquiry/Entity/'
+            - '../../src/Inquiry/Repository/'
+
+    App\Inquiry\Controller\:
+        resource: '../../src/Inquiry/Controller/'
+        tags: ['controller.service_arguments']
+
+    App\Inquiry\Repository\ContactMessageRepositoryInterface: '@app.repository.contact_message'
+
+    App\Inquiry\Security\RecaptchaVerifier:
+        arguments:
+            $siteKey: '%env(GOOGLE_RECAPTCHA_SITE_KEY)%'
+            $secret: '%env(GOOGLE_RECAPTCHA_SECRET)%'
+
+    App\Inquiry\Security\SubmissionGuard:
+        arguments:
+            $limiterFactory: '@limiter.inquiry'
+
+    App\Inquiry\Mailer\InquiryMailer:
+        arguments:
+            $localeCode: '%app.erp.locale_code%'

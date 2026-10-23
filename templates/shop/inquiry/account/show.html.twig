@@ -1,0 +1,6 @@
+{% extends '@SyliusShop/account/common/show.html.twig' %}
+
+{% set prefixes = ['app_shop.account.contact_message'] %}
+{% set attrs = { message, form } %}
+
+{% block title %}{{ 'app.inquiry.account.thread'|trans({}, 'inquiry') }} | {{ parent() }}{% endblock %}

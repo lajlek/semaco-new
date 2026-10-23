@@ -72,3 +72,10 @@ app:
             quantity_plus: 'Zvýšit množství'
             add_to_cart: 'Přidat do košíku'
             out_of_stock: 'Produkt není dostupný.'
+    ui:
+        cms_page: 'Stránka'
+        cms_pages: 'Stránky (CMS)'
+        registration_request: 'Žádost o registraci'
+        registration_requests: 'Žádosti o registraci'
+        contact_message: 'Zpráva z kontaktního formuláře'
+        contact_messages: 'Kontaktní formulář'

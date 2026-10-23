@@ -1,0 +1,78 @@
+sylius_resource:
+    resources:
+        app.registration_request:
+            driver: doctrine/orm
+            classes:
+                model: App\Inquiry\Entity\RegistrationRequest
+        app.contact_message:
+            driver: doctrine/orm
+            classes:
+                model: App\Inquiry\Entity\ContactMessage
+                repository: App\Inquiry\Repository\ContactMessageRepository
+
+sylius_mailer:
+    emails:
+        app_registration_request_admin:
+            subject: 'Nová registrace'
+            template: 'email/inquiry/registration_request_admin.html.twig'
+        app_registration_request_customer:
+            subject: 'Registrace odeslána'
+            template: 'email/inquiry/registration_request_customer.html.twig'
+        app_contact_message_admin:
+            subject: 'Zpráva z kontaktního formuláře'
+            template: 'email/inquiry/contact_message_admin.html.twig'
+        app_contact_message_customer:
+            subject: 'Přijetí zprávy'
+            template: 'email/inquiry/contact_message_customer.html.twig'
+        app_contact_message_answer:
+            subject: 'Nová odpověď'
+            template: 'email/inquiry/contact_message_answer.html.twig'
+
+framework:
+    rate_limiter:
+        inquiry:
+            policy: 'sliding_window'
+            limit: 5
+            interval: '10 minutes'
+
+sylius_twig_hooks:
+    hooks:
+        'sylius_admin.registration_request.show.content':
+            detail:
+                template: 'admin/inquiry/registration_request/show.html.twig'
+                priority: 0
+
+        'sylius_admin.contact_message.show.content':
+            detail:
+                template: 'admin/inquiry/contact_message/show.html.twig'
+                priority: 0
+
+        'app_shop.account.contact_message.index.content':
+            breadcrumbs:
+                template: 'shop/inquiry/account/breadcrumbs.html.twig'
+                priority: 200
+
+        'app_shop.account.contact_message.index.content.main':
+            list:
+                template: 'shop/inquiry/account/list.html.twig'
+                priority: 0
+
+        'app_shop.account.contact_message.index.content.main.header':
+            title:
+                template: 'shop/inquiry/account/title.html.twig'
+                priority: 0
+
+        'app_shop.account.contact_message.show.content':
+            breadcrumbs:
+                template: 'shop/inquiry/account/breadcrumbs.html.twig'
+                priority: 200
+
+        'app_shop.account.contact_message.show.content.main':
+            thread:
+                template: 'shop/inquiry/account/thread.html.twig'
+                priority: 0
+
+        'app_shop.account.contact_message.show.content.main.header':
+            title:
+                template: 'shop/inquiry/account/title.html.twig'
+                priority: 0

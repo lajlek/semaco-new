@@ -8,6 +8,7 @@ use App\Erp\Adapter\Helios\Infrastructure\ReadOnly\ReadOnlyMiddleware;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Schema\DefaultSchemaManagerFactory;
 
 final class HeliosConnectionFactory
 {
@@ -35,6 +36,7 @@ final class HeliosConnectionFactory
         $this->invalidate();
 
         $configuration = new Configuration();
+        $configuration->setSchemaManagerFactory(new DefaultSchemaManagerFactory());
         if (!$this->writeEnabled) {
             $configuration->setMiddlewares([new ReadOnlyMiddleware()]);
         }

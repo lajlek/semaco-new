@@ -1,0 +1,9 @@
+app:
+    inquiry:
+        registration_request:
+            success: 'Registrace byla úspěšně odeslána.'
+        contact:
+            success: 'Zpráva byla úspěšně odeslána.'
+            reply_sent: 'Zpráva byla doplněna.'
+            answer_sent: 'Odpověď byla odeslána zákazníkovi.'
+            answer_invalid: 'Odpověď nebyla odeslána – vyplňte text odpovědi.'

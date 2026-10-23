@@ -1,0 +1,20 @@
+{% from '@SyliusShop/shared/breadcrumbs.html.twig' import breadcrumbs as breadcrumbs %}
+
+{% set message = hookable_metadata.context.message|default(null) %}
+
+<div class="col-12">
+    {% if message %}
+        {{ breadcrumbs([
+            { label: 'sylius.ui.home'|trans, path: path('sylius_shop_homepage') },
+            { label: 'sylius.ui.my_account'|trans, path: path('sylius_shop_account_dashboard') },
+            { label: 'app.inquiry.account.title'|trans({}, 'inquiry'), path: path('app_shop_account_contact_message_index') },
+            { label: 'app.inquiry.account.thread'|trans({}, 'inquiry'), active: true }
+        ]) }}
+    {% else %}
+        {{ breadcrumbs([
+            { label: 'sylius.ui.home'|trans, path: path('sylius_shop_homepage') },
+            { label: 'sylius.ui.my_account'|trans, path: path('sylius_shop_account_dashboard') },
+            { label: 'app.inquiry.account.title'|trans({}, 'inquiry'), active: true }
+        ]) }}
+    {% endif %}
+</div>
