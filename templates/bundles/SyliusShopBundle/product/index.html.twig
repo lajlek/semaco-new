@@ -2,10 +2,12 @@
 
 {% set prefixes = ['sylius_shop.product.index'] %}
 
+{% block title %}{% set taxon = semaco_taxon_by_slug(app.request.attributes.get('slug')) %}{{ taxon ? taxon.name ~ ' | ' : '' }}{{ parent() }}{% endblock %}
+
 {% block content_class %}{% endblock %}
 
 {% block content %}
-    <main class="main">
+    <div class="main">
         {% hook 'semaco_shop.product.index' with { products, resources } %}
-    </main>
+    </div>
 {% endblock %}

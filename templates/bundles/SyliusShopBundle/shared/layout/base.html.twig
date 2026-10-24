@@ -19,6 +19,7 @@
     </head>
 
     <body data-route="{{ app.request.get('_route') }}">
+        <a class="skip-link" href="#main-content">{{ 'app.shop.skip_to_content'|trans }}</a>
         {% block body %}
             <div class="page-wrapper">
                 <header class="header">

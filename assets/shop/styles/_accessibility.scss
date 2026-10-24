@@ -1,0 +1,40 @@
+.skip-link {
+    position: absolute;
+    top: 0;
+    left: -9999px;
+    z-index: 10000;
+    padding: 1rem 1.6rem;
+    background: #fff;
+    color: #222;
+    font-size: 1.4rem;
+    font-weight: 600;
+
+    &:focus {
+        top: 1rem;
+        left: 1rem;
+    }
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+    outline: 2px solid #285da8;
+    outline-offset: 2px;
+}
+
+.header .header-search input.form-control[type="search"] {
+    color: #555;
+
+    &::placeholder {
+        color: #767676;
+    }
+}
+
+.cart-header .btn-close,
+.mobile-menu-container .btn-close,
+.semaco-steps .title-step.disabled span {
+    color: #767676;
+}

@@ -11,6 +11,7 @@ app:
                 taxons: 'Kategorie'
                 attributes: 'Parametry'
     shop:
+        skip_to_content: 'Přeskočit na obsah'
         checkout:
             steps: 'Kroky objednávky'
         account:
@@ -51,6 +52,7 @@ app:
             terms: 'Obchodní podmínky'
             privacy: 'Zásady ochrany osobních údajů'
             contacts: 'Kontakty'
+            accessibility: 'Informace o přístupnosti'
         footer:
             your_store: 'Váš obchod'
             phone: 'Tel.:'
