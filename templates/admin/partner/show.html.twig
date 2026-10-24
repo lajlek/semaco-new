@@ -99,6 +99,14 @@
                                 <tr><td class="text-secondary">{{ label }}</td><td>{{ value }}</td></tr>
                             {% endfor %}
                             </tbody>
+                            {% if item.detailParameters is not empty %}
+                                <tbody class="border-top">
+                                <tr><th colspan="2">Detail artiklu{% if item.detailsFetchedAt %} <span class="text-secondary fw-normal">(načteno {{ item.detailsFetchedAt|date('j. n. Y H:i') }})</span>{% endif %}</th></tr>
+                                {% for label, value in item.detailParameters %}
+                                    <tr><td class="text-secondary">{{ label }}</td><td>{{ value }}</td></tr>
+                                {% endfor %}
+                                </tbody>
+                            {% endif %}
                         </table>
                     </div>
                     {% if item.imageUrls is not empty %}
