@@ -1,0 +1,4 @@
+<form method="post" action="{{ path('app_admin_partner_item_bulk_approve') }}" data-bulk-delete="index" class="d-inline-block">
+    <input type="hidden" name="_token" value="{{ csrf_token('partner_bulk') }}">
+    <button type="submit" class="btn btn-primary" data-check-all-action="index" disabled>{{ ux_icon('tabler:checks', {class: 'icon'}) }} Schválit vybrané</button>
+</form>

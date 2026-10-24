@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Partner\Entity;
 
+use App\Entity\Product\Product;
 use App\Entity\Product\ProductVariant;
 use Doctrine\ORM\Mapping as ORM;
 use Sylius\Resource\Model\ResourceInterface;
@@ -29,6 +30,14 @@ class PartnerItem implements ResourceInterface
     public const STATE_EXPORTED = 'exported';
 
     public const STATE_PAIRED = 'paired';
+
+    public const GROUPING_EXISTING = 'existing';
+
+    public const GROUPING_NEW = 'new';
+
+    public const GROUPING_AMBIGUOUS = 'ambiguous';
+
+    public const ISSUE_CHANGED = 'changed_after_approval';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -85,6 +94,50 @@ class PartnerItem implements ResourceInterface
 
     #[ORM\Column(name: 'workflow_state', type: 'string', length: 16)]
     private string $workflowState = self::STATE_NEW;
+
+    #[ORM\Column(name: 'family_key', type: 'string', length: 64, nullable: true)]
+    private ?string $familyKey = null;
+
+    #[ORM\Column(name: 'grouping_status', type: 'string', length: 16, nullable: true)]
+    private ?string $grouping = null;
+
+    #[ORM\ManyToOne(targetEntity: Product::class)]
+    #[ORM\JoinColumn(name: 'proposed_product_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
+    private ?Product $proposedProduct = null;
+
+    #[ORM\Column(name: 'prepared_name', type: 'string', length: 255, nullable: true)]
+    private ?string $preparedName = null;
+
+    #[ORM\Column(name: 'prepared_product_name', type: 'string', length: 255, nullable: true)]
+    private ?string $preparedProductName = null;
+
+    #[ORM\Column(name: 'prepared_taxon_code', type: 'string', length: 255, nullable: true)]
+    private ?string $preparedTaxonCode = null;
+
+    /** @var array<string, array{value: string, source: string}> */
+    #[ORM\Column(name: 'prepared_options', type: 'json')]
+    private array $preparedOptions = [];
+
+    /** @var list<array{code: string, message: string, blocking: bool}> */
+    #[ORM\Column(type: 'json')]
+    private array $issues = [];
+
+    /** @var array{name?: string, product_name?: string, taxon_code?: string, options?: array<string, string>} */
+    #[ORM\Column(type: 'json')]
+    private array $overrides = [];
+
+    #[ORM\Column(name: 'approved_hash', type: 'string', length: 64, nullable: true)]
+    private ?string $approvedHash = null;
+
+    #[ORM\Column(name: 'approved_at', type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $approvedAt = null;
+
+    #[ORM\Column(name: 'approved_by', type: 'string', length: 255, nullable: true)]
+    private ?string $approvedBy = null;
+
+    #[ORM\ManyToOne(targetEntity: PartnerExportBatch::class, inversedBy: 'items')]
+    #[ORM\JoinColumn(name: 'export_batch_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
+    private ?PartnerExportBatch $exportBatch = null;
 
     #[ORM\Column(name: 'first_seen_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $firstSeenAt;
@@ -244,6 +297,161 @@ class PartnerItem implements ResourceInterface
         $this->workflowState = $workflowState;
     }
 
+    public function getFamilyKey(): ?string
+    {
+        return $this->familyKey;
+    }
+
+    public function getGrouping(): ?string
+    {
+        return $this->grouping;
+    }
+
+    public function getProposedProduct(): ?Product
+    {
+        return $this->proposedProduct;
+    }
+
+    public function getPreparedName(): ?string
+    {
+        return $this->preparedName;
+    }
+
+    public function getPreparedProductName(): ?string
+    {
+        return $this->preparedProductName;
+    }
+
+    public function getPreparedTaxonCode(): ?string
+    {
+        return $this->preparedTaxonCode;
+    }
+
+    /** @return array<string, array{value: string, source: string}> */
+    public function getPreparedOptions(): array
+    {
+        return $this->preparedOptions;
+    }
+
+    /** @return list<array{code: string, message: string, blocking: bool}> */
+    public function getIssues(): array
+    {
+        return $this->issues;
+    }
+
+    public function hasBlockingIssues(): bool
+    {
+        foreach ($this->issues as $issue) {
+            if ($issue['blocking'] && $issue['code'] !== self::ISSUE_CHANGED) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** @return array{name?: string, product_name?: string, taxon_code?: string, options?: array<string, string>} */
+    public function getOverrides(): array
+    {
+        return $this->overrides;
+    }
+
+    /** @param array{name?: string, product_name?: string, taxon_code?: string, options?: array<string, string>} $overrides */
+    public function setOverrides(array $overrides): void
+    {
+        $this->overrides = $overrides;
+    }
+
+    /**
+     * @param array<string, array{value: string, source: string}> $preparedOptions
+     * @param list<array{code: string, message: string, blocking: bool}> $issues
+     */
+    public function applyPreparation(
+        ?string $familyKey,
+        ?string $grouping,
+        ?Product $proposedProduct,
+        ?string $preparedName,
+        ?string $preparedProductName,
+        ?string $preparedTaxonCode,
+        array $preparedOptions,
+        array $issues,
+    ): void {
+        $this->familyKey = $familyKey;
+        $this->grouping = $grouping;
+        $this->proposedProduct = $proposedProduct;
+        $this->preparedName = $preparedName;
+        $this->preparedProductName = $preparedProductName;
+        $this->preparedTaxonCode = $preparedTaxonCode;
+        $this->preparedOptions = $preparedOptions;
+
+        $changed = $this->approvedHash !== null &&
+            $this->approvedHash !== $this->contentHash &&
+            in_array($this->workflowState, [self::STATE_READY, self::STATE_NEEDS_REVIEW], true);
+        if ($changed) {
+            $issues[] = ['code' => self::ISSUE_CHANGED, 'message' => 'Údaje u partnera se po schválení změnily', 'blocking' => true];
+        }
+        $this->issues = $issues;
+
+        if ($this->matchStatus === self::MATCH_MATCHED) {
+            $this->workflowState = self::STATE_PAIRED;
+        } elseif ($this->workflowState === self::STATE_EXPORTED || ($this->workflowState === self::STATE_READY && !$changed)) {
+            return;
+        } else {
+            $this->workflowState = self::blocking($issues) ? self::STATE_NEEDS_REVIEW : self::STATE_NEW;
+        }
+    }
+
+    public function renamePrepared(?string $preparedName): void
+    {
+        $this->preparedName = $preparedName;
+    }
+
+    /** @param array{code: string, message: string, blocking: bool} $issue */
+    public function addIssue(array $issue): void
+    {
+        $this->issues[] = $issue;
+        if ($issue['blocking'] && $this->workflowState === self::STATE_NEW) {
+            $this->workflowState = self::STATE_NEEDS_REVIEW;
+        }
+    }
+
+    public function canBeApproved(): bool
+    {
+        return in_array($this->workflowState, [self::STATE_NEW, self::STATE_NEEDS_REVIEW], true) &&
+            $this->matchStatus !== self::MATCH_MATCHED &&
+            !$this->hasBlockingIssues();
+    }
+
+    public function approve(string $approvedBy): void
+    {
+        $this->workflowState = self::STATE_READY;
+        $this->approvedHash = $this->contentHash;
+        $this->approvedAt = new \DateTimeImmutable();
+        $this->approvedBy = $approvedBy;
+        $this->issues = array_values(array_filter($this->issues, static fn (array $issue): bool => $issue['code'] !== self::ISSUE_CHANGED));
+    }
+
+    public function getApprovedAt(): ?\DateTimeImmutable
+    {
+        return $this->approvedAt;
+    }
+
+    public function getApprovedBy(): ?string
+    {
+        return $this->approvedBy;
+    }
+
+    public function getExportBatch(): ?PartnerExportBatch
+    {
+        return $this->exportBatch;
+    }
+
+    public function markExported(PartnerExportBatch $batch): void
+    {
+        $this->exportBatch = $batch;
+        $this->workflowState = self::STATE_EXPORTED;
+    }
+
     public function getFirstSeenAt(): \DateTimeImmutable
     {
         return $this->firstSeenAt;
@@ -257,5 +465,17 @@ class PartnerItem implements ResourceInterface
     public function getChangedAt(): \DateTimeImmutable
     {
         return $this->changedAt;
+    }
+
+    /** @param list<array{code: string, message: string, blocking: bool}> $issues */
+    private static function blocking(array $issues): bool
+    {
+        foreach ($issues as $issue) {
+            if ($issue['blocking']) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

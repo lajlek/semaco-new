@@ -1,0 +1,137 @@
+{% set item = hookable_metadata.context.resource %}
+{% set rule = partner_rules()[item.partnerCode] %}
+{% set state_labels = {new: 'Ke schválení', needs_review: 'Vyžaduje kontrolu', ready: 'Připraveno', exported: 'Exportováno, čeká na Helios', paired: 'Spárováno'} %}
+{% set match_labels = {matched: 'Existuje v Semaco', unmatched: 'V Semaco nenalezeno', ambiguous: 'Nejednoznačné'} %}
+{% set grouping_labels = {existing: 'Další varianta existujícího produktu', new: 'Nový hlavní produkt', ambiguous: 'Nejasné – rodina u více produktů'} %}
+{% set source_labels = {partner: 'od partnera', family: 'společné pro rodinu', manual: 'ručně'} %}
+{% set editable = item.workflowState not in ['exported', 'paired'] %}
+{% set overrides = item.overrides %}
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row">
+            <div class="col-12 col-lg-8 mb-3">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h3 class="card-title">{{ rule.label }} {{ item.orderCode }}</h3>
+                        <div class="card-actions"><span class="badge bg-blue-lt">{{ state_labels[item.workflowState]|default(item.workflowState) }}</span></div>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-4">Název u partnera</dt><dd class="col-8">{{ item.name }}{% if item.subtitle %}<div class="text-secondary small">{{ item.subtitle }}</div>{% endif %}</dd>
+                            <dt class="col-4">Zdroj</dt>
+                            <dd class="col-8">
+                                {% if item.detailUrl starts with 'https://' %}<a href="{{ item.detailUrl }}" target="_blank" rel="noopener noreferrer">detail u partnera</a> · {% endif %}
+                                {% if item.sourceUrl starts with 'https://' %}<a href="{{ item.sourceUrl }}" target="_blank" rel="noopener noreferrer">výpis</a>{% else %}{{ item.sourceUrl }}{% endif %}
+                            </dd>
+                            <dt class="col-4">Stáří údajů</dt><dd class="col-8">načteno {{ item.lastSeenAt|date('d. m. Y H:i') }}, změna u partnera {{ item.changedAt|date('d. m. Y H:i') }}</dd>
+                            <dt class="col-4">Párování</dt>
+                            <dd class="col-8">
+                                {{ match_labels[item.matchStatus]|default(item.matchStatus) }}
+                                {% if item.matchedVariant %} – <a href="{{ path('sylius_admin_product_variant_update', {productId: item.matchedVariant.product.id, id: item.matchedVariant.id}) }}">{{ item.matchedVariant.code }}</a>{% endif %}
+                            </dd>
+                            <dt class="col-4">Seskupení</dt>
+                            <dd class="col-8">
+                                {{ grouping_labels[item.grouping]|default('–') }}{% if item.familyKey %} (rodina {{ item.familyKey }}){% endif %}
+                                {% if item.grouping == 'new' %}<div>{{ item.preparedProductName|default('název chybí') }} · kategorie {{ item.preparedTaxonCode|default('chybí') }} · {{ rule.brandName }}</div>{% endif %}
+                                {% if item.proposedProduct %}<div><a href="{{ path('sylius_admin_product_update', {id: item.proposedProduct.id}) }}">{{ item.proposedProduct.name }}</a> · {{ item.proposedProduct.mainTaxon ? item.proposedProduct.mainTaxon.name : 'bez kategorie' }} · {{ item.proposedProduct.brand ? item.proposedProduct.brand.name : rule.brandName }}</div>{% endif %}
+                            </dd>
+                            <dt class="col-4">Návrh názvu varianty</dt><dd class="col-8">{{ item.preparedName|default('–') }}</dd>
+                            <dt class="col-4">Cena u partnera</dt><dd class="col-8">{{ item.price ? item.price ~ ' ' ~ item.currency : 'není k dispozici' }}</dd>
+                            {% if item.approvedAt %}<dt class="col-4">Schváleno</dt><dd class="col-8">{{ item.approvedAt|date('d. m. Y H:i') }} · {{ item.approvedBy }}</dd>{% endif %}
+                            {% if item.exportBatch %}<dt class="col-4">Exportní dávka</dt><dd class="col-8"><a href="{{ path('app_admin_partner_export_batch_download', {id: item.exportBatch.id}) }}">{{ item.exportBatch.fileName }}</a></dd>{% endif %}
+                        </dl>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header"><h3 class="card-title">Parametry</h3></div>
+                    <form method="post" action="{{ path('app_admin_partner_item_overrides', {id: item.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('partner_item_' ~ item.id) }}">
+                        <div class="table-responsive">
+                            <table class="table card-table table-vcenter">
+                                <thead><tr><th>Atribut Semaco</th><th>Návrh</th><th>Původ</th>{% if editable %}<th>Ruční hodnota</th>{% endif %}</tr></thead>
+                                <tbody>
+                                {% for field in partner_option_fields(item) %}
+                                    <tr>
+                                        <td>{{ field.name }}</td>
+                                        <td>{{ field.value ?: '–' }}</td>
+                                        <td class="text-secondary small">{{ source_labels[field.source]|default('chybí') }}</td>
+                                        {% if editable %}<td><input type="text" name="options[{{ field.code }}]" value="{{ field.override }}" class="form-control form-control-sm"></td>{% endif %}
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% if editable %}
+                            <div class="card-body border-top">
+                                <div class="row g-2">
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label">Název varianty (ručně)</label>
+                                        <input type="text" name="name" value="{{ overrides.name|default('') }}" class="form-control" placeholder="{{ item.preparedName }}">
+                                    </div>
+                                    {% if item.grouping == 'new' %}
+                                        <div class="col-12 col-md-6">
+                                            <label class="form-label">Český název nového hlavního produktu</label>
+                                            <input type="text" name="product_name" value="{{ overrides.product_name|default('') }}" class="form-control" placeholder="{{ item.preparedProductName }}">
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <label class="form-label">Kategorie (kód)</label>
+                                            <input type="text" name="taxon_code" value="{{ overrides.taxon_code|default('') }}" class="form-control" placeholder="{{ item.preparedTaxonCode|default('např. valcove') }}">
+                                        </div>
+                                        <div class="col-12 col-md-6 d-flex align-items-end">
+                                            <label class="form-check mb-2"><input type="checkbox" name="apply_family" value="1" class="form-check-input" checked> <span class="form-check-label">Název produktu a kategorii použít pro celou rodinu</span></label>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <button type="submit" class="btn btn-primary mt-3">{{ ux_icon('tabler:device-floppy', {class: 'icon'}) }} Uložit úpravy</button>
+                            </div>
+                        {% endif %}
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><h3 class="card-title">Původní data partnera</h3></div>
+                    <div class="table-responsive">
+                        <table class="table table-sm card-table">
+                            <tbody>
+                            {% for label, value in item.parameters %}
+                                <tr><td class="text-secondary">{{ label }}</td><td>{{ value }}</td></tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% if item.imageUrls is not empty %}
+                        <div class="card-body border-top d-flex flex-wrap gap-2">
+                            {% for url in item.imageUrls|filter(url => url starts with 'https://') %}
+                                <a href="{{ url }}" target="_blank" rel="noopener noreferrer" class="small">obrázek {{ loop.index }}</a>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-4 mb-3">
+                <div class="card mb-3">
+                    <div class="card-header"><h3 class="card-title">Upozornění</h3></div>
+                    <div class="card-body">
+                        {% for issue in item.issues %}
+                            <div class="mb-1 {{ issue.blocking ? 'text-danger' : 'text-secondary' }}">{{ issue.message }}</div>
+                        {% else %}
+                            <p class="text-secondary mb-0">Žádná.</p>
+                        {% endfor %}
+                    </div>
+                    {% if item.canBeApproved %}
+                        <div class="card-footer">
+                            <form method="post" action="{{ path('app_admin_partner_item_approve', {id: item.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('partner_item_' ~ item.id) }}">
+                                <button type="submit" class="btn btn-primary w-100">{{ ux_icon('tabler:check', {class: 'icon'}) }} Schválit k exportu</button>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+                <a href="{{ path('app_admin_partner_item_index') }}" class="btn w-100">{{ ux_icon('tabler:arrow-left', {class: 'icon'}) }} Zpět na položky</a>
+            </div>
+        </div>
+    </div>
+</div>

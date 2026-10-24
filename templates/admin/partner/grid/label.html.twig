@@ -1,0 +1,4 @@
+{% if data is not null %}
+    {% set color = options.vars.colors[data]|default(null) %}
+    {% if color %}<span class="badge bg-{{ color }}-lt">{% endif %}{{ options.vars.labels[data]|default(data) }}{% if color %}</span>{% endif %}
+{% endif %}

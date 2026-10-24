@@ -1,6 +1,8 @@
 parameters:
     app.partners.user_agent: 'SemacoCatalogBot/0.1 (+https://eshop.semaco.cz; obchod@semaco.cz)'
     app.partners.min_delay_seconds: 10
+    app.partners.max_pages: 30
+    app.partners.cooldown_hours: 6
 
 services:
     _defaults:
@@ -14,3 +16,4 @@ services:
             - '../../src/Partner/Entity/'
             - '../../src/Partner/Dto/'
             - '../../src/Partner/Fetch/RobotsPolicy.php'
+            - '../../src/Partner/Rules/PartnerRule.php'

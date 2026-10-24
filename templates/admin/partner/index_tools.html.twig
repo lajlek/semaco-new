@@ -1,0 +1,77 @@
+{% set runs = partner_recent_fetch_runs() %}
+{% set status_labels = {queued: 'Čeká', running: 'Běží', done: 'Hotovo', stopped: 'Zastaveno', failed: 'Chyba', cancelled: 'Zrušeno'} %}
+
+<div class="row g-3 mb-3">
+    <div class="col-12 col-xl-5">
+        <div class="card h-100">
+            <div class="card-header"><h3 class="card-title">Načíst výpis partnera</h3></div>
+            <div class="card-body">
+                <form method="post" action="{{ path('app_admin_partner_fetch_run_queue') }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('partner_fetch') }}">
+                    <div class="row g-2">
+                        <div class="col-4">
+                            <select name="partner" class="form-select" required>
+                                {% for code, rule in partner_rules() %}
+                                    <option value="{{ code }}"{% if rule.allowedHosts is empty %} disabled{% endif %}>{{ rule.label }}{% if rule.allowedHosts is empty %} (jen ruční import){% endif %}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-8">
+                            <input type="url" name="url" class="form-control" placeholder="https://… adresa kategorie nebo rodiny" required>
+                        </div>
+                        <div class="col-4">
+                            <input type="number" name="max_pages" class="form-control" min="1" max="30" value="5" title="Nejvýš stránek výpisu">
+                        </div>
+                        <div class="col-8">
+                            <button type="submit" class="btn btn-primary w-100">{{ ux_icon('tabler:download', {class: 'icon'}) }} Zařadit načtení</button>
+                        </div>
+                    </div>
+                    <p class="text-secondary small mt-2 mb-0">
+                        Stránky se stahují po jedné s odstupem nejméně 10 s podle robots.txt partnera, nejvýš 30 stránek najednou.
+                        Stejnou adresu lze znovu načíst nejdřív po 6 hodinách. POKOLM automatické načítání zakazuje.
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-xl-7">
+        <div class="card h-100">
+            <div class="card-header">
+                <h3 class="card-title">Poslední načítání</h3>
+                <div class="card-actions d-flex gap-2">
+                    <form method="post" action="{{ path('app_admin_partner_item_prepare') }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('partner_prepare') }}">
+                        <button type="submit" class="btn btn-sm">{{ ux_icon('tabler:refresh', {class: 'icon'}) }} Přepočítat párování a návrhy</button>
+                    </form>
+                    <a href="{{ path('app_admin_partner_export_batch_index') }}" class="btn btn-sm">{{ ux_icon('tabler:file-export', {class: 'icon'}) }} Exportní dávky</a>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm card-table">
+                    <tbody>
+                    {% for run in runs %}
+                        <tr>
+                            <td class="text-nowrap">{{ run.requestedAt|date('d. m. H:i') }}</td>
+                            <td>{{ partner_rules()[run.partnerCode].label|default(run.partnerCode) }}</td>
+                            <td class="text-truncate" style="max-width: 18rem" title="{{ run.url }}">{{ run.url }}</td>
+                            <td class="text-nowrap">{{ status_labels[run.status]|default(run.status) }}</td>
+                            <td class="text-nowrap">{{ run.pages }} str. · nové {{ run.itemsCreated }} · změněné {{ run.itemsChanged }}</td>
+                            <td class="small text-secondary">
+                                {{ run.message }}
+                                {% if run.status == 'queued' %}
+                                    <form method="post" action="{{ path('app_admin_partner_fetch_run_cancel', {id: run.id}) }}" class="d-inline">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('partner_fetch') }}">
+                                        <button type="submit" class="btn btn-sm btn-link p-0">Zrušit</button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr><td class="text-secondary">Zatím nic.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

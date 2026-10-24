@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Partner\Command;
 
+use App\Partner\Service\PartnerItemPreparer;
 use App\Partner\Service\PartnerItemStore;
 use App\Partner\Service\PartnerParserRegistry;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -20,6 +21,7 @@ final class ImportPartnerHtmlCommand extends Command
     public function __construct(
         private readonly PartnerParserRegistry $parsers,
         private readonly PartnerItemStore $store,
+        private readonly PartnerItemPreparer $preparer,
     ) {
         parent::__construct();
     }
@@ -51,7 +53,11 @@ final class ImportPartnerHtmlCommand extends Command
 
         $sourceUrl = $url !== '' ? $url : 'file://' . basename($file);
         $page = $this->parsers->get($partner)->parse((string) file_get_contents($file), $sourceUrl);
-        $summary = $this->store->store($partner, $page->items, $sourceUrl, (bool) $input->getOption('dry-run'));
+        $dryRun = (bool) $input->getOption('dry-run');
+        $summary = $this->store->store($partner, $page->items, $sourceUrl, $dryRun);
+        if (!$dryRun) {
+            $this->preparer->prepare($partner);
+        }
 
         $io->success(sprintf('Položek %d: nové %d, změněné %d, beze změny %d.', count($page->items), $summary['created'], $summary['changed'], $summary['unchanged']));
 

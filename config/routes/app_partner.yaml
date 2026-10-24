@@ -1,0 +1,27 @@
+app_partner_controllers:
+    resource:
+        path: ../../src/Partner/Controller/
+        namespace: App\Partner\Controller
+    type: attribute
+
+app_admin_partner_item:
+    resource: |
+        alias: app.partner_item
+        section: admin
+        templates: "@SyliusAdmin\\shared\\crud"
+        only: ['index', 'show']
+        grid: app_admin_partner_item
+        permission: false
+    type: sylius.resource
+    prefix: /admin
+
+app_admin_partner_export_batch:
+    resource: |
+        alias: app.partner_export_batch
+        section: admin
+        templates: "@SyliusAdmin\\shared\\crud"
+        only: ['index']
+        grid: app_admin_partner_export_batch
+        permission: false
+    type: sylius.resource
+    prefix: /admin

@@ -1,0 +1,3 @@
+{% for issue in data.issues %}
+    <div class="small {{ issue.blocking ? 'text-danger' : 'text-secondary' }}">{{ issue.message }}</div>
+{% endfor %}

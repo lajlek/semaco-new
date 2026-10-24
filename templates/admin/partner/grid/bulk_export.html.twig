@@ -1,0 +1,4 @@
+<form method="post" action="{{ path('app_admin_partner_item_bulk_export') }}" data-bulk-delete="index" class="d-inline-block">
+    <input type="hidden" name="_token" value="{{ csrf_token('partner_bulk') }}">
+    <button type="submit" class="btn" data-check-all-action="index" disabled>{{ ux_icon('tabler:file-export', {class: 'icon'}) }} Export pro Helios</button>
+</form>

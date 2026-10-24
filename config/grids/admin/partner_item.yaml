@@ -1,0 +1,143 @@
+sylius_grid:
+    templates:
+        bulk_action:
+            app_partner_approve: 'admin/partner/grid/bulk_approve.html.twig'
+            app_partner_export: 'admin/partner/grid/bulk_export.html.twig'
+    grids:
+        app_admin_partner_item:
+            driver:
+                name: doctrine/orm
+                options:
+                    class: App\Partner\Entity\PartnerItem
+            sorting:
+                orderCode: asc
+            limits: [50, 100, 250]
+            fields:
+                partnerCode:
+                    type: twig
+                    label: Partner
+                    sortable: partnerCode
+                    options:
+                        template: 'admin/partner/grid/label.html.twig'
+                        vars:
+                            labels: { pokolm: 'POKOLM', fraisa: 'FRAISA', brw: 'BRW' }
+                orderCode:
+                    type: string
+                    label: Objednací kód
+                    sortable: orderCode
+                name:
+                    type: string
+                    label: Název u partnera
+                preparedName:
+                    type: string
+                    label: Návrh názvu varianty
+                familyKey:
+                    type: string
+                    label: Rodina
+                    sortable: familyKey
+                grouping:
+                    type: twig
+                    label: Seskupení
+                    options:
+                        template: 'admin/partner/grid/label.html.twig'
+                        vars:
+                            labels: { existing: 'Existující produkt', new: 'Nový produkt', ambiguous: 'Nejasné' }
+                            colors: { existing: 'green', new: 'blue', ambiguous: 'red' }
+                matchStatus:
+                    type: twig
+                    label: Párování
+                    sortable: matchStatus
+                    options:
+                        template: 'admin/partner/grid/label.html.twig'
+                        vars:
+                            labels: { matched: 'Existuje', unmatched: 'Nenalezeno', ambiguous: 'Nejednoznačné' }
+                            colors: { matched: 'green', unmatched: 'yellow', ambiguous: 'red' }
+                workflowState:
+                    type: twig
+                    label: Stav
+                    sortable: workflowState
+                    options:
+                        template: 'admin/partner/grid/label.html.twig'
+                        vars:
+                            labels: { new: 'Ke schválení', needs_review: 'Vyžaduje kontrolu', ready: 'Připraveno', exported: 'Exportováno, čeká na Helios', paired: 'Spárováno' }
+                            colors: { new: 'blue', needs_review: 'red', ready: 'green', exported: 'purple', paired: 'secondary' }
+                issues:
+                    type: twig
+                    label: Upozornění
+                    path: .
+                    options:
+                        template: 'admin/partner/grid/issues.html.twig'
+                lastSeenAt:
+                    type: datetime
+                    label: Načteno
+                    sortable: lastSeenAt
+                    options:
+                        format: 'd. m. Y'
+            filters:
+                search:
+                    type: string
+                    label: sylius.ui.search
+                    options:
+                        fields: [orderCode, name, familyKey, preparedName]
+                partnerCode:
+                    type: select
+                    label: Partner
+                    form_options:
+                        choices: { 'POKOLM': pokolm, 'FRAISA': fraisa, 'BRW': brw }
+                workflowState:
+                    type: select
+                    label: Stav
+                    form_options:
+                        choices: { 'Ke schválení': new, 'Vyžaduje kontrolu': needs_review, 'Připraveno': ready, 'Exportováno, čeká na Helios': exported, 'Spárováno': paired }
+                matchStatus:
+                    type: select
+                    label: Párování
+                    form_options:
+                        choices: { 'Existuje': matched, 'Nenalezeno': unmatched, 'Nejednoznačné': ambiguous }
+                grouping:
+                    type: select
+                    label: Seskupení
+                    form_options:
+                        choices: { 'Existující produkt': existing, 'Nový produkt': new, 'Nejasné': ambiguous }
+            actions:
+                item:
+                    show:
+                        type: show
+                bulk:
+                    approve:
+                        type: app_partner_approve
+                    export:
+                        type: app_partner_export
+
+        app_admin_partner_export_batch:
+            driver:
+                name: doctrine/orm
+                options:
+                    class: App\Partner\Entity\PartnerExportBatch
+            sorting:
+                createdAt: desc
+            fields:
+                id:
+                    type: string
+                    label: Dávka
+                createdAt:
+                    type: datetime
+                    label: Vytvořeno
+                    sortable: createdAt
+                    options:
+                        format: 'd. m. Y H:i'
+                createdBy:
+                    type: string
+                    label: Vytvořil
+                itemCount:
+                    type: string
+                    label: Položek
+                pairedCount:
+                    type: string
+                    label: Spárováno po importu
+                download:
+                    type: twig
+                    label: Soubor
+                    path: .
+                    options:
+                        template: 'admin/partner/grid/batch_download.html.twig'

@@ -1,0 +1,31 @@
+sylius_resource:
+    resources:
+        app.partner_item:
+            driver: doctrine/orm
+            classes:
+                model: App\Partner\Entity\PartnerItem
+        app.partner_export_batch:
+            driver: doctrine/orm
+            classes:
+                model: App\Partner\Entity\PartnerExportBatch
+        app.partner_fetch_run:
+            driver: doctrine/orm
+            classes:
+                model: App\Partner\Entity\PartnerFetchRun
+
+sylius_twig_hooks:
+    hooks:
+        'sylius_admin.partner_item.index.content.header':
+            partner_tools:
+                template: 'admin/partner/index_tools.html.twig'
+                priority: -100
+
+        'sylius_admin.partner_item.show.content':
+            detail:
+                template: 'admin/partner/show.html.twig'
+                priority: 0
+
+        'sylius_admin.partner_export_batch.index.content.header':
+            info:
+                template: 'admin/partner/batch_info.html.twig'
+                priority: -100
