@@ -30,8 +30,6 @@ final readonly class Schedule implements ScheduleProviderInterface
             ->add(
                 RecurringMessage::every('10 minutes', new RunCommandMessage('app:erp:sync --no-debug')),
                 RecurringMessage::every('2 minutes', new RunCommandMessage('app:erp:push-orders --no-debug')),
-                RecurringMessage::every('1 minute', new RunCommandMessage('app:partners:process-queue --no-debug')),
-                RecurringMessage::every('1 hour', new RunCommandMessage('app:partners:match --exported --no-debug')),
                 RecurringMessage::cron('50 14 * * 1-5', new RunCommandMessage('app:exchange-rates:import'), new \DateTimeZone('Europe/Prague')),
             );
     }

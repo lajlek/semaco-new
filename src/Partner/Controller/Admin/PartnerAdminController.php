@@ -58,14 +58,14 @@ final class PartnerAdminController extends AbstractController
         $approved = 0;
         $items = $this->selectedItems($request);
         foreach ($items as $item) {
-            if ($item->canBeApproved()) {
+            if ($item->canBeApproved(false)) {
                 $item->approve($this->adminName());
                 ++$approved;
             }
         }
         $this->entityManager->flush();
 
-        $this->addFlash($approved > 0 ? 'success' : 'warning', sprintf('Schváleno %d z %d vybraných položek.%s', $approved, count($items), $approved < count($items) ? ' Ostatní mají nevyřešená upozornění, jsou už schválené nebo existují v Semaco.' : ''));
+        $this->addFlash($approved > 0 ? 'success' : 'warning', sprintf('Schváleno %d z %d vybraných položek.%s', $approved, count($items), $approved < count($items) ? ' Ostatní mají nevyřešená upozornění, změnily se po schválení (ty schvalte v detailu), jsou už schválené nebo existují v Semaco.' : ''));
 
         return $this->redirectBack($request);
     }
@@ -114,13 +114,13 @@ final class PartnerAdminController extends AbstractController
         $approved = 0;
         $members = $this->itemRepository->findBy(['partnerCode' => $item->getPartnerCode(), 'familyKey' => $item->getFamilyKey()]);
         foreach ($members as $member) {
-            if ($member->canBeApproved()) {
+            if ($member->canBeApproved(false)) {
                 $member->approve($this->adminName());
                 ++$approved;
             }
         }
         $this->entityManager->flush();
-        $this->addFlash($approved > 0 ? 'success' : 'warning', sprintf('V rodině %s schváleno %d položek. Položky s upozorněním, už schválené nebo existující v Semaco zůstaly beze změny.', $item->getFamilyKey(), $approved));
+        $this->addFlash($approved > 0 ? 'success' : 'warning', sprintf('V rodině %s schváleno %d položek. Položky s upozorněním, změněné po schválení, už schválené nebo existující v Semaco zůstaly beze změny.', $item->getFamilyKey(), $approved));
 
         return $this->redirectToRoute('app_admin_partner_item_index', ['criteria' => ['search' => ['type' => 'contains', 'value' => $item->getFamilyKey()], 'partnerCode' => $item->getPartnerCode()]]);
     }
@@ -153,12 +153,14 @@ final class PartnerAdminController extends AbstractController
         if ($request->request->getBoolean('apply_family') && $item->getFamilyKey() !== null) {
             $targets = $this->itemRepository->findBy(['partnerCode' => $item->getPartnerCode(), 'familyKey' => $item->getFamilyKey()]);
         }
+        $updated = 0;
         foreach ($targets as $target) {
             $overrides = $target->getOverrides();
+            $before = $overrides;
             foreach ($family as $key => $value) {
                 if ($value !== '') {
                     $overrides[$key] = $value;
-                } else {
+                } elseif ($target === $item) {
                     unset($overrides[$key]);
                 }
             }
@@ -171,14 +173,14 @@ final class PartnerAdminController extends AbstractController
                 }
                 $overrides['options'] = $options;
             }
-            $target->setOverrides($overrides);
-            if (in_array($target->getWorkflowState(), [PartnerItem::STATE_READY, PartnerItem::STATE_NEEDS_REVIEW], true)) {
-                $target->setWorkflowState(PartnerItem::STATE_NEW);
+            if ($overrides !== $before) {
+                $target->setOverrides($overrides);
+                ++$updated;
             }
         }
         $this->entityManager->flush();
-        $this->preparer->prepare($item->getPartnerCode());
-        $this->addFlash('success', count($targets) > 1 ? sprintf('Uloženo pro %d položek rodiny.', count($targets)) : 'Uloženo.');
+        $this->preparer->prepare($item->getPartnerCode(), $item->getFamilyKey() ?? '#' . $item->getOrderCode());
+        $this->addFlash('success', $updated > 1 ? sprintf('Uloženo pro %d položek rodiny.', $updated) : 'Uloženo.');
 
         return $this->redirectToRoute('app_admin_partner_item_show', ['id' => $id]);
     }

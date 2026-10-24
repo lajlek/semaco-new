@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Partner\Fetch;
 
+use App\Partner\Rules\PartnerRules;
 use App\Partner\Service\PartnerItemStore;
 use App\Partner\Service\PartnerParserRegistry;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final readonly class PartnerListingCrawler
 {
@@ -13,6 +15,9 @@ final readonly class PartnerListingCrawler
         private PolitePageFetcher $fetcher,
         private PartnerParserRegistry $parsers,
         private PartnerItemStore $store,
+        private PartnerRules $rules,
+        #[Autowire('%app.partners.max_pages%')]
+        private int $maxPagesCap,
     ) {
     }
 
@@ -27,6 +32,12 @@ final readonly class PartnerListingCrawler
         if (!$parser->supportsAutomaticFetching()) {
             throw new FetchForbiddenException(sprintf('U partnera %s automatické načítání neprovádíme (robots.txt / podmínky).', $partnerCode));
         }
+
+        $rule = $this->rules->get($partnerCode);
+        if (!$rule->isAllowedUrl($startUrl)) {
+            throw new FetchForbiddenException(sprintf('%s není adresa na webu partnera %s.', $startUrl, $rule->label));
+        }
+        $maxPages = max(1, min($maxPages, $this->maxPagesCap));
 
         $queue = [self::normalize($startUrl)];
         $visited = [];
@@ -58,7 +69,7 @@ final readonly class PartnerListingCrawler
             }
 
             foreach (array_map(self::normalize(...), $page->pageUrls) as $pageUrl) {
-                if (!isset($visited[$pageUrl]) && !in_array($pageUrl, $queue, true)) {
+                if ($rule->isAllowedUrl($pageUrl) && !isset($visited[$pageUrl]) && !in_array($pageUrl, $queue, true)) {
                     $queue[] = $pageUrl;
                 }
             }

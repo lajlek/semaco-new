@@ -426,38 +426,39 @@ class PartnerItem implements ResourceInterface
             $this->approvedHash !== $this->fingerprint() &&
             in_array($this->workflowState, [self::STATE_READY, self::STATE_NEEDS_REVIEW], true);
         if ($changed) {
-            $issues[] = ['code' => self::ISSUE_CHANGED, 'message' => 'Údaje u partnera se po schválení změnily', 'blocking' => true];
+            $issues[] = ['code' => self::ISSUE_CHANGED, 'message' => 'Údaje u partnera nebo návrh se po schválení změnily', 'blocking' => true];
         }
         $this->issues = $issues;
 
         if ($this->matchStatus === self::MATCH_MATCHED) {
             $this->workflowState = self::STATE_PAIRED;
-        } elseif ($this->workflowState === self::STATE_EXPORTED || ($this->workflowState === self::STATE_READY && !$changed)) {
+        } elseif ($this->workflowState === self::STATE_EXPORTED) {
             return;
-        } else {
-            $this->workflowState = self::blocking($issues) ? self::STATE_NEEDS_REVIEW : self::STATE_NEW;
-        }
-    }
-
-    public function renamePrepared(?string $preparedName): void
-    {
-        $this->preparedName = $preparedName;
-    }
-
-    /** @param array{code: string, message: string, blocking: bool} $issue */
-    public function addIssue(array $issue): void
-    {
-        $this->issues[] = $issue;
-        if ($issue['blocking'] && $this->workflowState === self::STATE_NEW) {
+        } elseif (self::blocking($issues)) {
             $this->workflowState = self::STATE_NEEDS_REVIEW;
+        } elseif ($this->workflowState !== self::STATE_READY) {
+            $this->workflowState = self::STATE_NEW;
         }
     }
 
-    public function canBeApproved(): bool
+    public function isChangedAfterApproval(): bool
+    {
+        return in_array(self::ISSUE_CHANGED, array_column($this->issues, 'code'), true);
+    }
+
+    public function canBeApproved(bool $allowChangedAfterApproval = true): bool
     {
         return in_array($this->workflowState, [self::STATE_NEW, self::STATE_NEEDS_REVIEW], true) &&
             $this->matchStatus !== self::MATCH_MATCHED &&
-            !$this->hasBlockingIssues();
+            !$this->hasBlockingIssues() &&
+            ($allowChangedAfterApproval || !$this->isChangedAfterApproval());
+    }
+
+    public function isExportable(): bool
+    {
+        return $this->workflowState === self::STATE_READY &&
+            $this->matchStatus !== self::MATCH_MATCHED &&
+            !self::blocking($this->issues);
     }
 
     public function approve(string $approvedBy): void
@@ -507,7 +508,21 @@ class PartnerItem implements ResourceInterface
 
     private function fingerprint(): string
     {
-        return $this->detailParameters === [] ? $this->contentHash : hash('sha256', $this->contentHash . '|' . json_encode($this->detailParameters));
+        $details = $this->detailParameters;
+        ksort($details);
+        $options = array_map(static fn (array $option): string => $option['value'], $this->preparedOptions);
+        ksort($options);
+
+        return hash('sha256', (string) json_encode([
+            $this->contentHash,
+            $details,
+            $this->grouping,
+            $this->proposedProduct?->getId(),
+            $this->preparedName,
+            $this->preparedProductName,
+            $this->preparedTaxonCode,
+            $options,
+        ]));
     }
 
     /** @param list<array{code: string, message: string, blocking: bool}> $issues */

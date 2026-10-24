@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Partner;
 
+use App\Partner\Rules\PartnerRule;
 use App\Partner\Rules\PartnerRules;
 use App\Partner\Service\PartnerItemPreparer;
 use PHPUnit\Framework\TestCase;
@@ -40,6 +41,14 @@ final class PartnerRulesTest extends TestCase
         self::assertFalse($rules->get('pokolm')->isAllowedUrl('https://www.pokolm.com/portal/'));
     }
 
+    public function testComparableUrlIgnoresCosmeticDifferences(): void
+    {
+        $base = PartnerRule::comparableUrl('https://webshop.fraisa.com/CH/en/mills?view=list&sort=a');
+
+        self::assertSame($base, PartnerRule::comparableUrl('https://WEBSHOP.fraisa.com/CH/en/mills/?sort=a&view=list&page=1#top'));
+        self::assertNotSame($base, PartnerRule::comparableUrl('https://webshop.fraisa.com/CH/en/mills?view=list&sort=a&page=2'));
+    }
+
     public function testNumbersUseDecimalComma(): void
     {
         self::assertSame('6,7', PartnerItemPreparer::number('6.7'));
@@ -49,5 +58,6 @@ final class PartnerRulesTest extends TestCase
         self::assertNull(PartnerItemPreparer::number('—'));
         self::assertNull(PartnerItemPreparer::number(' '));
         self::assertSame('DIN 6535', PartnerItemPreparer::number('DIN 6535'));
+        self::assertSame('+/-0,005', PartnerItemPreparer::number('+/- 0.005'));
     }
 }

@@ -6,6 +6,8 @@ namespace App\Partner\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
+use Doctrine\Common\Collections\Selectable;
 use Doctrine\ORM\Mapping as ORM;
 use Sylius\Resource\Model\ResourceInterface;
 
@@ -30,8 +32,8 @@ class PartnerExportBatch implements ResourceInterface
     #[ORM\Column(type: 'text')]
     private string $content;
 
-    /** @var Collection<int, PartnerItem> */
-    #[ORM\OneToMany(mappedBy: 'exportBatch', targetEntity: PartnerItem::class)]
+    /** @var Collection<int, PartnerItem>&Selectable<int, PartnerItem> */
+    #[ORM\OneToMany(mappedBy: 'exportBatch', targetEntity: PartnerItem::class, fetch: 'EXTRA_LAZY')]
     private Collection $items;
 
     public function __construct(string $createdBy, int $itemCount, string $content)
@@ -81,6 +83,6 @@ class PartnerExportBatch implements ResourceInterface
 
     public function getPairedCount(): int
     {
-        return $this->items->filter(static fn (PartnerItem $item): bool => $item->getWorkflowState() === PartnerItem::STATE_PAIRED)->count();
+        return $this->items->matching(Criteria::create()->where(Criteria::expr()->eq('workflowState', PartnerItem::STATE_PAIRED)))->count();
     }
 }

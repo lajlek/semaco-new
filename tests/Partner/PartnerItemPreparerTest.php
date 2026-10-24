@@ -8,6 +8,7 @@ use App\Entity\Product\Product;
 use App\Entity\Product\ProductVariant;
 use App\Entity\Taxonomy\Taxon;
 use App\Partner\Entity\PartnerItem;
+use App\Partner\Repository\PartnerItemRepository;
 use App\Partner\Rules\PartnerRules;
 use App\Partner\Service\PartnerItemPreparer;
 use Doctrine\ORM\EntityManagerInterface;
@@ -35,6 +36,28 @@ final class PartnerItemPreparerTest extends TestCase
         self::assertSame('4,5', $first->getPreparedOptions()['option_group_3']['value']);
         self::assertTrue($first->canBeApproved());
         self::assertSame(PartnerItem::STATE_PAIRED, $known->getWorkflowState());
+    }
+
+    public function testApprovedItemReturnsToReviewWhenProposalChanges(): void
+    {
+        $first = $this->item('A8770100', 'End mill', ['d1' => '1', 'd2' => '4', 'l1' => '30', 'l2' => '1.5', 'z' => '3']);
+        $first->setOverrides(['product_name' => 'Fréza', 'taxon_code' => 'valcove']);
+        $preparer = $this->preparer([$first]);
+        $preparer->prepare('fraisa');
+        $first->approve('admin');
+
+        $preparer->prepare('fraisa');
+        self::assertSame(PartnerItem::STATE_READY, $first->getWorkflowState());
+
+        $second = $this->item('A8770101', 'End mill', ['d1' => '1', 'd2' => '6', 'l1' => '30', 'l2' => '1.5', 'z' => '3']);
+        $second->setOverrides(['product_name' => 'Fréza', 'taxon_code' => 'valcove']);
+        $this->preparer([$first, $second])->prepare('fraisa');
+
+        self::assertSame('Průměr 1 D2=4', $first->getPreparedName());
+        self::assertSame(PartnerItem::STATE_NEEDS_REVIEW, $first->getWorkflowState());
+        self::assertTrue($first->isChangedAfterApproval());
+        self::assertFalse($first->canBeApproved(false));
+        self::assertTrue($first->canBeApproved());
     }
 
     public function testNewFamilyWithoutSimilarFamilyNeedsReview(): void
@@ -75,8 +98,8 @@ final class PartnerItemPreparerTest extends TestCase
     /** @param list<PartnerItem> $items */
     private function preparer(array $items): PartnerItemPreparer
     {
-        $itemRepository = $this->createStub(RepositoryInterface::class);
-        $itemRepository->method('findBy')->willReturn($items);
+        $itemRepository = $this->createStub(PartnerItemRepository::class);
+        $itemRepository->method('findForPreparation')->willReturn($items);
         $optionRepository = $this->createStub(RepositoryInterface::class);
         $optionRepository->method('findAll')->willReturn([]);
 

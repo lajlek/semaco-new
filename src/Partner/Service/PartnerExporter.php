@@ -14,6 +14,7 @@ final readonly class PartnerExporter
     public function __construct(
         private EntityManagerInterface $entityManager,
         private PartnerItemPreparer $preparer,
+        private PartnerItemMatcher $matcher,
         private PartnerRules $rules,
     ) {
     }
@@ -21,12 +22,21 @@ final readonly class PartnerExporter
     /** @param iterable<PartnerItem> $items */
     public function export(iterable $items, string $createdBy): ?PartnerExportBatch
     {
-        $ready = [];
+        $selected = [];
+        $partners = [];
         foreach ($items as $item) {
             if ($item->getWorkflowState() === PartnerItem::STATE_READY) {
-                $ready[] = $item;
+                $this->matcher->match($item);
+                $selected[] = $item;
+                $partners[$item->getPartnerCode()] = true;
             }
         }
+        $this->entityManager->flush();
+        foreach (array_keys($partners) as $partnerCode) {
+            $this->preparer->prepare($partnerCode);
+        }
+
+        $ready = array_values(array_filter($selected, static fn (PartnerItem $item): bool => $item->isExportable()));
         if ($ready === []) {
             return null;
         }
@@ -66,7 +76,7 @@ final readonly class PartnerExporter
         foreach ($items as $item) {
             $product = $item->getProposedProduct();
             $options = $item->getPreparedOptions();
-            fputcsv($stream, [
+            fputcsv($stream, array_map(self::cell(...), [
                 $item->getOrderCode(),
                 $this->rules->get($item->getPartnerCode())->label,
                 $product?->getBrand()?->getName() ?? $this->rules->get($item->getPartnerCode())->brandName,
@@ -81,7 +91,7 @@ final readonly class PartnerExporter
                 $item->getCurrency() ?? '',
                 $item->getDetailUrl() ?? $item->getSourceUrl() ?? '',
                 ...array_map(static fn (string $code): string => $options[$code]['value'] ?? '', array_keys($optionCodes)),
-            ], ';', '"', '');
+            ]), ';', '"', '');
         }
 
         rewind($stream);
@@ -89,5 +99,10 @@ final readonly class PartnerExporter
         fclose($stream);
 
         return $content;
+    }
+
+    private static function cell(string $value): string
+    {
+        return preg_match('/^(?:[=@\t\r]|[+-][A-Za-z(])/', $value) === 1 ? "'" . $value : $value;
     }
 }

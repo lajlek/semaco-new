@@ -4,6 +4,7 @@ sylius_resource:
             driver: doctrine/orm
             classes:
                 model: App\Partner\Entity\PartnerItem
+                repository: App\Partner\Repository\PartnerItemRepository
         app.partner_export_batch:
             driver: doctrine/orm
             classes:

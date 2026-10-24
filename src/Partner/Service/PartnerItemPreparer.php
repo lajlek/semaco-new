@@ -7,6 +7,7 @@ namespace App\Partner\Service;
 use App\Entity\Product\Product;
 use App\Entity\Product\ProductVariant;
 use App\Partner\Entity\PartnerItem;
+use App\Partner\Repository\PartnerItemRepository;
 use App\Partner\Rules\PartnerRule;
 use App\Partner\Rules\PartnerRules;
 use Doctrine\ORM\EntityManagerInterface;
@@ -15,6 +16,9 @@ use Sylius\Component\Product\Model\ProductVariantInterface;
 use Sylius\Resource\Doctrine\Persistence\RepositoryInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
+/**
+ * @phpstan-type ItemPlan array{item: PartnerItem, matched: bool, name: ?string, templated: bool, productName: ?string, taxonCode: ?string, options: array<string, array{value: string, source: string}>, issues: list<array{code: string, message: string, blocking: bool}>}
+ */
 final class PartnerItemPreparer
 {
     public const SOURCE_PARTNER = 'partner';
@@ -26,13 +30,10 @@ final class PartnerItemPreparer
     /** @var array<string, string>|null */
     private ?array $optionNames = null;
 
-    /**
-     * @param RepositoryInterface<PartnerItem> $partnerItemRepository
-     * @param RepositoryInterface<ProductOptionInterface> $optionRepository
-     */
+    /** @param RepositoryInterface<ProductOptionInterface> $optionRepository */
     public function __construct(
         #[Autowire(service: 'app.repository.partner_item')]
-        private readonly RepositoryInterface $partnerItemRepository,
+        private readonly PartnerItemRepository $partnerItemRepository,
         #[Autowire(service: 'sylius.repository.product_option')]
         private readonly RepositoryInterface $optionRepository,
         private readonly PartnerRules $rules,
@@ -55,11 +56,11 @@ final class PartnerItemPreparer
         return $this->optionNames;
     }
 
-    public function prepare(string $partnerCode): int
+    public function prepare(string $partnerCode, ?string $onlyFamilyKey = null): int
     {
         $rule = $this->rules->get($partnerCode);
         $families = [];
-        foreach ($this->partnerItemRepository->findBy(['partnerCode' => $partnerCode]) as $item) {
+        foreach ($this->partnerItemRepository->findForPreparation($partnerCode) as $item) {
             $familyKey = $rule->familyKey($item->getOrderCode(), $item->getFamilyCode());
             $families[$familyKey ?? '#' . $item->getOrderCode()][] = $item;
         }
@@ -67,6 +68,10 @@ final class PartnerItemPreparer
         $knownFamilies = $this->knownFamilies($families);
         $count = 0;
         foreach ($families as $familyKey => $members) {
+            if ($onlyFamilyKey !== null && (string) $familyKey !== $onlyFamilyKey) {
+                continue;
+            }
+
             $products = [];
             foreach ($members as $member) {
                 $product = $member->getMatchedVariant()?->getProduct();
@@ -87,11 +92,29 @@ final class PartnerItemPreparer
                 : array_values($rule->options);
 
             $similar = $grouping === PartnerItem::GROUPING_NEW ? self::similarFamily($knownFamilies, (string) $members[0]->getName()) : null;
+            $plans = [];
             foreach ($members as $item) {
-                $this->prepareItem($item, $rule, str_starts_with((string) $familyKey, '#') ? null : (string) $familyKey, $grouping, $product, $familyValues, $required, $similar);
+                $plans[] = $this->planItem($item, $rule, $grouping, $familyValues, $required, $similar);
+            }
+            [$renamed, $duplicates] = $this->disambiguateNames($plans, $rule);
+
+            foreach ($plans as $index => $plan) {
+                $issues = $plan['issues'];
+                if (isset($duplicates[$index])) {
+                    $issues[] = self::issue('duplicate_name', sprintf('Název „%s“ má v rodině více variant, zadejte název ručně', $duplicates[$index]), true);
+                }
+                $plan['item']->applyPreparation(
+                    str_starts_with((string) $familyKey, '#') ? null : (string) $familyKey,
+                    $grouping,
+                    $product,
+                    $renamed[$index] ?? $plan['name'],
+                    $plan['productName'],
+                    $plan['taxonCode'],
+                    $plan['options'],
+                    $issues,
+                );
                 ++$count;
             }
-            $this->disambiguateNames($members, $rule);
         }
         $this->entityManager->flush();
 
@@ -102,8 +125,10 @@ final class PartnerItemPreparer
      * @param array<string, string> $familyValues
      * @param list<string> $required
      * @param array{name: string, product_name: string, taxon_code: ?string}|null $similar
+     *
+     * @return ItemPlan
      */
-    private function prepareItem(PartnerItem $item, PartnerRule $rule, ?string $familyKey, string $grouping, ?Product $product, array $familyValues, array $required, ?array $similar): void
+    private function planItem(PartnerItem $item, PartnerRule $rule, string $grouping, array $familyValues, array $required, ?array $similar): array
     {
         $overrides = $item->getOverrides();
         $source = $rule->sourceValues([...$item->getParameters(), ...$item->getDetailParameters()]);
@@ -129,7 +154,8 @@ final class PartnerItemPreparer
         $taxonCode = null;
         $names = $this->optionNames();
         $matchedVariant = $item->getMatchedVariant();
-        if ($item->getMatchStatus() === PartnerItem::MATCH_MATCHED && $matchedVariant instanceof ProductVariant) {
+        $matched = $item->getMatchStatus() === PartnerItem::MATCH_MATCHED;
+        if ($matched && $matchedVariant instanceof ProductVariant) {
             $actual = $this->variantOptionValues($matchedVariant);
             foreach ($options as $code => $option) {
                 if ($option['source'] === self::SOURCE_PARTNER && isset($actual[$code]) && !self::sameValue($option['value'], $actual[$code])) {
@@ -167,7 +193,8 @@ final class PartnerItemPreparer
         }
 
         $name = trim($overrides['name'] ?? '');
-        if ($name === '') {
+        $templated = $name === '';
+        if ($templated) {
             $name = (string) preg_replace_callback(
                 '/\{(\w+)\}/',
                 static fn (array $match): string => $options[$match[1]]['value'] ?? '{?}',
@@ -175,32 +202,47 @@ final class PartnerItemPreparer
             );
         }
         if (str_contains($name, '{?}')) {
-            $issues[] = self::issue('missing', 'Název varianty nelze sestavit, chybí parametr', $item->getMatchStatus() !== PartnerItem::MATCH_MATCHED);
+            $issues[] = self::issue('missing', 'Název varianty nelze sestavit, chybí parametr', !$matched);
             $name = null;
         }
 
-        $item->applyPreparation($familyKey, $grouping, $product, $name, $productName, $taxonCode, $options, $issues);
+        return [
+            'item' => $item,
+            'matched' => $matched,
+            'name' => $name,
+            'templated' => $templated,
+            'productName' => $productName,
+            'taxonCode' => $taxonCode,
+            'options' => $options,
+            'issues' => $issues,
+        ];
     }
 
-    /** @param list<PartnerItem> $members */
-    private function disambiguateNames(array $members, PartnerRule $rule): void
+    /**
+     * @param list<ItemPlan> $plans
+     *
+     * @return array{array<int, string>, array<int, string>} new names and unresolved duplicate names by plan index
+     */
+    private function disambiguateNames(array $plans, PartnerRule $rule): array
     {
         $byName = [];
-        foreach ($members as $item) {
-            if ($item->getMatchStatus() !== PartnerItem::MATCH_MATCHED && $item->getPreparedName() !== null && !isset($item->getOverrides()['name'])) {
-                $byName[$item->getPreparedName()][] = $item;
+        foreach ($plans as $index => $plan) {
+            if (!$plan['matched'] && $plan['templated'] && $plan['name'] !== null) {
+                $byName[$plan['name']][] = $index;
             }
         }
 
-        foreach ($byName as $name => $duplicates) {
-            if (count($duplicates) < 2) {
+        $renamed = [];
+        $duplicates = [];
+        foreach ($byName as $name => $indexes) {
+            if (count($indexes) < 2) {
                 continue;
             }
 
+            $names = array_fill(0, count($indexes), (string) $name);
             $resolved = false;
-            $names = array_fill(0, count($duplicates), $name);
             foreach ($rule->options as $parameter => $code) {
-                $values = array_map(static fn (PartnerItem $item): string => $item->getPreparedOptions()[$code]['value'] ?? '', $duplicates);
+                $values = array_map(static fn (int $index): string => $plans[$index]['options'][$code]['value'] ?? '', $indexes);
                 if (in_array('', $values, true) || count(array_unique($values)) === 1) {
                     continue;
                 }
@@ -212,21 +254,22 @@ final class PartnerItemPreparer
                 }
                 $names = $candidate;
                 if (count(array_unique($names)) === count($names)) {
-                    foreach ($duplicates as $index => $item) {
-                        $item->renamePrepared($names[$index]);
-                    }
                     $resolved = true;
 
                     break;
                 }
             }
 
-            if (!$resolved) {
-                foreach ($duplicates as $item) {
-                    $item->addIssue(self::issue('duplicate_name', sprintf('Název „%s“ má v rodině více variant, zadejte název ručně', $name), true));
+            foreach ($indexes as $position => $index) {
+                if ($resolved) {
+                    $renamed[$index] = $names[$position];
+                } else {
+                    $duplicates[$index] = (string) $name;
                 }
             }
         }
+
+        return [$renamed, $duplicates];
     }
 
     /**

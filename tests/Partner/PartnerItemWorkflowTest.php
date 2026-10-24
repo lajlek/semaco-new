@@ -51,9 +51,37 @@ final class PartnerItemWorkflowTest extends TestCase
         self::assertSame(PartnerItem::STATE_NEEDS_REVIEW, $item->getWorkflowState());
         self::assertSame(PartnerItem::ISSUE_CHANGED, $item->getIssues()[0]['code']);
         self::assertTrue($item->canBeApproved());
+        self::assertFalse($item->canBeApproved(false));
+        self::assertFalse($item->isExportable());
 
         $item->approve('admin');
         self::assertSame([], $item->getIssues());
+    }
+
+    public function testApprovalIgnoresStoredKeyOrder(): void
+    {
+        $options = ['option_group_3' => ['value' => '4,5', 'source' => 'partner'], 'option_group_1' => ['value' => '3', 'source' => 'partner']];
+        $item = $this->item('a');
+        $item->applyPreparation('F', PartnerItem::GROUPING_NEW, null, 'Průměr 3', 'Fréza', 'valcove', $options, []);
+        $item->approve('admin');
+
+        $item->applyPreparation('F', PartnerItem::GROUPING_NEW, null, 'Průměr 3', 'Fréza', 'valcove', array_reverse($options, true), []);
+
+        self::assertSame(PartnerItem::STATE_READY, $item->getWorkflowState());
+        self::assertTrue($item->isExportable());
+    }
+
+    public function testReadyItemWithNewBlockingIssueIsNotExportable(): void
+    {
+        $item = $this->item('a');
+        $item->applyPreparation('F', PartnerItem::GROUPING_NEW, null, 'Průměr 3', 'Fréza', 'valcove', [], []);
+        $item->approve('admin');
+        self::assertTrue($item->isExportable());
+
+        $item->applyPreparation('F', PartnerItem::GROUPING_AMBIGUOUS, null, 'Průměr 3', null, null, [], [self::issue(true)]);
+
+        self::assertSame(PartnerItem::STATE_NEEDS_REVIEW, $item->getWorkflowState());
+        self::assertFalse($item->isExportable());
     }
 
     public function testExistingItemIsPaired(): void

@@ -78,7 +78,7 @@ final class PartnerDetailFetcherTest extends TestCase
     {
         $repository = $this->createStub(RepositoryInterface::class);
         $repository->method('findBy')->willReturn($items);
-        $pageFetcher = new PolitePageFetcher($client, 'test-agent', 0.0, sys_get_temp_dir() . '/partner-detail-test', new ArrayAdapter());
+        $pageFetcher = new PolitePageFetcher($client, new PartnerRules(), 'test-agent', 0.0, 6, sys_get_temp_dir() . '/partner-detail-test', new ArrayAdapter());
 
         return new PartnerDetailFetcher($repository, $this->createStub(EntityManagerInterface::class), new PartnerParserRegistry([new BrwFamilyParser()]), new PartnerRules(), $pageFetcher);
     }

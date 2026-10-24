@@ -17,3 +17,4 @@ services:
             - '../../src/Partner/Dto/'
             - '../../src/Partner/Fetch/RobotsPolicy.php'
             - '../../src/Partner/Rules/PartnerRule.php'
+            - '../../src/Partner/Repository/'

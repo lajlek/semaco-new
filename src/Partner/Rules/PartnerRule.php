@@ -53,6 +53,28 @@ final readonly class PartnerRule
         return $parameters;
     }
 
+    public static function comparableUrl(string $url): string
+    {
+        $parts = parse_url(trim($url));
+        if ($parts === false) {
+            return trim($url);
+        }
+
+        parse_str($parts['query'] ?? '', $query);
+        if (($query['page'] ?? null) === '1') {
+            unset($query['page']);
+        }
+        ksort($query);
+
+        return sprintf(
+            '%s://%s%s%s',
+            strtolower($parts['scheme'] ?? 'https'),
+            strtolower($parts['host'] ?? ''),
+            rtrim($parts['path'] ?? '', '/'),
+            $query === [] ? '' : '?' . http_build_query($query),
+        );
+    }
+
     public function isAllowedUrl(string $url): bool
     {
         $scheme = parse_url($url, \PHP_URL_SCHEME);

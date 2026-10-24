@@ -14,6 +14,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Lock\LockFactory;
 
 #[AsCommand(name: 'app:partners:fetch', description: 'Ohleduplně načte výpis partnera (robots.txt, rozestup požadavků) a uloží položky.')]
 final class FetchPartnerListingCommand extends Command
@@ -21,6 +22,7 @@ final class FetchPartnerListingCommand extends Command
     public function __construct(
         private readonly PartnerListingCrawler $crawler,
         private readonly PartnerItemPreparer $preparer,
+        private readonly LockFactory $lockFactory,
     ) {
         parent::__construct();
     }
@@ -46,6 +48,13 @@ final class FetchPartnerListingCommand extends Command
         $maxPages = max(1, is_numeric($maxPagesOption) ? (int) $maxPagesOption : 1);
         $dryRun = (bool) $input->getOption('dry-run');
 
+        $lock = $this->lockFactory->createLock('app-partner-fetch', null);
+        if (!$lock->acquire()) {
+            $io->error('Jiné načítání partnera právě běží, zkus to později.');
+
+            return Command::FAILURE;
+        }
+
         try {
             $result = $this->crawler->crawl(
                 $partner,
@@ -55,9 +64,11 @@ final class FetchPartnerListingCommand extends Command
                 static fn (string $url, int $count, array $summary) => $io->writeln(sprintf('%s: %d položek (nové %d, změněné %d)', $url, $count, $summary['created'], $summary['changed'])),
             );
         } catch (FetchForbiddenException $exception) {
-            $io->error($exception->getMessage() . ' Použij app:partners:import-html.');
+            $io->error($exception->getMessage());
 
             return Command::FAILURE;
+        } finally {
+            $lock->release();
         }
 
         if ($result['stopped'] !== null) {
