@@ -1,13 +1,28 @@
 {% set resources = hookable_metadata.context.resources %}
+{% set list_layout = app.request.hasPreviousSession and app.session.get('product_list_type') == 'list' %}
 
 {% if resources.data|length > 0 %}
-    <div class="row cols-2 cols-sm-3 cols-md-4 product-wrapper equal-height" id="products">
-        {% for product in resources.data %}
-            <div class="product-wrap">
-                {% include 'shop/product/common/card.html.twig' with { product } %}
-            </div>
-        {% endfor %}
+    <div class="row text-right mb-3">
+        <div class="toolbox-layout justify-content-end">
+            <a href="{{ path('app_shop_set_product_list_type', {type: 'list', return: app.request.requestUri}) }}" class="d-icon-mode-list btn-layout{{ list_layout ? ' active' }}" aria-label="{{ 'app.shop.listing.layout_list'|trans }}"{% if list_layout %} aria-current="true"{% endif %}></a>
+            <a href="{{ path('app_shop_set_product_list_type', {type: 'modern', return: app.request.requestUri}) }}" class="d-icon-mode-grid btn-layout{{ list_layout ? '' : ' active' }}" aria-label="{{ 'app.shop.listing.layout_grid'|trans }}"{% if not list_layout %} aria-current="true"{% endif %}></a>
+        </div>
     </div>
+    {% if list_layout %}
+        <div class="row product-lists product-wrapper" id="products">
+            {% for product in resources.data %}
+                {% include 'shop/product/common/card_list.html.twig' with { product } %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="row cols-2 cols-sm-3 cols-md-4 product-wrapper equal-height" id="products">
+            {% for product in resources.data %}
+                <div class="product-wrap">
+                    {% include 'shop/product/common/card.html.twig' with { product } %}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
 {% else %}
     <p class="mt-4">{{ 'app.shop.listing.no_results'|trans }}</p>
 {% endif %}

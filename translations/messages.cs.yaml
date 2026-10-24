@@ -79,6 +79,9 @@ app:
             previous: 'Předchozí'
             next: 'Následující'
             no_results: 'V této kategorii nejsou žádné produkty.'
+            layout_list: 'Zobrazit jako seznam'
+            layout_grid: 'Zobrazit jako mřížku'
+            level_up: 'Úroveň nahoru'
             sort:
                 newest: 'Nejnovější'
                 oldest: 'Nejstarší'
