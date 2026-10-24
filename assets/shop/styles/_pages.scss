@@ -436,3 +436,15 @@
 .latest-products-title {
     font-size: 3rem;
 }
+
+@media (max-width: 575px) {
+    .product-lists .product-list {
+        flex-wrap: wrap;
+
+        .product-media {
+            flex: 0 0 100%;
+            max-width: 100%;
+            margin: 0 0 1rem;
+        }
+    }
+}
