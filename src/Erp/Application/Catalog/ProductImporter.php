@@ -172,11 +172,19 @@ final class ProductImporter
         $product->setCurrentLocale($this->localeCode);
         $product->setFallbackLocale($this->localeCode);
         $product->setEnabled($snapshot->enabled);
-        $product->setName($snapshot->name);
-        $product->setDescription($snapshot->description);
-        $product->setShortDescription($snapshot->shortDescription);
-        $product->setMetaKeywords($snapshot->metaKeywords);
-        $product->setMetaDescription($snapshot->metaDescription);
+        if (!$product->isErpFieldLocked(Product::ERP_FIELD_NAME)) {
+            $product->setName($snapshot->name);
+        }
+        if (!$product->isErpFieldLocked(Product::ERP_FIELD_DESCRIPTION)) {
+            $product->setDescription($snapshot->description);
+        }
+        if (!$product->isErpFieldLocked(Product::ERP_FIELD_SHORT_DESCRIPTION)) {
+            $product->setShortDescription($snapshot->shortDescription);
+        }
+        if (!$product->isErpFieldLocked(Product::ERP_FIELD_META)) {
+            $product->setMetaKeywords($snapshot->metaKeywords);
+            $product->setMetaDescription($snapshot->metaDescription);
+        }
         $product->setSkupzbo($snapshot->skupzbo);
         $product->setQuantityStep($snapshot->quantityStep);
         $product->setMinimumQuantity($snapshot->minimumQuantity);
@@ -187,8 +195,12 @@ final class ProductImporter
             $product->addChannel($channel);
         }
 
-        $this->applyTaxons($product, $snapshot);
-        $this->applyAttributes($product, $snapshot);
+        if (!$product->isErpFieldLocked(Product::ERP_FIELD_TAXONS)) {
+            $this->applyTaxons($product, $snapshot);
+        }
+        if (!$product->isErpFieldLocked(Product::ERP_FIELD_ATTRIBUTES)) {
+            $this->applyAttributes($product, $snapshot);
+        }
         $this->applyOptions($product, $snapshot);
     }
 

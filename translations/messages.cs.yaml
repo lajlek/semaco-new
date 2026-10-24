@@ -1,4 +1,15 @@
 app:
+    admin:
+        product:
+            erp_lock:
+                label: 'Spravováno v e-shopu (synchronizace z Heliosu nepřepisuje)'
+                help: 'Pole upravené v administraci se zaškrtne samo. Odškrtnutím vrátíte správu Heliosu, přepíše ho další synchronizace.'
+                name: 'Název'
+                description: 'Popis'
+                short_description: 'Krátký popis'
+                meta: 'SEO klíčová slova a popis'
+                taxons: 'Kategorie'
+                attributes: 'Parametry'
     shop:
         checkout:
             steps: 'Kroky objednávky'

@@ -1,0 +1,7 @@
+{% set form = hookable_metadata.context.form %}
+
+{% if form.erpLockedFields is defined %}
+    <div class="mb-3">
+        {{ form_row(form.erpLockedFields) }}
+    </div>
+{% endif %}

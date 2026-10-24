@@ -15,6 +15,27 @@ use Sylius\Component\Product\Model\ProductTranslationInterface;
 #[ORM\Index(name: 'IDX_product_external_id', columns: ['external_identifier'])]
 class Product extends BaseProduct
 {
+    public const ERP_FIELD_NAME = 'name';
+
+    public const ERP_FIELD_DESCRIPTION = 'description';
+
+    public const ERP_FIELD_SHORT_DESCRIPTION = 'short_description';
+
+    public const ERP_FIELD_META = 'meta';
+
+    public const ERP_FIELD_TAXONS = 'taxons';
+
+    public const ERP_FIELD_ATTRIBUTES = 'attributes';
+
+    public const ERP_FIELDS = [
+        self::ERP_FIELD_NAME,
+        self::ERP_FIELD_DESCRIPTION,
+        self::ERP_FIELD_SHORT_DESCRIPTION,
+        self::ERP_FIELD_META,
+        self::ERP_FIELD_TAXONS,
+        self::ERP_FIELD_ATTRIBUTES,
+    ];
+
     #[ORM\Column(name: 'external_identifier', type: 'string', length: 128, nullable: true)]
     private ?string $externalIdentifier = null;
 
@@ -29,6 +50,10 @@ class Product extends BaseProduct
 
     #[ORM\Column(name: 'sync_with_erp', type: 'boolean', options: ['default' => true])]
     private bool $syncWithErp = true;
+
+    /** @var list<string>|null */
+    #[ORM\Column(name: 'erp_locked_fields', type: 'json', nullable: true)]
+    private ?array $erpLockedFields = null;
 
     #[ORM\ManyToOne(targetEntity: Brand::class)]
     #[ORM\JoinColumn(name: 'brand_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
@@ -93,6 +118,24 @@ class Product extends BaseProduct
     public function setSyncWithErp(bool $syncWithErp): void
     {
         $this->syncWithErp = $syncWithErp;
+    }
+
+    /** @return list<string> */
+    public function getErpLockedFields(): array
+    {
+        return $this->erpLockedFields ?? [];
+    }
+
+    /** @param iterable<string> $fields */
+    public function setErpLockedFields(iterable $fields): void
+    {
+        $locked = array_values(array_intersect(self::ERP_FIELDS, [...$fields]));
+        $this->erpLockedFields = $locked === [] ? null : $locked;
+    }
+
+    public function isErpFieldLocked(string $field): bool
+    {
+        return in_array($field, $this->getErpLockedFields(), true);
     }
 
     public function getBrand(): ?Brand
