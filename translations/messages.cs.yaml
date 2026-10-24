@@ -123,3 +123,7 @@ app:
         partner_items: 'Partnerský sortiment'
         partner_export_batch: 'Exportní dávka'
         partner_export_batches: 'Exportní dávky pro Helios'
+
+sylius:
+    ui:
+        info: 'Informace'
