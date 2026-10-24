@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Admin\Product;
 
 use App\Entity\Product\Product;
-use Sylius\Component\Product\Model\ProductTranslationInterface;
+use Sylius\Component\Core\Model\ProductTranslationInterface;
 
 final class ProductContentFingerprint
 {
@@ -33,15 +33,15 @@ final class ProductContentFingerprint
 
         $attributes = [];
         foreach ($product->getAttributes() as $attributeValue) {
-            if ($attributeValue->getValue() === null) {
+            $code = (string) $attributeValue->getAttribute()?->getCode();
+            $value = $attributeValue->getValue();
+            if ($value === null || !str_starts_with($code, 'attr_group_')) {
                 continue;
             }
-            $attributes[] = sprintf(
-                '%s|%s|%s',
-                (string) $attributeValue->getAttribute()?->getCode(),
-                (string) $attributeValue->getLocaleCode(),
-                json_encode($attributeValue->getValue()),
-            );
+            if (is_array($value)) {
+                sort($value);
+            }
+            $attributes[] = sprintf('%s|%s|%s', $code, (string) $attributeValue->getLocaleCode(), json_encode($value));
         }
         sort($attributes);
 
@@ -63,11 +63,11 @@ final class ProductContentFingerprint
      */
     public static function changedFields(array $before, array $after): array
     {
-        return array_values(array_keys(array_filter(
+        return array_keys(array_filter(
             $after,
             static fn (string $value, string $field): bool => ($before[$field] ?? null) !== $value,
             \ARRAY_FILTER_USE_BOTH,
-        )));
+        ));
     }
 
     private static function normalize(?string $value): string
