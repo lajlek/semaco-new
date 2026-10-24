@@ -437,7 +437,7 @@ class PartnerItem implements ResourceInterface
         } elseif (self::blocking($issues)) {
             $this->workflowState = self::STATE_NEEDS_REVIEW;
         } elseif ($this->workflowState !== self::STATE_READY) {
-            $this->workflowState = self::STATE_NEW;
+            $this->workflowState = $this->approvedHash === $this->fingerprint() ? self::STATE_READY : self::STATE_NEW;
         }
     }
 

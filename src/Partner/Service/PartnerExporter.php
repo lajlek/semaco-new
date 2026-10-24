@@ -6,8 +6,10 @@ namespace App\Partner\Service;
 
 use App\Partner\Entity\PartnerExportBatch;
 use App\Partner\Entity\PartnerItem;
+use App\Partner\Repository\PartnerItemRepository;
 use App\Partner\Rules\PartnerRules;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final readonly class PartnerExporter
 {
@@ -16,6 +18,8 @@ final readonly class PartnerExporter
         private PartnerItemPreparer $preparer,
         private PartnerItemMatcher $matcher,
         private PartnerRules $rules,
+        #[Autowire(service: 'app.repository.partner_item')]
+        private PartnerItemRepository $itemRepository,
     ) {
     }
 
@@ -26,10 +30,20 @@ final readonly class PartnerExporter
         $partners = [];
         foreach ($items as $item) {
             if ($item->getWorkflowState() === PartnerItem::STATE_READY) {
-                $this->matcher->match($item);
                 $selected[] = $item;
-                $partners[$item->getPartnerCode()] = true;
+                $partners[$item->getPartnerCode()][(string) $item->getFamilyKey()] = true;
             }
+        }
+        $toMatch = $selected;
+        foreach ($partners as $partnerCode => $families) {
+            foreach ($this->itemRepository->findBy(['partnerCode' => $partnerCode, 'familyKey' => array_keys($families)]) as $sibling) {
+                if ($sibling instanceof PartnerItem) {
+                    $toMatch[] = $sibling;
+                }
+            }
+        }
+        foreach ($toMatch as $item) {
+            $this->matcher->match($item);
         }
         $this->entityManager->flush();
         foreach (array_keys($partners) as $partnerCode) {
@@ -101,8 +115,10 @@ final readonly class PartnerExporter
         return $content;
     }
 
-    private static function cell(string $value): string
+    public static function cell(string $value): string
     {
-        return preg_match('/^(?:[=@\t\r]|[+-][A-Za-z(])/', $value) === 1 ? "'" . $value : $value;
+        $harmless = preg_match('#^(?:[+-]?\d+(?:[.,]\d+)?|\+/-\s?\d+(?:[.,]\d+)?)$#', $value) === 1;
+
+        return !$harmless && preg_match('/^[=+\-@\t\r]/', $value) === 1 ? "'" . $value : $value;
     }
 }

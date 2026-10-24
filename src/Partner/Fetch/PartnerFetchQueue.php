@@ -9,6 +9,7 @@ use App\Partner\Rules\PartnerRule;
 use App\Partner\Rules\PartnerRules;
 use App\Partner\Service\PartnerItemPreparer;
 use App\Partner\Service\PartnerParserRegistry;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\EntityManagerInterface;
 use Sylius\Resource\Doctrine\Persistence\RepositoryInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -86,8 +87,9 @@ final readonly class PartnerFetchQueue
     public function cancel(int $id): bool
     {
         return $this->entityManager->getConnection()->executeStatement(
-            'UPDATE app_partner_fetch_run SET status = :cancelled, finished_at = NOW() WHERE id = :id AND status = :queued',
-            ['cancelled' => PartnerFetchRun::STATUS_CANCELLED, 'id' => $id, 'queued' => PartnerFetchRun::STATUS_QUEUED],
+            'UPDATE app_partner_fetch_run SET status = :cancelled, finished_at = :now WHERE id = :id AND status = :queued',
+            ['cancelled' => PartnerFetchRun::STATUS_CANCELLED, 'now' => new \DateTimeImmutable(), 'id' => $id, 'queued' => PartnerFetchRun::STATUS_QUEUED],
+            ['now' => Types::DATETIME_IMMUTABLE],
         ) === 1;
     }
 
@@ -101,8 +103,9 @@ final readonly class PartnerFetchQueue
         try {
             $connection = $this->entityManager->getConnection();
             $connection->executeStatement(
-                'UPDATE app_partner_fetch_run SET status = :failed, finished_at = NOW(), message = :message WHERE status = :running',
-                ['failed' => PartnerFetchRun::STATUS_FAILED, 'message' => 'Běh byl přerušen (restart nebo chyba workeru)', 'running' => PartnerFetchRun::STATUS_RUNNING],
+                'UPDATE app_partner_fetch_run SET status = :failed, finished_at = :now, message = :message WHERE status = :running',
+                ['failed' => PartnerFetchRun::STATUS_FAILED, 'now' => new \DateTimeImmutable(), 'message' => 'Běh byl přerušen (restart nebo chyba workeru)', 'running' => PartnerFetchRun::STATUS_RUNNING],
+                ['now' => Types::DATETIME_IMMUTABLE],
             );
 
             $run = $this->runRepository->findBy(['status' => PartnerFetchRun::STATUS_QUEUED], ['requestedAt' => 'ASC'], 1)[0] ?? null;
@@ -110,8 +113,9 @@ final readonly class PartnerFetchQueue
                 return null;
             }
             $started = $connection->executeStatement(
-                'UPDATE app_partner_fetch_run SET status = :running, started_at = NOW() WHERE id = :id AND status = :queued',
-                ['running' => PartnerFetchRun::STATUS_RUNNING, 'id' => $run->getId(), 'queued' => PartnerFetchRun::STATUS_QUEUED],
+                'UPDATE app_partner_fetch_run SET status = :running, started_at = :now WHERE id = :id AND status = :queued',
+                ['running' => PartnerFetchRun::STATUS_RUNNING, 'now' => new \DateTimeImmutable(), 'id' => $run->getId(), 'queued' => PartnerFetchRun::STATUS_QUEUED],
+                ['now' => Types::DATETIME_IMMUTABLE],
             );
             $this->entityManager->refresh($run);
             if ($started !== 1) {
@@ -146,8 +150,9 @@ final readonly class PartnerFetchQueue
                     $this->entityManager->flush();
                 } else {
                     $connection->executeStatement(
-                        'UPDATE app_partner_fetch_run SET status = :failed, finished_at = NOW(), message = :message WHERE id = :id',
-                        ['failed' => PartnerFetchRun::STATUS_FAILED, 'message' => $message, 'id' => $run->getId()],
+                        'UPDATE app_partner_fetch_run SET status = :failed, finished_at = :now, message = :message WHERE id = :id',
+                        ['failed' => PartnerFetchRun::STATUS_FAILED, 'now' => new \DateTimeImmutable(), 'message' => $message, 'id' => $run->getId()],
+                        ['now' => Types::DATETIME_IMMUTABLE],
                     );
                 }
             }

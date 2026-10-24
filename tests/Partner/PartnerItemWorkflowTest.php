@@ -84,6 +84,19 @@ final class PartnerItemWorkflowTest extends TestCase
         self::assertFalse($item->isExportable());
     }
 
+    public function testApprovalIsRestoredWhenTransientIssueClears(): void
+    {
+        $item = $this->item('a');
+        $item->applyPreparation('F', PartnerItem::GROUPING_NEW, null, 'Průměr 3', 'Fréza', 'valcove', [], []);
+        $item->approve('admin');
+
+        $item->applyPreparation('F', PartnerItem::GROUPING_NEW, null, 'Průměr 3', 'Fréza', 'valcove', [], [self::issue(true)]);
+        self::assertSame(PartnerItem::STATE_NEEDS_REVIEW, $item->getWorkflowState());
+
+        $item->applyPreparation('F', PartnerItem::GROUPING_NEW, null, 'Průměr 3', 'Fréza', 'valcove', [], []);
+        self::assertSame(PartnerItem::STATE_READY, $item->getWorkflowState());
+    }
+
     public function testExistingItemIsPaired(): void
     {
         $item = $this->item('a');

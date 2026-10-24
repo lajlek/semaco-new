@@ -77,9 +77,12 @@ final readonly class PartnerRule
 
     public function isAllowedUrl(string $url): bool
     {
-        $scheme = parse_url($url, \PHP_URL_SCHEME);
-        $host = parse_url($url, \PHP_URL_HOST);
+        $parts = parse_url($url);
 
-        return $scheme === 'https' && is_string($host) && in_array(strtolower($host), $this->allowedHosts, true);
+        return is_array($parts) &&
+            ($parts['scheme'] ?? null) === 'https' &&
+            in_array($parts['port'] ?? 443, [443], true) &&
+            !isset($parts['user']) &&
+            in_array(strtolower($parts['host'] ?? ''), $this->allowedHosts, true);
     }
 }

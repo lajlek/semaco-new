@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Partner;
 
 use App\Partner\Fetch\FetchForbiddenException;
+use App\Partner\Fetch\PageGoneException;
 use App\Partner\Fetch\PolitePageFetcher;
 use App\Partner\Rules\PartnerRules;
 use PHPUnit\Framework\TestCase;
@@ -61,6 +62,56 @@ final class PolitePageFetcherTest extends TestCase
         self::assertNotNull($fetcher->backoffUntil('www.brw.ch'));
         $this->expectException(FetchForbiddenException::class);
         $fetcher->fetch('https://www.brw.ch/de-CH/b', 'brw');
+    }
+
+    public function testMissingPageIsReportedWithoutBackoff(): void
+    {
+        $fetcher = $this->fetcher(static fn (string $url): MockResponse => str_ends_with($url, '/robots.txt')
+            ? new MockResponse('')
+            : new MockResponse('', ['http_code' => 404]));
+
+        try {
+            $fetcher->fetch('https://www.brw.ch/de-CH/gone', 'brw');
+            self::fail('404 should be reported');
+        } catch (PageGoneException) {
+        }
+        self::assertNull($fetcher->backoffUntil('www.brw.ch'));
+    }
+
+    public function testForbiddenPageBacksOff(): void
+    {
+        $fetcher = $this->fetcher(static fn (string $url): MockResponse => str_ends_with($url, '/robots.txt')
+            ? new MockResponse('')
+            : new MockResponse('', ['http_code' => 403]));
+
+        try {
+            $fetcher->fetch('https://www.brw.ch/de-CH/a', 'brw');
+            self::fail('403 should stop fetching');
+        } catch (FetchForbiddenException $exception) {
+            self::assertNotInstanceOf(PageGoneException::class, $exception);
+        }
+        self::assertNotNull($fetcher->backoffUntil('www.brw.ch'));
+    }
+
+    public function testRobotsRedirectOnSameHostIsFollowed(): void
+    {
+        $fetcher = $this->fetcher(static fn (string $url): MockResponse => match ($url) {
+            'https://www.brw.ch/robots.txt' => new MockResponse('', ['http_code' => 301, 'response_headers' => ['Location' => '/robots-de.txt']]),
+            'https://www.brw.ch/robots-de.txt' => new MockResponse("User-agent: *\nDisallow: /private/"),
+            default => new MockResponse('page'),
+        });
+
+        self::assertSame('page', $fetcher->fetch('https://www.brw.ch/de-CH/a', 'brw'));
+        $this->expectException(FetchForbiddenException::class);
+        $fetcher->fetch('https://www.brw.ch/private/x', 'brw');
+    }
+
+    public function testRobotsRedirectToAnotherHostStops(): void
+    {
+        $fetcher = $this->fetcher(static fn (): MockResponse => new MockResponse('', ['http_code' => 301, 'response_headers' => ['Location' => 'https://cdn.example.com/robots.txt']]));
+
+        $this->expectException(FetchForbiddenException::class);
+        $fetcher->fetch('https://www.brw.ch/de-CH/a', 'brw');
     }
 
     /** @param \Closure(string): MockResponse $responder */

@@ -21,7 +21,9 @@ final class PolitePageFetcher
 
     private const MAX_BODY_BYTES = 15 * 1024 * 1024;
 
-    /** @var array<string, RobotsPolicy> */
+    private const ROBOTS_TTL_SECONDS = 86400;
+
+    /** @var array<string, array{policy: RobotsPolicy, loadedAt: int}> */
     private array $robots = [];
 
     /** @var array<string, float> */
@@ -48,41 +50,37 @@ final class PolitePageFetcher
     {
         for ($redirects = 0; ; ++$redirects) {
             $host = $this->assertAllowed($url, $partnerCode);
-            $policy = $this->robotsFor($url, $host);
+            $policy = $this->robotsFor($host);
             if (!$policy->isAllowed($url)) {
                 throw new FetchForbiddenException(sprintf('robots.txt zakazuje %s', $url));
             }
 
-            $this->waitForTurn($host, $policy);
-
-            try {
-                $response = $this->request($url, 60);
-                $status = $response->getStatusCode();
-                if ($status === 429 || $status === 503) {
-                    $this->backOff($host, $status);
+            $result = $this->exchange($host, $url, $policy, 60);
+            $status = $result['status'];
+            if ($status === 429 || $status === 403 || $status >= 500) {
+                $this->backOff($host, $status);
+            }
+            if ($status >= 300 && $status < 400) {
+                if ($result['location'] === null || $redirects >= self::MAX_REDIRECTS) {
+                    throw new FetchForbiddenException(sprintf('%s přesměrovává (%d), nepokračuji', $url, $status));
                 }
+                $url = $result['location'];
 
-                if ($status >= 300 && $status < 400) {
-                    $location = HtmlDocument::absoluteUrl($response->getHeaders(false)['location'][0] ?? null, $url);
-                    if ($location === null || $redirects >= self::MAX_REDIRECTS) {
-                        throw new FetchForbiddenException(sprintf('%s přesměrovává (%d), nepokračuji', $url, $status));
-                    }
-                    $url = $location;
-
-                    continue;
-                }
-
-                $content = $response->getContent();
-            } catch (TransportExceptionInterface $exception) {
-                throw new FetchForbiddenException(sprintf('Spojení s %s selhalo (%s), nepokračuji', $host, $exception->getMessage()));
+                continue;
+            }
+            if ($status === 404 || $status === 410) {
+                throw new PageGoneException(sprintf('%s neexistuje (%d)', $url, $status));
+            }
+            if ($status >= 400) {
+                throw new FetchForbiddenException(sprintf('%s odpověděl %d, nepokračuji', $url, $status));
             }
 
             $this->filesystem->dumpFile(
                 sprintf('%s/%s/%s-%s.html', $this->snapshotDirectory, $partnerCode, date('Ymd\THis'), substr(sha1($url), 0, 12)),
-                '<!-- ' . str_replace('--', '', $url) . " -->\n" . $content,
+                '<!-- ' . str_replace('--', '', $url) . " -->\n" . $result['body'],
             );
 
-            return $content;
+            return $result['body'];
         }
     }
 
@@ -134,36 +132,73 @@ final class PolitePageFetcher
         ]);
     }
 
-    private function robotsFor(string $url, string $host): RobotsPolicy
+    private function robotsFor(string $host): RobotsPolicy
     {
-        if (isset($this->robots[$host])) {
-            return $this->robots[$host];
+        $memo = $this->robots[$host] ?? null;
+        if ($memo !== null && $memo['loadedAt'] > time() - self::ROBOTS_TTL_SECONDS) {
+            return $memo['policy'];
         }
 
         $cached = $this->cache->getItem('partner_robots_' . md5($host));
         if ($cached->isHit() && is_string($cached->get())) {
-            return $this->robots[$host] = $this->checkedPolicy(RobotsPolicy::parse($cached->get()), $host);
+            $content = $cached->get();
+        } else {
+            $url = sprintf('https://%s/robots.txt', $host);
+            for ($redirects = 0; ; ++$redirects) {
+                $result = $this->exchange($host, $url, null, 15);
+                $status = $result['status'];
+                if ($status === 429 || $status >= 500) {
+                    $this->backOff($host, $status);
+                }
+                if ($status >= 300 && $status < 400) {
+                    $location = $result['location'];
+                    if ($location === null || $redirects >= self::MAX_REDIRECTS || !str_starts_with($location, 'https://') || strtolower((string) parse_url($location, \PHP_URL_HOST)) !== $host) {
+                        throw new FetchForbiddenException(sprintf('robots.txt na %s přesměrovává mimo web, nepokračuji', $host));
+                    }
+                    $url = $location;
+
+                    continue;
+                }
+
+                $content = $status >= 400 ? '' : $result['body'];
+
+                break;
+            }
+            $this->cache->save($cached->set($content)->expiresAfter(self::ROBOTS_TTL_SECONDS));
         }
 
-        $this->waitForTurn($host, null);
+        $policy = $this->checkedPolicy(RobotsPolicy::parse($content), $host);
+        $this->robots[$host] = ['policy' => $policy, 'loadedAt' => time()];
+
+        return $policy;
+    }
+
+    /** @return array{status: int, location: ?string, body: string} */
+    private function exchange(string $host, string $url, ?RobotsPolicy $policy, float $maxDuration): array
+    {
+        $this->waitForTurn($host, $policy);
 
         try {
-            $response = $this->request(sprintf('https://%s/robots.txt', $host), 15);
+            $response = $this->request($url, $maxDuration);
             $status = $response->getStatusCode();
-            if ($status === 429) {
-                $this->backOff($host, $status);
-            }
-            if ($status >= 500 || ($status >= 300 && $status < 400)) {
-                throw new FetchForbiddenException(sprintf('robots.txt na %s nedostupný (%d), nepokračuji', $host, $status));
+            $headers = $response->getHeaders(false);
+            if ($status < 200 || $status >= 300) {
+                $response->cancel();
+
+                return ['status' => $status, 'location' => HtmlDocument::absoluteUrl($headers['location'][0] ?? null, $url), 'body' => ''];
             }
 
-            $content = $status >= 400 ? '' : $response->getContent(false);
+            $body = $response->getContent(false);
+            if (strlen($body) > self::MAX_BODY_BYTES) {
+                throw new FetchForbiddenException('Odpověď je větší než 15 MB, nepokračuji');
+            }
+
+            return ['status' => $status, 'location' => null, 'body' => $body];
         } catch (TransportExceptionInterface $exception) {
-            throw new FetchForbiddenException(sprintf('robots.txt na %s nedostupný (%s), nepokračuji', $host, $exception->getMessage()));
+            throw new FetchForbiddenException(sprintf('Spojení s %s selhalo (%s), nepokračuji', $host, $exception->getMessage()));
+        } finally {
+            $this->markRequestDone($host);
         }
-        $this->cache->save($cached->set($content)->expiresAfter(86400));
-
-        return $this->robots[$host] = $this->checkedPolicy(RobotsPolicy::parse($content), $host);
     }
 
     private function checkedPolicy(RobotsPolicy $policy, string $host): RobotsPolicy
@@ -185,7 +220,13 @@ final class PolitePageFetcher
             usleep((int) ($wait * 1_000_000));
         }
 
+        $this->markRequestDone($host);
+    }
+
+    private function markRequestDone(string $host): void
+    {
         $this->lastRequestAt[$host] = microtime(true);
+        $shared = $this->cache->getItem('partner_last_request_' . md5($host));
         $this->cache->save($shared->set($this->lastRequestAt[$host])->expiresAfter(3600));
     }
 }

@@ -65,6 +65,24 @@ final class PartnerDetailFetcherTest extends TestCase
         self::assertNull($item->getDetailsFetchedAt());
     }
 
+    public function testMissingDetailIsSkipped(): void
+    {
+        $client = new MockHttpClient(static fn (string $method, string $url): MockResponse => match (true) {
+            str_ends_with($url, '/robots.txt') => new MockResponse(''),
+            str_ends_with($url, '/1') => new MockResponse('', ['http_code' => 404]),
+            default => new MockResponse(self::DETAIL),
+        });
+
+        $gone = $this->item('222401.0010', 'https://www.brw.ch/de-CH/product/accordion/article-details/1');
+        $next = $this->item('222401.0020', 'https://www.brw.ch/de-CH/product/accordion/article-details/2');
+        $result = $this->fetcher([$gone, $next], $client)->fetch('brw', 30);
+
+        self::assertSame(['fetched' => 2, 'stopped' => null, 'remaining' => 0], $result);
+        self::assertSame([], $gone->getDetailParameters());
+        self::assertNotNull($gone->getDetailsFetchedAt());
+        self::assertSame('40', $next->getDetailParameters()['l1 [mm]']);
+    }
+
     private function item(string $code, ?string $dataUrl): PartnerItem
     {
         $item = new PartnerItem('brw', $code);

@@ -64,6 +64,8 @@ final readonly class PartnerDetailFetcher
         foreach (array_slice($pending, 0, $limit) as $item) {
             try {
                 $item->applyDetails($parser->parseArticleDetails($this->fetcher->fetch((string) $item->getDataUrl(), $partnerCode)));
+            } catch (PageGoneException) {
+                $item->applyDetails([]);
             } catch (FetchForbiddenException $exception) {
                 $stopped = $exception->getMessage();
 

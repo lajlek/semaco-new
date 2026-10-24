@@ -33,6 +33,9 @@ final class HtmlDocument
         }
 
         $parts = parse_url($baseUrl);
+        if (str_starts_with($url, '//')) {
+            return ($parts['scheme'] ?? 'https') . ':' . $url;
+        }
         $origin = ($parts['scheme'] ?? 'https') . '://' . ($parts['host'] ?? '');
 
         return str_starts_with($url, '/') ? $origin . $url : $origin . '/' . ltrim($url, './');

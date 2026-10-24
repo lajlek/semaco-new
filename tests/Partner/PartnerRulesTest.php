@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Tests\Partner;
 
+use App\Partner\Parser\HtmlDocument;
 use App\Partner\Rules\PartnerRule;
 use App\Partner\Rules\PartnerRules;
+use App\Partner\Service\PartnerExporter;
 use App\Partner\Service\PartnerItemPreparer;
 use PHPUnit\Framework\TestCase;
 
@@ -39,6 +41,10 @@ final class PartnerRulesTest extends TestCase
         self::assertFalse($rules->get('brw')->isAllowedUrl('https://www.brw.ch.example.com/'));
         self::assertFalse($rules->get('fraisa')->isAllowedUrl('https://www.brw.ch/'));
         self::assertFalse($rules->get('pokolm')->isAllowedUrl('https://www.pokolm.com/portal/'));
+        self::assertFalse($rules->get('brw')->isAllowedUrl('https://www.brw.ch:8443/de-CH/x'));
+        self::assertTrue($rules->get('brw')->isAllowedUrl('https://www.brw.ch:443/de-CH/x'));
+        self::assertFalse($rules->get('brw')->isAllowedUrl('https://user@www.brw.ch/de-CH/x'));
+        self::assertSame('https://cdn.example.com/x', HtmlDocument::absoluteUrl('//cdn.example.com/x', 'https://www.brw.ch/de-CH/a'));
     }
 
     public function testComparableUrlIgnoresCosmeticDifferences(): void
@@ -47,6 +53,16 @@ final class PartnerRulesTest extends TestCase
 
         self::assertSame($base, PartnerRule::comparableUrl('https://WEBSHOP.fraisa.com/CH/en/mills/?sort=a&view=list&page=1#top'));
         self::assertNotSame($base, PartnerRule::comparableUrl('https://webshop.fraisa.com/CH/en/mills?view=list&sort=a&page=2'));
+    }
+
+    public function testCsvCellsCannotStartFormulas(): void
+    {
+        self::assertSame("'=HYPERLINK(1)", PartnerExporter::cell('=HYPERLINK(1)'));
+        self::assertSame("'-2+3+cmd|' /C calc'!A0", PartnerExporter::cell("-2+3+cmd|' /C calc'!A0"));
+        self::assertSame("'@SUM(1)", PartnerExporter::cell('@SUM(1)'));
+        self::assertSame('+/-0,005', PartnerExporter::cell('+/-0,005'));
+        self::assertSame('-12,5', PartnerExporter::cell('-12,5'));
+        self::assertSame('P5337180', PartnerExporter::cell('P5337180'));
     }
 
     public function testNumbersUseDecimalComma(): void
