@@ -61,3 +61,8 @@ textarea:focus-visible,
         display: none;
     }
 }
+
+.product-details .product-order-code,
+.pagination .page-item.disabled .page-link {
+    color: #767676;
+}

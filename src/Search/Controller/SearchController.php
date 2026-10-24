@@ -36,7 +36,7 @@ final readonly class SearchController
         $query = $this->query($request);
         $results = null;
         if (mb_strlen($query) >= self::MIN_QUERY_LENGTH) {
-            $results = $this->productSearch->search($query, $this->channel(), $this->localeContext->getLocaleCode(), $request->query->getInt('page', 1), 24);
+            $results = $this->productSearch->search($query, $this->channel(), $this->localeContext->getLocaleCode(), $request->query->getInt('page', 1), 12);
         }
 
         return new Response($this->twig->render('shop/search/index.html.twig', [

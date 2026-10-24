@@ -14,6 +14,9 @@
         </h3>
         {% if not product.enabledVariants.empty() %}
             {% set card_variant = product|sylius_resolve_variant %}
+            {% if show_order_code|default(false) and card_variant is not null %}
+                <span class="product-order-code">{{ 'app.shop.product.order_code'|trans }} {{ semaco_order_code(card_variant) }}</span>
+            {% endif %}
             {% if card_variant is not null and card_variant.getChannelPricingForChannel(sylius.channel) is not null %}
                 <div class="product-price">
                     <ins class="new-price">{% include 'shop/product/common/price_value.html.twig' with { variant: card_variant } %}</ins>

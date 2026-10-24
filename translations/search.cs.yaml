@@ -1,6 +1,7 @@
 app:
     search:
         title: 'Vyhledávání'
+        results: 'Výsledky vyhledávání'
         too_short: 'Zadejte alespoň 2 znaky.'
         no_results: 'Nebyly nalezeny žádné produkty.'
         count: 'Nalezeno produktů: %count%'

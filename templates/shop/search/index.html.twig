@@ -2,43 +2,52 @@
 
 {% block title %}{{ 'app.search.title'|trans({}, 'search') }} | {{ parent() }}{% endblock %}
 
+{% block content_class %}{% endblock %}
+
 {% block content %}
-    <nav class="breadcrumb-nav" aria-label="{{ 'sylius.ui.breadcrumb'|trans }}">
-        <div class="container">
-            <ul class="breadcrumb">
-                <li><a href="{{ path('sylius_shop_homepage') }}" aria-label="{{ 'sylius.ui.home'|trans }}"><i class="d-icon-home" aria-hidden="true"></i></a></li>
-                <li>{{ 'app.search.title'|trans({}, 'search') }}</li>
-            </ul>
+    <div class="main">
+        <div class="page-header" style="background-color: #285da8;">
+            <h1 class="page-title">{{ 'app.search.results'|trans({}, 'search') }}</h1>
         </div>
-    </nav>
-    <div class="page-content mb-10">
-        <div class="container">
-            <h1 class="title title-simple text-left">
-                {{ 'app.search.title'|trans({}, 'search') }}{% if query %}: „{{ query }}“{% endif %}
-            </h1>
-            {% if results is null %}
-                <p>{{ 'app.search.too_short'|trans({}, 'search') }}</p>
-            {% elseif results.nbResults == 0 %}
-                <p>{{ 'app.search.no_results'|trans({}, 'search') }}</p>
-            {% else %}
-                <p class="mb-4">{{ 'app.search.count'|trans({'%count%': results.nbResults}, 'search') }}</p>
-                <div class="row cols-2 cols-sm-3 cols-md-4 product-wrapper equal-height" id="products">
-                    {% for product in results %}
-                        <div class="product-wrap">
-                            {% include 'shop/product/common/card.html.twig' with { product } %}
+        <div class="page-content mb-10 pb-3">
+            <div class="container">
+                <div class="row gutter-lg mt-5">
+                    <div class="col-lg-3 sidebar-fixed shop-sidebar sticky-sidebar-wrapper">
+                        <a href="#" class="sidebar-toggle" aria-label="{{ 'app.shop.homepage.categories'|trans }}"><i class="fas fa-chevron-right" aria-hidden="true"></i></a>
+                        <a class="sidebar-close" href="#" aria-label="{{ 'app.shop.cart.close'|trans }}"><i class="d-icon-times" aria-hidden="true"></i></a>
+                        <div class="sidebar-content">
+                            <div class="sticky-sidebar">
+                                {{ component('sylius_shop:common:taxon_menu', { template: 'shop/homepage/sidebar/categories.html.twig' }) }}
+                            </div>
                         </div>
-                    {% endfor %}
-                </div>
-                {% if results.haveToPaginate() %}
-                    <div class="d-flex justify-content-end mt-3">
-                        {{ pagerfanta(results, 'twig', {
-                            template: '@BabDevPagerfanta/twitter_bootstrap4.html.twig',
-                            prev_message: '← ' ~ 'app.shop.listing.previous'|trans,
-                            next_message: 'app.shop.listing.next'|trans ~ ' →',
-                        }) }}
                     </div>
-                {% endif %}
-            {% endif %}
+                    <div class="col-lg-9">
+                        {% if results is null %}
+                            <p>{{ 'app.search.too_short'|trans({}, 'search') }}</p>
+                        {% elseif results.nbResults == 0 %}
+                            <p>{{ 'app.search.no_results'|trans({}, 'search') }}</p>
+                        {% else %}
+                            <p class="mb-4">{{ 'app.search.count'|trans({'%count%': results.nbResults}, 'search') }}{% if query %} („{{ query }}“){% endif %}</p>
+                            <div class="row product-wrapper equal-height" id="search_results">
+                                {% for product in results %}
+                                    <div class="col-md-3 col-6">
+                                        {% include 'shop/product/common/card.html.twig' with { product, show_order_code: true } %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            {% if results.haveToPaginate() %}
+                                <div class="d-flex justify-content-end mt-3">
+                                    {{ pagerfanta(results, 'twig', {
+                                        template: '@BabDevPagerfanta/twitter_bootstrap4.html.twig',
+                                        prev_message: '← ' ~ 'app.shop.listing.previous'|trans,
+                                        next_message: 'app.shop.listing.next'|trans ~ ' →',
+                                    }) }}
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %}
