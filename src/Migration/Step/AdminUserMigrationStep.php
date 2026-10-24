@@ -15,6 +15,8 @@ final readonly class AdminUserMigrationStep implements MigrationStepInterface
 {
     private const ADMIN_ROLE = 'ROLE_ADMINISTRATION_ACCESS';
 
+    private const MIGRATED_OLD_ROLE = 'Administrator';
+
     public function __construct(
         private OldShopConnectionFactory $oldShop,
         private EntityManagerInterface $entityManager,
@@ -32,16 +34,16 @@ final readonly class AdminUserMigrationStep implements MigrationStepInterface
 
         /** @var list<array<string, string|int|null>> $rows */
         $rows = $this->oldShop->getConnection()->fetchAllAssociative(
-            "SELECT u.username, u.email, u.password, u.enabled, u.first_name, u.last_name, u.locale_code, u.last_login, u.created_at,
-                    COALESCE(r.permissions, '[]') = '[]' AS no_access
+            'SELECT u.username, u.email, u.password, u.enabled, u.first_name, u.last_name, u.locale_code, u.last_login, u.created_at,
+                    r.name AS role_name
              FROM sylius_admin_user u LEFT JOIN sylius_rbac_administration_role r ON r.id = u.administration_role_id
-             ORDER BY u.id ASC",
+             ORDER BY u.id ASC',
         );
 
         foreach ($rows as $row) {
             $email = mb_strtolower(trim((string) $row['email']));
             $username = trim((string) ($row['username'] ?? $email));
-            if ($email === '' || $row['password'] === null) {
+            if ($email === '' || $row['password'] === null || $row['role_name'] !== self::MIGRATED_OLD_ROLE) {
                 $result->skipped();
 
                 continue;
@@ -62,7 +64,7 @@ final readonly class AdminUserMigrationStep implements MigrationStepInterface
             $user->setEmail($email);
             $user->setEmailCanonical($email);
             $user->setPassword((string) $row['password']);
-            $user->setEnabled((bool) $row['enabled'] && !(bool) $row['no_access']);
+            $user->setEnabled((bool) $row['enabled']);
             $user->setFirstName($row['first_name'] === null ? null : (string) $row['first_name']);
             $user->setLastName($row['last_name'] === null ? null : (string) $row['last_name']);
             $user->setLocaleCode((string) ($row['locale_code'] ?? 'cs_CZ'));
