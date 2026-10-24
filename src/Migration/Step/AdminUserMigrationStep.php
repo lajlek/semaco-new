@@ -32,8 +32,10 @@ final readonly class AdminUserMigrationStep implements MigrationStepInterface
 
         /** @var list<array<string, string|int|null>> $rows */
         $rows = $this->oldShop->getConnection()->fetchAllAssociative(
-            'SELECT username, email, password, enabled, first_name, last_name, locale_code, last_login, created_at
-             FROM sylius_admin_user ORDER BY id ASC',
+            "SELECT u.username, u.email, u.password, u.enabled, u.first_name, u.last_name, u.locale_code, u.last_login, u.created_at,
+                    COALESCE(r.permissions, '[]') = '[]' AS no_access
+             FROM sylius_admin_user u LEFT JOIN sylius_rbac_administration_role r ON r.id = u.administration_role_id
+             ORDER BY u.id ASC",
         );
 
         foreach ($rows as $row) {
@@ -60,7 +62,7 @@ final readonly class AdminUserMigrationStep implements MigrationStepInterface
             $user->setEmail($email);
             $user->setEmailCanonical($email);
             $user->setPassword((string) $row['password']);
-            $user->setEnabled((bool) $row['enabled']);
+            $user->setEnabled((bool) $row['enabled'] && !(bool) $row['no_access']);
             $user->setFirstName($row['first_name'] === null ? null : (string) $row['first_name']);
             $user->setLastName($row['last_name'] === null ? null : (string) $row['last_name']);
             $user->setLocaleCode((string) ($row['locale_code'] ?? 'cs_CZ'));
