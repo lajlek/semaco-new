@@ -89,6 +89,7 @@ app:
                 cheapest: 'Nejlevnější'
         product:
             show: 'Zobrazit'
+            latest_products: 'Nejnovější produkty'
             order_code: 'Obj. č.:'
             order_code_short: 'Obj. č.'
             variant: 'Varianta'

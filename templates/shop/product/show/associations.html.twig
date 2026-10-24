@@ -1,7 +1,9 @@
 {% set product = hookable_metadata.context.product %}
+{% set has_associated_products = false %}
 {% for association in product.associations %}
     {% set associated_products = association.associatedProducts|filter(p => p.enabled) %}
     {% if associated_products|length > 0 %}
+        {% set has_associated_products = true %}
         <section class="pt-3 mt-10">
             <h2 class="title">{{ association.type.name }}</h2>
             <div class="row product-wrapper equal-height">
@@ -14,3 +16,6 @@
         </section>
     {% endif %}
 {% endfor %}
+{% if not has_associated_products %}
+    {{ component('sylius_shop:product:list', { limit: 4, template: 'shop/product/show/latest_products.html.twig' }) }}
+{% endif %}

@@ -1,0 +1,13 @@
+{# Rendered with \Sylius\Bundle\ShopBundle\Twig\Component\Product\ListComponent #}
+<section class="product-wrapper mt-10 pt-6" {{ attributes }}>
+    <div class="title-wrapper d-flex align-items-center mb-5">
+        <h2 class="latest-products-title mb-5">{{ 'app.shop.product.latest_products'|trans }}</h2>
+    </div>
+    <div class="row product-wrapper equal-height">
+        {% for product in latest_products %}
+            <div class="col-md-3 col-6">
+                {% include 'shop/product/common/card.html.twig' with { product } %}
+            </div>
+        {% endfor %}
+    </div>
+</section>
