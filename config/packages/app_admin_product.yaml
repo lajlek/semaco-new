@@ -4,3 +4,8 @@ sylius_twig_hooks:
             erp_lock:
                 template: 'admin/product/form/erp_lock.html.twig'
                 priority: -100
+
+        'sylius_admin.product_variant.create.content.form.sections.general.body':
+            erp_name_lock:
+                template: 'admin/product_variant/form/erp_name_lock.html.twig'
+                priority: -100

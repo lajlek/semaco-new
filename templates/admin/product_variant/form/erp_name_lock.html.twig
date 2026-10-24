@@ -1,0 +1,7 @@
+{% set form = hookable_metadata.context.form %}
+
+{% if form.erpNameLocked is defined %}
+    <div class="mb-3">
+        {{ form_row(form.erpNameLocked, {label_attr: {class: 'checkbox-switch'}}) }}
+    </div>
+{% endif %}

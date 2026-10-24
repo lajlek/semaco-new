@@ -355,7 +355,9 @@ final class ProductImporter
     {
         $variant->setCurrentLocale($this->localeCode);
         $variant->setFallbackLocale($this->localeCode);
-        $variant->setName($snapshot->name);
+        if (!$variant->isErpNameLocked()) {
+            $variant->setName($snapshot->name);
+        }
         $variant->setEnabled($snapshot->enabled);
         $variant->setRegcis($snapshot->regcis);
         $variant->setBarcode($snapshot->barcode);

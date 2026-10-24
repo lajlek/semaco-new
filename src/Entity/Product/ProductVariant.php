@@ -27,6 +27,9 @@ class ProductVariant extends BaseProductVariant
     #[ORM\Column(name: 'barcode', type: 'string', length: 64, nullable: true)]
     private ?string $barcode = null;
 
+    #[ORM\Column(name: 'erp_name_locked', type: 'boolean', options: ['default' => false])]
+    private bool $erpNameLocked = false;
+
     public function getExternalIdentifier(): ?string
     {
         return $this->externalIdentifier;
@@ -61,6 +64,16 @@ class ProductVariant extends BaseProductVariant
     public function setBarcode(?string $barcode): void
     {
         $this->barcode = $barcode;
+    }
+
+    public function isErpNameLocked(): bool
+    {
+        return $this->erpNameLocked;
+    }
+
+    public function setErpNameLocked(bool $erpNameLocked): void
+    {
+        $this->erpNameLocked = $erpNameLocked;
     }
 
     protected function createTranslation(): ProductVariantTranslationInterface

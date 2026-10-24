@@ -10,6 +10,10 @@ app:
                 meta: 'SEO klíčová slova a popis'
                 taxons: 'Kategorie'
                 attributes: 'Parametry'
+        product_variant:
+            erp_name_lock:
+                label: 'Název spravovaný v e-shopu (synchronizace z Heliosu ho nepřepisuje)'
+                help: 'Zaškrtne se samo, když název varianty upravíte. Odškrtnutím vrátíte správu názvu Heliosu.'
     shop:
         skip_to_content: 'Přeskočit na obsah'
         checkout:
