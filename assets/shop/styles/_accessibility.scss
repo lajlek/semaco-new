@@ -35,6 +35,11 @@ textarea:focus-visible,
 
 .cart-header .btn-close,
 .mobile-menu-container .btn-close,
-.semaco-steps .title-step.disabled span {
+.semaco-steps .title-step.disabled span,
+.cart-dropdown .product-cart .product-quantity {
     color: #767676;
+}
+
+.sylius-scope .text-body-tertiary {
+    color: #6c757d !important;
 }
