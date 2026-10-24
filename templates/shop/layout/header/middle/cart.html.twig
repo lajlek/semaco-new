@@ -8,6 +8,7 @@
             <span class="cart-price">{{ money.convertAndFormat(cart is not null ? cart.itemsSubtotal : 0) }}</span>
             <small class="small text-lowercase">{{ 'app.shop.price.without_vat_long'|trans }}</small>
         </div>
+        <span class="sr-only-text">{{ 'app.shop.cart.title'|trans }}</span>
         <i class="d-icon-bag" aria-hidden="true"><span class="cart-count">{{ cart is not null ? cart.items|length : 0 }}</span></i>
     </a>
     <div class="cart-overlay"></div>
