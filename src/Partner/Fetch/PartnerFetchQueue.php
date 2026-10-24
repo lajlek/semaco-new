@@ -23,6 +23,7 @@ final readonly class PartnerFetchQueue
         private PartnerRules $rules,
         private PartnerParserRegistry $parsers,
         private PartnerListingCrawler $crawler,
+        private PartnerDetailFetcher $detailFetcher,
         private PartnerItemPreparer $preparer,
         private LockFactory $lockFactory,
         #[Autowire('%app.partners.max_pages%')]
@@ -36,7 +37,7 @@ final readonly class PartnerFetchQueue
     {
         $rule = $this->rules->get($partnerCode);
         if (!$this->parsers->get($partnerCode)->supportsAutomaticFetching()) {
-            throw new \DomainException(sprintf('%s nepovoluje automatické načítání (robots.txt). Uložte stránku ručně a nahrajte ji příkazem app:partners:import-html.', $rule->label));
+            throw new \DomainException(sprintf('%s nepovoluje automatické načítání (robots.txt). Uložte stránku v prohlížeči a nahrajte ji (Nahrát stránku).', $rule->label));
         }
         if (!$rule->isAllowedUrl($url)) {
             throw new \DomainException(sprintf('Adresa musí začínat https://%s/', implode(' nebo https://', $rule->allowedHosts)));
@@ -45,16 +46,33 @@ final readonly class PartnerFetchQueue
             throw new \DomainException(sprintf('Počet stránek musí být 1 až %d.', $this->maxPages));
         }
 
-        foreach ($this->runRepository->findBy(['partnerCode' => $partnerCode], ['requestedAt' => 'DESC'], 5) as $run) {
-            if (in_array($run->getStatus(), [PartnerFetchRun::STATUS_QUEUED, PartnerFetchRun::STATUS_RUNNING], true)) {
-                throw new \DomainException(sprintf('Načítání %s už čeká nebo běží.', $rule->label));
-            }
+        $this->assertNoActiveRun($partnerCode, $rule->label);
+        foreach ($this->runRepository->findBy(['partnerCode' => $partnerCode, 'kind' => PartnerFetchRun::KIND_LISTING], ['requestedAt' => 'DESC'], 5) as $run) {
             if ($run->getStatus() !== PartnerFetchRun::STATUS_CANCELLED && $run->getUrl() === $url && $run->getRequestedAt() > new \DateTimeImmutable(sprintf('-%d hours', $this->cooldownHours))) {
                 throw new \DomainException(sprintf('Stejná adresa se načítala %s. Znovu ji lze načíst po %d hodinách.', $run->getRequestedAt()->format('d. m. H:i'), $this->cooldownHours));
             }
         }
 
         $run = new PartnerFetchRun($partnerCode, $url, $maxPages, $requestedBy);
+        $this->entityManager->persist($run);
+        $this->entityManager->flush();
+
+        return $run;
+    }
+
+    public function queueDetails(string $partnerCode, string $requestedBy): PartnerFetchRun
+    {
+        $rule = $this->rules->get($partnerCode);
+        if (!$this->detailFetcher->supports($partnerCode)) {
+            throw new \DomainException(sprintf('U partnera %s se detaily artiklů nenačítají.', $rule->label));
+        }
+        $pending = count($this->detailFetcher->pending($partnerCode));
+        if ($pending === 0) {
+            throw new \DomainException(sprintf('Všechny položky %s už mají načtený detail.', $rule->label));
+        }
+        $this->assertNoActiveRun($partnerCode, $rule->label);
+
+        $run = new PartnerFetchRun($partnerCode, '', min($pending, $this->maxPages), $requestedBy, PartnerFetchRun::KIND_DETAILS);
         $this->entityManager->persist($run);
         $this->entityManager->flush();
 
@@ -90,6 +108,12 @@ final readonly class PartnerFetchQueue
             $run->start();
             $this->entityManager->flush();
 
+            if ($run->getKind() === PartnerFetchRun::KIND_DETAILS) {
+                $this->processDetails($run);
+
+                return $run;
+            }
+
             try {
                 $result = $this->crawler->crawl(
                     $run->getPartnerCode(),
@@ -109,6 +133,32 @@ final readonly class PartnerFetchQueue
             return $run;
         } finally {
             $lock->release();
+        }
+    }
+
+    private function processDetails(PartnerFetchRun $run): void
+    {
+        try {
+            $result = $this->detailFetcher->fetch(
+                $run->getPartnerCode(),
+                min($run->getMaxPages(), $this->maxPages),
+                static fn () => $run->addPage(['created' => 0, 'changed' => 1, 'unchanged' => 0]),
+            );
+            $this->preparer->prepare($run->getPartnerCode());
+            $message = $result['stopped'] ?? ($result['remaining'] > 0 ? sprintf('Zbývá načíst detail u %d položek', $result['remaining']) : null);
+            $run->finish($result['stopped'] !== null ? PartnerFetchRun::STATUS_STOPPED : PartnerFetchRun::STATUS_DONE, $message);
+        } catch (\Throwable $exception) {
+            $run->finish(PartnerFetchRun::STATUS_FAILED, mb_substr($exception->getMessage(), 0, 1000));
+        }
+        $this->entityManager->flush();
+    }
+
+    private function assertNoActiveRun(string $partnerCode, string $label): void
+    {
+        foreach ($this->runRepository->findBy(['partnerCode' => $partnerCode], ['requestedAt' => 'DESC'], 5) as $run) {
+            if (in_array($run->getStatus(), [PartnerFetchRun::STATUS_QUEUED, PartnerFetchRun::STATUS_RUNNING], true)) {
+                throw new \DomainException(sprintf('Načítání %s už čeká nebo běží.', $label));
+            }
         }
     }
 

@@ -7,7 +7,7 @@ namespace App\Partner\Parser;
 use App\Partner\Dto\ParsedItem;
 use App\Partner\Dto\ParsedPage;
 
-final class BrwFamilyParser implements PartnerParserInterface
+final class BrwFamilyParser implements PartnerParserInterface, ArticleDetailParserInterface
 {
     public const PARTNER = 'brw';
 
@@ -43,6 +43,11 @@ final class BrwFamilyParser implements PartnerParserInterface
             }
 
             $nameLink = $row->querySelector('a.product_link_show_tab');
+            $dataUrl = null;
+            $detailsId = ltrim((string) $nameLink?->getAttribute('href'), '#');
+            if (preg_match('/^[\w-]+$/', $detailsId) === 1) {
+                $dataUrl = HtmlDocument::absoluteUrl($document->querySelector(sprintf('#%s [data-load]', $detailsId))?->getAttribute('data-load'), $pageUrl);
+            }
             $spec = null;
             $productColumn = $nameLink?->parentElement;
             if ($productColumn !== null) {
@@ -76,6 +81,7 @@ final class BrwFamilyParser implements PartnerParserInterface
                 price: null,
                 currency: null,
                 availability: null,
+                dataUrl: $dataUrl,
             );
         }
 
@@ -93,5 +99,22 @@ final class BrwFamilyParser implements PartnerParserInterface
         }
 
         return new ParsedPage($items, array_keys($pageUrls), $total);
+    }
+
+    public function parseArticleDetails(string $html): array
+    {
+        $document = HtmlDocument::load('<!DOCTYPE html><html><body>' . $html . '</body></html>');
+        $parameters = [];
+        foreach ($document->querySelectorAll('table.brw_product_attribute_list tr') as $row) {
+            $label = HtmlDocument::text($row->querySelector('td.brw_product_attribute_list_name'));
+            $value = HtmlDocument::text($row->querySelector('td:not(.brw_product_attribute_list_name)'));
+            if ($label === null || $value === null) {
+                continue;
+            }
+
+            $parameters[$label] = trim((string) preg_replace('/\s*(mm|°)$/u', '', $value));
+        }
+
+        return $parameters;
     }
 }

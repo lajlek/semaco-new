@@ -46,6 +46,7 @@ final readonly class PartnerItemStore
                 $parsed->currency,
                 $parsed->availability,
                 self::hash($parsed),
+                $parsed->dataUrl,
             );
             $this->matcher->match($item);
 

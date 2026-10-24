@@ -102,6 +102,29 @@ final class PartnerAdminController extends AbstractController
         return $this->redirectToRoute('app_admin_partner_item_show', ['id' => $id]);
     }
 
+    #[Route('/admin/partner-items/{id}/approve-family', name: 'app_admin_partner_item_approve_family', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function approveFamily(Request $request, int $id): Response
+    {
+        $item = $this->item($id);
+        $this->assertToken($request, 'partner_item_' . $id);
+        if ($item->getFamilyKey() === null) {
+            return $this->redirectToRoute('app_admin_partner_item_show', ['id' => $id]);
+        }
+
+        $approved = 0;
+        $members = $this->itemRepository->findBy(['partnerCode' => $item->getPartnerCode(), 'familyKey' => $item->getFamilyKey()]);
+        foreach ($members as $member) {
+            if ($member->canBeApproved()) {
+                $member->approve($this->adminName());
+                ++$approved;
+            }
+        }
+        $this->entityManager->flush();
+        $this->addFlash($approved > 0 ? 'success' : 'warning', sprintf('V rodině %s schváleno %d položek. Položky s upozorněním, už schválené nebo existující v Semaco zůstaly beze změny.', $item->getFamilyKey(), $approved));
+
+        return $this->redirectToRoute('app_admin_partner_item_index', ['criteria' => ['search' => ['type' => 'contains', 'value' => $item->getFamilyKey()], 'partnerCode' => $item->getPartnerCode()]]);
+    }
+
     #[Route('/admin/partner-items/{id}/overrides', name: 'app_admin_partner_item_overrides', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function overrides(Request $request, int $id): Response
     {
@@ -241,6 +264,21 @@ final class PartnerAdminController extends AbstractController
         $this->addFlash('success', sprintf('Načteno %d položek: nové %d, změněné %d, beze změny %d.', count($page->items), $summary['created'], $summary['changed'], $summary['unchanged']));
 
         return $this->redirectToRoute('app_admin_partner_item_index', ['criteria' => ['partnerCode' => $partnerCode]]);
+    }
+
+    #[Route('/admin/partner-fetch-runs/details', name: 'app_admin_partner_fetch_run_details', methods: ['POST'])]
+    public function queueDetails(Request $request): Response
+    {
+        $this->assertToken($request, 'partner_fetch');
+
+        try {
+            $run = $this->fetchQueue->queueDetails($request->request->getString('partner'), $this->adminName());
+            $this->addFlash('success', sprintf('Načtení detailů je zařazené (nejvýš %d artiklů, odstup nejméně 10 s).', $run->getMaxPages()));
+        } catch (\DomainException|\InvalidArgumentException $exception) {
+            $this->addFlash('error', $exception->getMessage());
+        }
+
+        return $this->redirectToRoute('app_admin_partner_item_index');
     }
 
     #[Route('/admin/partner-fetch-runs/{id}/cancel', name: 'app_admin_partner_fetch_run_cancel', requirements: ['id' => '\d+'], methods: ['POST'])]

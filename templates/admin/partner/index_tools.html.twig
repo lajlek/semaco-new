@@ -66,6 +66,15 @@
                         <input type="hidden" name="_token" value="{{ csrf_token('partner_prepare') }}">
                         <button type="submit" class="btn btn-sm">{{ ux_icon('tabler:refresh', {class: 'icon'}) }} Přepočítat párování a návrhy</button>
                     </form>
+                    {% for code, count in partner_details_pending() %}
+                        {% if count > 0 %}
+                            <form method="post" action="{{ path('app_admin_partner_fetch_run_details') }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('partner_fetch') }}">
+                                <input type="hidden" name="partner" value="{{ code }}">
+                                <button type="submit" class="btn btn-sm" title="Načte parametry z detailu artiklu, nejvýš 30 najednou">{{ ux_icon('tabler:list-details', {class: 'icon'}) }} Detaily {{ partner_rules()[code].label }} ({{ count }})</button>
+                            </form>
+                        {% endif %}
+                    {% endfor %}
                     <a href="{{ path('app_admin_partner_export_batch_index') }}" class="btn btn-sm">{{ ux_icon('tabler:file-export', {class: 'icon'}) }} Exportní dávky</a>
                 </div>
             </div>
@@ -76,7 +85,7 @@
                         <tr>
                             <td class="text-nowrap">{{ run.requestedAt|date('d. m. H:i') }}</td>
                             <td>{{ partner_rules()[run.partnerCode].label|default(run.partnerCode) }}</td>
-                            <td class="text-truncate" style="max-width: 18rem" title="{{ run.url }}">{{ run.url }}</td>
+                            <td class="text-truncate" style="max-width: 18rem" title="{{ run.url }}">{{ run.kind == 'details' ? 'Detaily artiklů' : run.url }}</td>
                             <td class="text-nowrap">{{ status_labels[run.status]|default(run.status) }}</td>
                             <td class="text-nowrap">{{ run.pages }} str. · nové {{ run.itemsCreated }} · změněné {{ run.itemsChanged }}</td>
                             <td class="small text-secondary">

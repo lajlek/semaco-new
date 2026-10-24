@@ -24,6 +24,10 @@ class PartnerFetchRun implements ResourceInterface
 
     public const STATUS_CANCELLED = 'cancelled';
 
+    public const KIND_LISTING = 'listing';
+
+    public const KIND_DETAILS = 'details';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
@@ -31,6 +35,9 @@ class PartnerFetchRun implements ResourceInterface
 
     #[ORM\Column(name: 'partner_code', type: 'string', length: 32)]
     private string $partnerCode;
+
+    #[ORM\Column(type: 'string', length: 16, options: ['default' => self::KIND_LISTING])]
+    private string $kind;
 
     #[ORM\Column(type: 'text')]
     private string $url;
@@ -68,8 +75,9 @@ class PartnerFetchRun implements ResourceInterface
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $message = null;
 
-    public function __construct(string $partnerCode, string $url, int $maxPages, string $requestedBy)
+    public function __construct(string $partnerCode, string $url, int $maxPages, string $requestedBy, string $kind = self::KIND_LISTING)
     {
+        $this->kind = $kind;
         $this->partnerCode = $partnerCode;
         $this->url = $url;
         $this->maxPages = $maxPages;
@@ -85,6 +93,11 @@ class PartnerFetchRun implements ResourceInterface
     public function getPartnerCode(): string
     {
         return $this->partnerCode;
+    }
+
+    public function getKind(): string
+    {
+        return $this->kind;
     }
 
     public function getUrl(): string

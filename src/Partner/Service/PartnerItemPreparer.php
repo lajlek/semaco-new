@@ -106,7 +106,7 @@ final class PartnerItemPreparer
     private function prepareItem(PartnerItem $item, PartnerRule $rule, ?string $familyKey, string $grouping, ?Product $product, array $familyValues, array $required, ?array $similar): void
     {
         $overrides = $item->getOverrides();
-        $source = $rule->sourceValues($item->getParameters());
+        $source = $rule->sourceValues([...$item->getParameters(), ...$item->getDetailParameters()]);
 
         $options = [];
         foreach ($rule->options as $parameter => $code) {
@@ -306,6 +306,10 @@ final class PartnerItemPreparer
         $value = trim((string) $value);
         if ($value === '' || in_array($value, ['-', '—', '–'], true)) {
             return null;
+        }
+
+        if (preg_match('#^\+/-\s*(\d+(?:[.,]\d+)?)$#', $value, $match) === 1) {
+            return '+/-' . self::number($match[1]);
         }
 
         if (preg_match('/^\d+(?:[.,]\d+)?$/', $value) === 1) {

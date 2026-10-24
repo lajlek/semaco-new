@@ -95,6 +95,16 @@ class PartnerItem implements ResourceInterface
     #[ORM\Column(name: 'workflow_state', type: 'string', length: 16)]
     private string $workflowState = self::STATE_NEW;
 
+    #[ORM\Column(name: 'data_url', type: 'text', nullable: true)]
+    private ?string $dataUrl = null;
+
+    /** @var array<string, string> */
+    #[ORM\Column(name: 'detail_parameters', type: 'json')]
+    private array $detailParameters = [];
+
+    #[ORM\Column(name: 'details_fetched_at', type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $detailsFetchedAt = null;
+
     #[ORM\Column(name: 'family_key', type: 'string', length: 64, nullable: true)]
     private ?string $familyKey = null;
 
@@ -245,10 +255,12 @@ class PartnerItem implements ResourceInterface
         ?string $currency,
         ?string $availability,
         string $contentHash,
+        ?string $dataUrl = null,
     ): bool {
         $now = new \DateTimeImmutable();
         $this->lastSeenAt = $now;
         $this->sourceUrl = $sourceUrl;
+        $this->dataUrl = $dataUrl ?? $this->dataUrl;
         if ($this->contentHash === $contentHash) {
             return false;
         }
@@ -266,6 +278,32 @@ class PartnerItem implements ResourceInterface
         $this->changedAt = $now;
 
         return true;
+    }
+
+    public function getDataUrl(): ?string
+    {
+        return $this->dataUrl;
+    }
+
+    /** @return array<string, string> */
+    public function getDetailParameters(): array
+    {
+        return $this->detailParameters;
+    }
+
+    public function getDetailsFetchedAt(): ?\DateTimeImmutable
+    {
+        return $this->detailsFetchedAt;
+    }
+
+    /** @param array<string, string> $parameters */
+    public function applyDetails(array $parameters): void
+    {
+        if ($parameters !== $this->detailParameters) {
+            $this->detailParameters = $parameters;
+            $this->changedAt = new \DateTimeImmutable();
+        }
+        $this->detailsFetchedAt = new \DateTimeImmutable();
     }
 
     public function getMatchStatus(): string
@@ -385,7 +423,7 @@ class PartnerItem implements ResourceInterface
         $this->preparedOptions = $preparedOptions;
 
         $changed = $this->approvedHash !== null &&
-            $this->approvedHash !== $this->contentHash &&
+            $this->approvedHash !== $this->fingerprint() &&
             in_array($this->workflowState, [self::STATE_READY, self::STATE_NEEDS_REVIEW], true);
         if ($changed) {
             $issues[] = ['code' => self::ISSUE_CHANGED, 'message' => 'Údaje u partnera se po schválení změnily', 'blocking' => true];
@@ -425,7 +463,7 @@ class PartnerItem implements ResourceInterface
     public function approve(string $approvedBy): void
     {
         $this->workflowState = self::STATE_READY;
-        $this->approvedHash = $this->contentHash;
+        $this->approvedHash = $this->fingerprint();
         $this->approvedAt = new \DateTimeImmutable();
         $this->approvedBy = $approvedBy;
         $this->issues = array_values(array_filter($this->issues, static fn (array $issue): bool => $issue['code'] !== self::ISSUE_CHANGED));
@@ -465,6 +503,11 @@ class PartnerItem implements ResourceInterface
     public function getChangedAt(): \DateTimeImmutable
     {
         return $this->changedAt;
+    }
+
+    private function fingerprint(): string
+    {
+        return $this->detailParameters === [] ? $this->contentHash : hash('sha256', $this->contentHash . '|' . json_encode($this->detailParameters));
     }
 
     /** @param list<array{code: string, message: string, blocking: bool}> $issues */

@@ -6,6 +6,7 @@ namespace App\Partner\Twig;
 
 use App\Partner\Entity\PartnerFetchRun;
 use App\Partner\Entity\PartnerItem;
+use App\Partner\Fetch\PartnerDetailFetcher;
 use App\Partner\Fetch\PartnerFetchQueue;
 use App\Partner\Rules\PartnerRule;
 use App\Partner\Rules\PartnerRules;
@@ -19,6 +20,7 @@ final readonly class PartnerAdminExtension
         private PartnerItemPreparer $preparer,
         private PartnerRules $rules,
         private PartnerFetchQueue $fetchQueue,
+        private PartnerDetailFetcher $detailFetcher,
     ) {
     }
 
@@ -53,6 +55,20 @@ final readonly class PartnerAdminExtension
     public function rules(): array
     {
         return $this->rules->all();
+    }
+
+    /** @return array<string, int> partner => items without fetched article details */
+    #[AsTwigFunction('partner_details_pending')]
+    public function detailsPending(): array
+    {
+        $pending = [];
+        foreach (array_keys($this->rules->all()) as $partnerCode) {
+            if ($this->detailFetcher->supports($partnerCode)) {
+                $pending[$partnerCode] = count($this->detailFetcher->pending($partnerCode));
+            }
+        }
+
+        return $pending;
     }
 
     /** @return list<PartnerFetchRun> */

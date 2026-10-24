@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Partner\Fetch;
 
+use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -24,6 +25,8 @@ final class PolitePageFetcher
         private readonly float $minDelaySeconds,
         #[Autowire('%kernel.project_dir%/var/partners/snapshots')]
         private readonly string $snapshotDirectory,
+        #[Autowire(service: 'cache.app')]
+        private readonly CacheItemPoolInterface $cache,
         private readonly Filesystem $filesystem = new Filesystem(),
     ) {
     }
@@ -62,6 +65,11 @@ final class PolitePageFetcher
             return $this->robots[$host];
         }
 
+        $cached = $this->cache->getItem('partner_robots_' . md5($host));
+        if ($cached->isHit() && is_string($cached->get())) {
+            return $this->robots[$host] = RobotsPolicy::parse($cached->get());
+        }
+
         $scheme = (string) (parse_url($url, \PHP_URL_SCHEME) ?? 'https');
         $this->waitForTurn($host, null);
         $response = $this->httpClient->request('GET', sprintf('%s://%s/robots.txt', $scheme, $host), [
@@ -74,20 +82,23 @@ final class PolitePageFetcher
             throw new FetchForbiddenException(sprintf('robots.txt na %s nedostupný (%d), nepokračuji', $host, $status));
         }
 
-        return $this->robots[$host] = $status >= 400 ? RobotsPolicy::parse('') : RobotsPolicy::parse($response->getContent(false));
+        $content = $status >= 400 ? '' : $response->getContent(false);
+        $this->cache->save($cached->set($content)->expiresAfter(86400));
+
+        return $this->robots[$host] = RobotsPolicy::parse($content);
     }
 
     private function waitForTurn(string $host, ?RobotsPolicy $policy): void
     {
         $delay = max($this->minDelaySeconds, $policy === null ? 0.0 : ($policy->crawlDelay ?? 0.0));
-        $last = $this->lastRequestAt[$host] ?? null;
-        if ($last !== null) {
-            $wait = $last + $delay - microtime(true);
-            if ($wait > 0) {
-                usleep((int) ($wait * 1_000_000));
-            }
+        $shared = $this->cache->getItem('partner_last_request_' . md5($host));
+        $last = max($this->lastRequestAt[$host] ?? 0.0, $shared->isHit() && is_float($shared->get()) ? $shared->get() : 0.0);
+        $wait = $last + $delay - microtime(true);
+        if ($wait > 0) {
+            usleep((int) ($wait * 1_000_000));
         }
 
         $this->lastRequestAt[$host] = microtime(true);
+        $this->cache->save($shared->set($this->lastRequestAt[$host])->expiresAfter(3600));
     }
 }

@@ -130,6 +130,13 @@
                         </div>
                     {% endif %}
                 </div>
+                {% if item.familyKey and item.matchStatus != 'matched' %}
+                    <form method="post" action="{{ path('app_admin_partner_item_approve_family', {id: item.id}) }}" class="mb-3">
+                        <input type="hidden" name="_token" value="{{ csrf_token('partner_item_' ~ item.id) }}">
+                        <button type="submit" class="btn w-100">{{ ux_icon('tabler:checks', {class: 'icon'}) }} Schválit celou rodinu {{ item.familyKey }}</button>
+                        <p class="text-secondary small mt-1 mb-0">Schválí všechny položky rodiny bez nevyřešených upozornění.</p>
+                    </form>
+                {% endif %}
                 <a href="{{ path('app_admin_partner_item_index') }}" class="btn w-100">{{ ux_icon('tabler:arrow-left', {class: 'icon'}) }} Zpět na položky</a>
             </div>
         </div>

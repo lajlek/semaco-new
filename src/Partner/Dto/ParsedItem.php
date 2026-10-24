@@ -21,6 +21,7 @@ final readonly class ParsedItem
         public ?string $price,
         public ?string $currency,
         public ?string $availability,
+        public ?string $dataUrl = null,
     ) {
     }
 }
