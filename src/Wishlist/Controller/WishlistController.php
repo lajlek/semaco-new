@@ -83,7 +83,14 @@ final class WishlistController extends AbstractController
             return $this->redirectToRoute('app_shop_wishlist_index');
         }
 
-        $this->cartFiller->addToCart($lines);
+        $added = $this->cartFiller->addToCart($lines);
+        if ($added < count($lines)) {
+            $this->addFlash('warning', 'app.wishlist.price_on_request_skipped');
+        }
+        if ($added === 0) {
+            return $this->redirectToRoute('app_shop_wishlist_index');
+        }
+
         $this->addFlash('success', 'app.wishlist.added_to_cart');
 
         return $this->redirectToRoute('sylius_shop_cart_summary');

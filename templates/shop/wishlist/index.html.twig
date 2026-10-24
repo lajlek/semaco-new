@@ -60,7 +60,7 @@
                                     <td class="product-quantity">
                                         <label class="sr-only visually-hidden" for="wishlist-quantity-{{ variant.id }}">{{ 'app.wishlist.quantity'|trans({}, 'wishlist') }} – {{ product.name }}</label>
                                         <input type="number" class="form-control" id="wishlist-quantity-{{ variant.id }}" name="quantity[{{ variant.id }}]"
-                                               value="0" min="0" step="{{ quantity_step }}" inputmode="numeric" style="max-width: 10rem;">
+                                               value="0" min="0" step="{{ quantity_step }}" inputmode="numeric" style="max-width: 10rem;"{% if not semaco_has_price(variant) %} disabled{% endif %}>
                                         {% if quantity_step > 1 or minimum_quantity > 1 %}
                                             <small class="d-block mt-1">{{ 'app.wishlist.quantity_rule'|trans({'%step%': quantity_step, '%minimum%': minimum_quantity}, 'wishlist') }}</small>
                                         {% endif %}

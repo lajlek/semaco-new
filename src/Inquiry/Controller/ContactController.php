@@ -37,6 +37,11 @@ final class ContactController extends AbstractController
             $contactMessage->setPhone($customer->getPhoneNumber());
         }
 
+        $prefill = trim($request->query->getString('message'));
+        if ($prefill !== '') {
+            $contactMessage->setMessage(mb_substr($prefill, 0, 500));
+        }
+
         $form = $this->createForm(ContactMessageType::class, $contactMessage);
         $form->handleRequest($request);
 

@@ -84,6 +84,9 @@ app:
             quantity_plus: 'Zvýšit množství'
             add_to_cart: 'Přidat do košíku'
             out_of_stock: 'Produkt není dostupný.'
+            price_on_request_notice: 'Tato položka nemá cenu a nelze ji objednat přes e-shop.'
+            price_on_request_link: 'Poptat cenu'
+            price_on_request_message: 'Prosím o cenu: %product% (%code%)'
     ui:
         cms_page: 'Stránka'
         cms_pages: 'Stránky (CMS)'

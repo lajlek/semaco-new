@@ -13,10 +13,18 @@
                 <button class="quantity-plus d-icon-plus" type="button" aria-label="{{ 'app.shop.product.quantity_plus'|trans }}"></button>
             </div>
             {% set selected_variant = form.cartItem.vars.value.variant %}
-            <button type="submit" class="btn btn-primary btn-add-to-cart"{% if not form.vars.valid or selected_variant is null or not selected_variant.enabled %} disabled{% endif %}>
+            {% set has_price = selected_variant is not null and semaco_has_price(selected_variant) %}
+            <button type="submit" class="btn btn-primary btn-add-to-cart"{% if not form.vars.valid or selected_variant is null or not selected_variant.enabled or not has_price %} disabled{% endif %}>
                 <span class="btn-icon"><i class="fas fa-shopping-bag" aria-hidden="true"></i></span>
                 {{ 'app.shop.product.add_to_cart'|trans }}
             </button>
         </div>
     </div>
+    {% if selected_variant is not null and not has_price %}
+        {% set inquiry_message = 'app.shop.product.price_on_request_message'|trans({'%product%': product.name, '%code%': semaco_order_code(selected_variant)}) %}
+        <p class="w-100 mt-3 mb-0" data-js-price-on-request>
+            {{ 'app.shop.product.price_on_request_notice'|trans }}
+            <a href="{{ path('sylius_shop_contact_request', {message: inquiry_message}) }}" class="font-weight-bold">{{ 'app.shop.product.price_on_request_link'|trans }}</a>
+        </p>
+    {% endif %}
 </div>

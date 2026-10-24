@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Wishlist;
 
+use App\Checkout\Price\VariantPriceChecker;
 use App\Checkout\Quantity\QuantityRules;
 use App\Entity\Product\ProductVariant;
 use Doctrine\ORM\EntityManagerInterface;
@@ -31,6 +32,7 @@ final readonly class WishlistCartFiller
         private AddToCartCommandFactoryInterface $addToCartCommandFactory,
         private EventDispatcherInterface $eventDispatcher,
         private EntityManagerInterface $entityManager,
+        private VariantPriceChecker $priceChecker,
     ) {
     }
 
@@ -52,7 +54,7 @@ final readonly class WishlistCartFiller
         $added = 0;
         foreach ($lines as $line) {
             $quantity = self::normalizeQuantity($line['variant'], $line['quantity']);
-            if ($quantity === 0) {
+            if ($quantity === 0 || !$this->priceChecker->hasPrice($line['variant'], $cart->getChannel())) {
                 continue;
             }
 

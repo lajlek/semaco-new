@@ -1,6 +1,7 @@
 app:
     order_item:
         quantity_rules: 'Produkt {{ product }} lze objednat jen po {{ step }} ks, minimálně {{ minimum }} ks.'
+        price_on_request: 'Produkt {{ product }} nemá cenu, nelze ho objednat. Cenu vám sdělíme na poptávku.'
     checkout:
         accept_terms_required: 'Pro dokončení objednávky je nutný souhlas s obchodními podmínkami.'
         accept_privacy_required: 'Pro dokončení objednávky je nutný souhlas se zpracováním osobních údajů.'

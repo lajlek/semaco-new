@@ -2,3 +2,5 @@ Sylius\Bundle\OrderBundle\Controller\AddToCartCommand:
     constraints:
         - App\Checkout\Quantity\OrderItemQuantityRules:
             groups: ['sylius']
+        - App\Checkout\Price\OrderItemHasPrice:
+            groups: ['sylius']

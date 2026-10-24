@@ -12,6 +12,7 @@ app:
         removed: 'Produkt byl odebrán z oblíbených.'
         added_to_cart: 'Vybrané produkty byly přidány do košíku.'
         nothing_to_add: 'Vyplňte počet kusů u produktů, které chcete přidat do košíku.'
+        price_on_request_skipped: 'Produkty bez ceny nelze objednat, do košíku nebyly přidány. Cenu vám sdělíme na poptávku.'
     withdrawal:
         expired: 'Platnost formuláře vypršela, potvrďte prosím odstoupení znovu.'
         handled: 'Odstoupení bylo označeno jako vyřízené.'
