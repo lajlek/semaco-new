@@ -20,7 +20,10 @@ Postup přechodu ze starého e-shopu (Sylius 1.9) na nový. Kroky jdou v tomto p
 3. `bin/console app:migrate:old` (všechny kroky: slugy, data založení produktů, přesměrování, zákazníci, admini, CMS,
    poptávky, wishlisty, číslování objednávek). Nejdřív lze pustit `--dry-run`.
 4. Obrázky a dokumenty: kopie starého `public/media` (jen čtení, rsync) a `bin/console app:migrate:media --source=…`.
-   Doplní jen chybějící soubory.
+   Doplní jen chybějící soubory. Dump i kopii souborů vzít ve stejnou chvíli – starý web obrázky při změně v Heliosu
+   nahrával s novou cestou, takže starší dump odkazuje na soubory, které už neexistují.
+   Nový web obrázky z Heliosu nestahuje (podle nabídky se po převzetí spravují v e-shopu); produkty, které starý web
+   neměl, dostanou obrázky v administraci.
 5. Tři PDF ze starého `public/files` do `public/files` (stejné URL): `H8604_e.pdf`, `P15257_e.pdf`,
    `rezne_parametry.pdf`.
 6. Přepnout DNS / virtual host na nový web.
