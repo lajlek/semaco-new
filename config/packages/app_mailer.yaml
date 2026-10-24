@@ -14,6 +14,3 @@ sylius_mailer:
             template: 'email/order_confirmation.html.twig'
         account_verification:
             template: 'email/verification.html.twig'
-        app_sales_representative_account:
-            subject: 'Přístup do e-shopu SEMACO'
-            template: 'email/sales_representative_account.html.twig'
