@@ -10,17 +10,17 @@
                     <input type="hidden" name="_token" value="{{ csrf_token('partner_fetch') }}">
                     <div class="row g-2">
                         <div class="col-4">
-                            <select name="partner" class="form-select" required>
+                            <select name="partner" class="form-select" required aria-label="Partner">
                                 {% for code, rule in partner_rules() %}
                                     <option value="{{ code }}"{% if rule.allowedHosts is empty %} disabled{% endif %}>{{ rule.label }}{% if rule.allowedHosts is empty %} (jen ruční import){% endif %}</option>
                                 {% endfor %}
                             </select>
                         </div>
                         <div class="col-8">
-                            <input type="url" name="url" class="form-control" placeholder="https://… adresa kategorie nebo rodiny" required>
+                            <input type="url" name="url" class="form-control" placeholder="https://… adresa kategorie nebo rodiny" required aria-label="Adresa kategorie nebo rodiny">
                         </div>
                         <div class="col-4">
-                            <input type="number" name="max_pages" class="form-control" min="1" max="30" value="5" title="Nejvýš stránek výpisu">
+                            <input type="number" name="max_pages" class="form-control" min="1" max="30" value="5" title="Nejvýš stránek výpisu" aria-label="Nejvýš stránek výpisu">
                         </div>
                         <div class="col-8">
                             <button type="submit" class="btn btn-primary w-100">{{ ux_icon('tabler:download', {class: 'icon'}) }} Zařadit načtení</button>
@@ -30,6 +30,29 @@
                         Stránky se stahují po jedné s odstupem nejméně 10 s podle robots.txt partnera, nejvýš 30 stránek najednou.
                         Stejnou adresu lze znovu načíst nejdřív po 6 hodinách. POKOLM automatické načítání zakazuje.
                     </p>
+                </form>
+                <hr class="my-3">
+                <form method="post" action="{{ path('app_admin_partner_item_import_html') }}" enctype="multipart/form-data">
+                    <input type="hidden" name="_token" value="{{ csrf_token('partner_import') }}">
+                    <div class="row g-2">
+                        <div class="col-4">
+                            <select name="partner" class="form-select" required aria-label="Partner">
+                                {% for code, rule in partner_rules() %}
+                                    <option value="{{ code }}">{{ rule.label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-8">
+                            <input type="file" name="html" accept=".html,.htm,text/html" class="form-control" required aria-label="Uložená stránka (.html)">
+                        </div>
+                        <div class="col-8">
+                            <input type="url" name="url" class="form-control" placeholder="https://… adresa uložené stránky (nepovinné)" aria-label="Adresa uložené stránky">
+                        </div>
+                        <div class="col-4">
+                            <button type="submit" class="btn w-100">{{ ux_icon('tabler:upload', {class: 'icon'}) }} Nahrát stránku</button>
+                        </div>
+                    </div>
+                    <p class="text-secondary small mt-2 mb-0">Pro POKOLM: otevřete výpis kategorie v prohlížeči, uložte ho (Ctrl+S) a nahrajte. Na web partnera se nic neodesílá.</p>
                 </form>
             </div>
         </div>

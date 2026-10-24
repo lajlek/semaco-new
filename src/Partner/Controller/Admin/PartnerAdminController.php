@@ -11,11 +11,15 @@ use App\Partner\Rules\PartnerRules;
 use App\Partner\Service\PartnerExporter;
 use App\Partner\Service\PartnerItemMatcher;
 use App\Partner\Service\PartnerItemPreparer;
+use App\Partner\Service\PartnerItemStore;
+use App\Partner\Service\PartnerParserRegistry;
 use Doctrine\ORM\EntityManagerInterface;
 use Sylius\Component\Core\Model\TaxonInterface;
 use Sylius\Resource\Doctrine\Persistence\RepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -40,6 +44,10 @@ final class PartnerAdminController extends AbstractController
         private readonly PartnerExporter $exporter,
         private readonly PartnerFetchQueue $fetchQueue,
         private readonly PartnerRules $rules,
+        private readonly PartnerParserRegistry $parsers,
+        private readonly PartnerItemStore $store,
+        #[Autowire('%kernel.project_dir%/var/partners/snapshots')]
+        private readonly string $snapshotDirectory,
     ) {
     }
 
@@ -187,6 +195,52 @@ final class PartnerAdminController extends AbstractController
         }
 
         return $this->redirectToRoute('app_admin_partner_item_index');
+    }
+
+    #[Route('/admin/partner-items/import-html', name: 'app_admin_partner_item_import_html', methods: ['POST'])]
+    public function importHtml(Request $request): Response
+    {
+        $this->assertToken($request, 'partner_import');
+        $partnerCode = $request->request->getString('partner');
+        $url = trim($request->request->getString('url'));
+        $file = $request->files->get('html');
+        if (!$file instanceof UploadedFile || !$file->isValid() || $file->getSize() > 20 * 1024 * 1024 || !in_array(strtolower($file->getClientOriginalExtension()), ['html', 'htm'], true)) {
+            $this->addFlash('error', 'Nahrajte stránku uloženou z prohlížeče jako soubor .html (nejvýš 20 MB).');
+
+            return $this->redirectToRoute('app_admin_partner_item_index');
+        }
+        if ($url !== '' && !str_starts_with($url, 'https://')) {
+            $this->addFlash('error', 'Adresa stránky musí začínat https://');
+
+            return $this->redirectToRoute('app_admin_partner_item_index');
+        }
+
+        try {
+            $parser = $this->parsers->get($partnerCode);
+        } catch (\InvalidArgumentException $exception) {
+            $this->addFlash('error', $exception->getMessage());
+
+            return $this->redirectToRoute('app_admin_partner_item_index');
+        }
+
+        $html = (string) file_get_contents($file->getPathname());
+        $sourceUrl = $url !== '' ? $url : 'soubor ' . mb_substr($file->getClientOriginalName(), 0, 200);
+        $page = $parser->parse($html, $sourceUrl);
+        if ($page->items === []) {
+            $this->addFlash('warning', sprintf('Ve stránce nebyly nalezeny položky %s. Uložte celou stránku výpisu (Ctrl+S, „Webová stránka, kompletní“ nebo „jen HTML“).', $this->rules->get($partnerCode)->label));
+
+            return $this->redirectToRoute('app_admin_partner_item_index');
+        }
+
+        (new Filesystem())->dumpFile(
+            sprintf('%s/%s/upload-%s-%s.html', $this->snapshotDirectory, $partnerCode, date('Ymd\THis'), substr(sha1($html), 0, 12)),
+            '<!-- ' . str_replace('--', '', $sourceUrl) . " -->\n" . $html,
+        );
+        $summary = $this->store->store($partnerCode, $page->items, $sourceUrl, false);
+        $this->preparer->prepare($partnerCode);
+        $this->addFlash('success', sprintf('Načteno %d položek: nové %d, změněné %d, beze změny %d.', count($page->items), $summary['created'], $summary['changed'], $summary['unchanged']));
+
+        return $this->redirectToRoute('app_admin_partner_item_index', ['criteria' => ['partnerCode' => $partnerCode]]);
     }
 
     #[Route('/admin/partner-fetch-runs/{id}/cancel', name: 'app_admin_partner_fetch_run_cancel', requirements: ['id' => '\d+'], methods: ['POST'])]
