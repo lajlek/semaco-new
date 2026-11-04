@@ -98,7 +98,7 @@ final class BrwFamilyParser implements PartnerParserInterface, ArticleDetailPars
             $total = (int) $m[1];
         }
 
-        return new ParsedPage($items, array_keys($pageUrls), $total);
+        return new ParsedPage($items, array_keys($pageUrls), $total, $familyName);
     }
 
     public function parseArticleDetails(string $html): array

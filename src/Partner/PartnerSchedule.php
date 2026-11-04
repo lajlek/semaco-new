@@ -30,6 +30,7 @@ final readonly class PartnerSchedule implements ScheduleProviderInterface
             ->add(
                 RecurringMessage::every('1 minute', new RunCommandMessage('app:partners:process-queue --no-debug')),
                 RecurringMessage::every('1 hour', new RunCommandMessage('app:partners:match --exported --no-debug')),
+                RecurringMessage::every('1 hour', new RunCommandMessage('app:partners:continue-categories --no-debug')),
             );
     }
 }

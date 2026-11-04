@@ -28,6 +28,8 @@ class PartnerFetchRun implements ResourceInterface
 
     public const KIND_DETAILS = 'details';
 
+    public const KIND_CATEGORY = 'category';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
@@ -41,6 +43,10 @@ class PartnerFetchRun implements ResourceInterface
 
     #[ORM\Column(type: 'text')]
     private string $url;
+
+    #[ORM\ManyToOne(targetEntity: PartnerCategory::class)]
+    #[ORM\JoinColumn(name: 'category_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
+    private ?PartnerCategory $category;
 
     #[ORM\Column(name: 'max_pages', type: 'integer')]
     private int $maxPages;
@@ -75,9 +81,10 @@ class PartnerFetchRun implements ResourceInterface
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $message = null;
 
-    public function __construct(string $partnerCode, string $url, int $maxPages, string $requestedBy, string $kind = self::KIND_LISTING)
+    public function __construct(string $partnerCode, string $url, int $maxPages, string $requestedBy, string $kind = self::KIND_LISTING, ?PartnerCategory $category = null)
     {
         $this->kind = $kind;
+        $this->category = $category;
         $this->partnerCode = $partnerCode;
         $this->url = $url;
         $this->maxPages = $maxPages;
@@ -98,6 +105,11 @@ class PartnerFetchRun implements ResourceInterface
     public function getKind(): string
     {
         return $this->kind;
+    }
+
+    public function getCategory(): ?PartnerCategory
+    {
+        return $this->category;
     }
 
     public function getUrl(): string

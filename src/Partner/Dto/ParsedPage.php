@@ -14,6 +14,7 @@ final readonly class ParsedPage
         public array $items,
         public array $pageUrls,
         public ?int $totalCount,
+        public ?string $title = null,
     ) {
     }
 }

@@ -70,6 +70,9 @@ final class PartnerRules
                 extract: ['spec' => '/^Ø[\d.]+ x r[\d.]+ x (?<l2>[\d.]+)(?: x [\d.]+)?$/u'],
                 variantNameTemplate: 'Průměr {option_group_1} L3={option_group_28}',
                 allowedHosts: ['www.brw.ch'],
+                sitemapUrl: 'https://www.brw.ch/storage/sitemap.xml',
+                listingUrlPattern: '#/de-CH/[^/?]+-\d{4,}$#',
+                titlePattern: '/\b(?:FUTURO|NERIOX)\b/iu',
             ),
         ];
     }

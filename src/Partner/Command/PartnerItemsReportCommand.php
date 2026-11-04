@@ -42,13 +42,19 @@ final class PartnerItemsReportCommand extends Command
         }
 
         $rows = [];
+        $families = [];
         foreach ($this->entityManager->getRepository(PartnerItem::class)->findBy($criteria, ['partnerCode' => 'ASC', 'orderCode' => 'ASC']) as $item) {
             $this->matcher->match($item);
             $rows[$item->getPartnerCode()][$item->getMatchStatus()] = ($rows[$item->getPartnerCode()][$item->getMatchStatus()] ?? 0) + 1;
+            $families[$item->getPartnerCode()][$item->getFamilyKey() ?? '#' . $item->getOrderCode()] = true;
         }
         $this->entityManager->flush();
         foreach (array_keys($rows) as $partner) {
-            $this->preparer->prepare($partner);
+            if ((bool) $input->getOption('exported')) {
+                $this->preparer->prepareFamilies($partner, array_map(strval(...), array_keys($families[$partner])));
+            } else {
+                $this->preparer->prepare($partner);
+            }
         }
 
         $io->table(

@@ -8,6 +8,7 @@ use App\Partner\Entity\PartnerExportBatch;
 use App\Partner\Entity\PartnerItem;
 use App\Partner\Fetch\PartnerFetchQueue;
 use App\Partner\Rules\PartnerRules;
+use App\Partner\Service\PartnerCategories;
 use App\Partner\Service\PartnerExporter;
 use App\Partner\Service\PartnerItemMatcher;
 use App\Partner\Service\PartnerItemPreparer;
@@ -46,6 +47,7 @@ final class PartnerAdminController extends AbstractController
         private readonly PartnerRules $rules,
         private readonly PartnerParserRegistry $parsers,
         private readonly PartnerItemStore $store,
+        private readonly PartnerCategories $categories,
         #[Autowire('%kernel.project_dir%/var/partners/snapshots')]
         private readonly string $snapshotDirectory,
     ) {
@@ -222,6 +224,65 @@ final class PartnerAdminController extends AbstractController
         return $this->redirectToRoute('app_admin_partner_item_index');
     }
 
+    #[Route('/admin/partner-fetch-runs/categories', name: 'app_admin_partner_fetch_run_categories', methods: ['POST'])]
+    public function queueCategories(Request $request): Response
+    {
+        $this->assertToken($request, 'partner_fetch');
+
+        try {
+            $this->fetchQueue->queueCategories($request->request->getString('partner'), $this->adminName());
+            $this->addFlash('success', 'Načítání vybraných kategorií je zařazené. Běží po částech: nejvýš 30 stránek za hodinu s odstupem nejméně 10 s.');
+        } catch (\DomainException|\InvalidArgumentException $exception) {
+            $this->addFlash('error', $exception->getMessage());
+        }
+
+        return $this->redirectToRoute('app_admin_partner_item_index');
+    }
+
+    #[Route('/admin/partner-categories/selection', name: 'app_admin_partner_category_selection', methods: ['POST'])]
+    public function saveCategorySelection(Request $request): Response
+    {
+        $this->assertToken($request, 'partner_category');
+        $this->categories->select(array_values(array_map(intval(...), array_filter($request->request->all('enabled'), is_numeric(...)))));
+        $this->addFlash('success', 'Výběr kategorií je uložený. Odškrtnutá kategorie se přestane načítat.');
+
+        return $this->redirectToRoute('app_admin_partner_item_index');
+    }
+
+    #[Route('/admin/partner-categories', name: 'app_admin_partner_category_create', methods: ['POST'])]
+    public function createCategory(Request $request): Response
+    {
+        $this->assertToken($request, 'partner_category');
+
+        try {
+            $this->categories->add(
+                $request->request->getString('partner'),
+                trim($request->request->getString('name')),
+                trim($request->request->getString('start_url')),
+                trim($request->request->getString('url_keywords')),
+            );
+            $this->addFlash('success', 'Kategorie je přidaná a vybraná.');
+        } catch (\DomainException|\InvalidArgumentException $exception) {
+            $this->addFlash('error', $exception->getMessage());
+        }
+
+        return $this->redirectToRoute('app_admin_partner_item_index');
+    }
+
+    #[Route('/admin/partner-categories/{id}/delete', name: 'app_admin_partner_category_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function deleteCategory(Request $request, int $id): Response
+    {
+        $this->assertToken($request, 'partner_category');
+
+        try {
+            $this->categories->delete($id);
+        } catch (\DomainException $exception) {
+            $this->addFlash('error', $exception->getMessage());
+        }
+
+        return $this->redirectToRoute('app_admin_partner_item_index');
+    }
+
     #[Route('/admin/partner-items/import-html', name: 'app_admin_partner_item_import_html', methods: ['POST'])]
     public function importHtml(Request $request): Response
     {
@@ -251,6 +312,11 @@ final class PartnerAdminController extends AbstractController
         $html = (string) file_get_contents($file->getPathname());
         $sourceUrl = $url !== '' ? $url : 'soubor ' . mb_substr($file->getClientOriginalName(), 0, 200);
         $page = $parser->parse($html, $sourceUrl);
+        if (!$this->rules->get($partnerCode)->allowsTitle($page->title)) {
+            $this->addFlash('error', sprintf('Stránka „%s“ nepatří do povolených řad partnera %s, položky se nenačetly.', (string) $page->title, $this->rules->get($partnerCode)->label));
+
+            return $this->redirectToRoute('app_admin_partner_item_index');
+        }
         if ($page->items === []) {
             $this->addFlash('warning', sprintf('Ve stránce nebyly nalezeny položky %s. Uložte celou stránku výpisu (Ctrl+S, „Webová stránka, kompletní“ nebo „jen HTML“).', $this->rules->get($partnerCode)->label));
 

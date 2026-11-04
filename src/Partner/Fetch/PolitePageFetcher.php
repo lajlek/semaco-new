@@ -21,6 +21,8 @@ final class PolitePageFetcher
 
     private const MAX_BODY_BYTES = 15 * 1024 * 1024;
 
+    private const MAX_SITEMAP_BYTES = 64 * 1024 * 1024;
+
     private const ROBOTS_TTL_SECONDS = 86400;
 
     /** @var array<string, array{policy: RobotsPolicy, loadedAt: int}> */
@@ -48,6 +50,22 @@ final class PolitePageFetcher
 
     public function fetch(string $url, string $partnerCode): string
     {
+        $body = $this->fetchChecked($url, $partnerCode, self::MAX_BODY_BYTES);
+        $this->filesystem->dumpFile(
+            sprintf('%s/%s/%s-%s.html', $this->snapshotDirectory, $partnerCode, date('Ymd\THis'), substr(sha1($url), 0, 12)),
+            '<!-- ' . str_replace('--', '', $url) . " -->\n" . $body,
+        );
+
+        return $body;
+    }
+
+    public function fetchSitemap(string $url, string $partnerCode): string
+    {
+        return $this->fetchChecked($url, $partnerCode, self::MAX_SITEMAP_BYTES);
+    }
+
+    private function fetchChecked(string $url, string $partnerCode, int $maxBytes): string
+    {
         for ($redirects = 0; ; ++$redirects) {
             $host = $this->assertAllowed($url, $partnerCode);
             $policy = $this->robotsFor($host);
@@ -55,7 +73,7 @@ final class PolitePageFetcher
                 throw new FetchForbiddenException(sprintf('robots.txt zakazuje %s', $url));
             }
 
-            $result = $this->exchange($host, $url, $policy, 60);
+            $result = $this->exchange($host, $url, $policy, 60, $maxBytes);
             $status = $result['status'];
             if ($status === 429 || $status === 403 || $status >= 500) {
                 $this->backOff($host, $status);
@@ -74,11 +92,6 @@ final class PolitePageFetcher
             if ($status >= 400) {
                 throw new FetchForbiddenException(sprintf('%s odpověděl %d, nepokračuji', $url, $status));
             }
-
-            $this->filesystem->dumpFile(
-                sprintf('%s/%s/%s-%s.html', $this->snapshotDirectory, $partnerCode, date('Ymd\THis'), substr(sha1($url), 0, 12)),
-                '<!-- ' . str_replace('--', '', $url) . " -->\n" . $result['body'],
-            );
 
             return $result['body'];
         }
@@ -117,16 +130,16 @@ final class PolitePageFetcher
         throw new FetchForbiddenException(sprintf('%s odpověděl %d, zastavuji a %d h nic nestahuji', $host, $status, $this->backoffHours));
     }
 
-    private function request(string $url, float $maxDuration): ResponseInterface
+    private function request(string $url, float $maxDuration, int $maxBytes): ResponseInterface
     {
         return $this->httpClient->request('GET', $url, [
             'headers' => ['User-Agent' => $this->userAgent, 'Accept-Language' => 'de-CH,de;q=0.9,en;q=0.8'],
             'timeout' => 30,
             'max_duration' => $maxDuration,
             'max_redirects' => 0,
-            'on_progress' => static function (int $downloaded): void {
-                if ($downloaded > self::MAX_BODY_BYTES) {
-                    throw new FetchForbiddenException('Odpověď je větší než 15 MB, nepokračuji');
+            'on_progress' => static function (int $downloaded) use ($maxBytes): void {
+                if ($downloaded > $maxBytes) {
+                    throw new FetchForbiddenException(sprintf('Odpověď je větší než %d MB, nepokračuji', $maxBytes / 1024 / 1024));
                 }
             },
         ]);
@@ -145,7 +158,7 @@ final class PolitePageFetcher
         } else {
             $url = sprintf('https://%s/robots.txt', $host);
             for ($redirects = 0; ; ++$redirects) {
-                $result = $this->exchange($host, $url, null, 15);
+                $result = $this->exchange($host, $url, null, 15, self::MAX_BODY_BYTES);
                 $status = $result['status'];
                 if ($status === 429 || $status >= 500) {
                     $this->backOff($host, $status);
@@ -174,12 +187,12 @@ final class PolitePageFetcher
     }
 
     /** @return array{status: int, location: ?string, body: string} */
-    private function exchange(string $host, string $url, ?RobotsPolicy $policy, float $maxDuration): array
+    private function exchange(string $host, string $url, ?RobotsPolicy $policy, float $maxDuration, int $maxBytes): array
     {
         $this->waitForTurn($host, $policy);
 
         try {
-            $response = $this->request($url, $maxDuration);
+            $response = $this->request($url, $maxDuration, $maxBytes);
             $status = $response->getStatusCode();
             $headers = $response->getHeaders(false);
             if ($status < 200 || $status >= 300) {
@@ -189,8 +202,8 @@ final class PolitePageFetcher
             }
 
             $body = $response->getContent(false);
-            if (strlen($body) > self::MAX_BODY_BYTES) {
-                throw new FetchForbiddenException('Odpověď je větší než 15 MB, nepokračuji');
+            if (strlen($body) > $maxBytes) {
+                throw new FetchForbiddenException(sprintf('Odpověď je větší než %d MB, nepokračuji', $maxBytes / 1024 / 1024));
             }
 
             return ['status' => $status, 'location' => null, 'body' => $body];

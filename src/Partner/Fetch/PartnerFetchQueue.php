@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Partner\Fetch;
 
+use App\Partner\Entity\PartnerCategory;
 use App\Partner\Entity\PartnerFetchRun;
 use App\Partner\Rules\PartnerRule;
 use App\Partner\Rules\PartnerRules;
@@ -17,10 +18,16 @@ use Symfony\Component\Lock\LockFactory;
 
 final readonly class PartnerFetchQueue
 {
-    /** @param RepositoryInterface<PartnerFetchRun> $runRepository */
+    /**
+     * @param RepositoryInterface<PartnerFetchRun> $runRepository
+     * @param RepositoryInterface<PartnerCategory> $categoryRepository
+     */
     public function __construct(
         #[Autowire(service: 'app.repository.partner_fetch_run')]
         private RepositoryInterface $runRepository,
+        #[Autowire(service: 'app.repository.partner_category')]
+        private RepositoryInterface $categoryRepository,
+        private PartnerCategoryCrawler $categoryCrawler,
         private EntityManagerInterface $entityManager,
         private PartnerRules $rules,
         private PartnerParserRegistry $parsers,
@@ -72,7 +79,7 @@ final readonly class PartnerFetchQueue
         if (!$this->detailFetcher->supports($partnerCode)) {
             throw new \DomainException(sprintf('U partnera %s se detaily artiklů nenačítají.', $rule->label));
         }
-        $pending = count($this->detailFetcher->pending($partnerCode));
+        $pending = $this->detailFetcher->countPending($partnerCode);
         if ($pending === 0) {
             throw new \DomainException(sprintf('Všechny položky %s už mají načtený detail.', $rule->label));
         }
@@ -82,6 +89,57 @@ final readonly class PartnerFetchQueue
 
             return $this->persist(new PartnerFetchRun($partnerCode, '', min($pending, $this->maxPages), $requestedBy, PartnerFetchRun::KIND_DETAILS));
         });
+    }
+
+    public function queueCategories(string $partnerCode, string $requestedBy): PartnerFetchRun
+    {
+        $rule = $this->rules->get($partnerCode);
+        if (!$this->parsers->get($partnerCode)->supportsAutomaticFetching()) {
+            throw new \DomainException(sprintf('%s nepovoluje automatické načítání (robots.txt). Uložte stránku v prohlížeči a nahrajte ji (Nahrát stránku).', $rule->label));
+        }
+
+        return $this->locked(function () use ($rule, $partnerCode, $requestedBy): PartnerFetchRun {
+            $this->assertCanQueue($rule);
+            $categories = $this->categoryRepository->findBy(['partnerCode' => $partnerCode, 'enabled' => true], ['name' => 'ASC']);
+            if ($categories === []) {
+                throw new \DomainException(sprintf('U partnera %s není vybraná žádná kategorie.', $rule->label));
+            }
+
+            $since = new \DateTimeImmutable(sprintf('-%d hours', $this->cooldownHours));
+            $requested = array_values(array_filter($categories, static fn (PartnerCategory $category): bool => $category->requestFetch($since)));
+            if ($requested === []) {
+                throw new \DomainException(sprintf('Vybrané kategorie se načítaly před méně než %d hodinami.', $this->cooldownHours));
+            }
+
+            return $this->persist($this->categoryRun($requested[0], $requestedBy));
+        });
+    }
+
+    public function queueContinuations(): int
+    {
+        $queued = 0;
+        foreach ($this->rules->all() as $partnerCode => $rule) {
+            $active = array_values(array_filter(
+                $this->categoryRepository->findBy(['partnerCode' => $partnerCode, 'enabled' => true], ['name' => 'ASC']),
+                static fn (PartnerCategory $category): bool => $category->isActive(),
+            ));
+            if ($active === []) {
+                continue;
+            }
+
+            try {
+                $this->locked(function () use ($rule, $active): PartnerFetchRun {
+                    $this->assertCanQueue($rule);
+
+                    return $this->persist($this->categoryRun($active[0], 'plánovač'));
+                });
+                ++$queued;
+            } catch (\DomainException) {
+                continue;
+            }
+        }
+
+        return $queued;
     }
 
     public function cancel(int $id): bool
@@ -123,6 +181,10 @@ final readonly class PartnerFetchQueue
             }
 
             try {
+                if ($run->getKind() === PartnerFetchRun::KIND_CATEGORY) {
+                    return $this->processCategory($run);
+                }
+
                 if ($run->getKind() === PartnerFetchRun::KIND_DETAILS) {
                     $result = $this->detailFetcher->fetch(
                         $run->getPartnerCode(),
@@ -138,7 +200,11 @@ final readonly class PartnerFetchQueue
                         false,
                         static fn (string $url, int $count, array $summary) => $run->addPage($summary),
                     );
-                    $message = $result['stopped'] ?? ($result['queued'] > 0 ? sprintf('Další stránky nenačteny (limit): %d', $result['queued']) : null);
+                    $message = $result['stopped'] ?? match (true) {
+                        $result['skipped'] > 0 => sprintf('Přeskočeno stránek mimo povolené řady partnera: %d', $result['skipped']),
+                        $result['queued'] > 0 => sprintf('Další stránky nenačteny (limit): %d', $result['queued']),
+                        default => null,
+                    };
                 }
                 $this->preparer->prepare($run->getPartnerCode());
                 $run->finish($result['stopped'] !== null ? PartnerFetchRun::STATUS_STOPPED : PartnerFetchRun::STATUS_DONE, $message);
@@ -167,6 +233,34 @@ final readonly class PartnerFetchQueue
     public function recent(int $limit = 10): array
     {
         return array_values($this->runRepository->findBy([], ['requestedAt' => 'DESC'], $limit));
+    }
+
+    private function categoryRun(PartnerCategory $category, string $requestedBy): PartnerFetchRun
+    {
+        return new PartnerFetchRun($category->getPartnerCode(), $category->getName(), $this->maxPages, $requestedBy, PartnerFetchRun::KIND_CATEGORY, $category);
+    }
+
+    private function processCategory(PartnerFetchRun $run): PartnerFetchRun
+    {
+        $category = $run->getCategory();
+        if (!$category instanceof PartnerCategory || !$category->isEnabled()) {
+            $run->finish(PartnerFetchRun::STATUS_CANCELLED, 'Kategorie už není vybraná.');
+            $this->entityManager->flush();
+
+            return $run;
+        }
+
+        $result = $this->categoryCrawler->crawl($category, min($run->getMaxPages(), $this->maxPages), static fn (array $summary) => $run->addPage($summary));
+        $this->preparer->prepareFamilies($run->getPartnerCode(), $result['families']);
+
+        $message = $result['stopped'] ?? ($result['finished'] ? 'Kategorie je načtená.' : sprintf('Zbývá %d stránek, pokračuje se každou hodinu.', $result['remaining']));
+        if ($result['skipped'] > 0) {
+            $message .= sprintf(' Přeskočeno mimo povolené řady: %d.', $result['skipped']);
+        }
+        $run->finish($result['stopped'] !== null ? PartnerFetchRun::STATUS_STOPPED : PartnerFetchRun::STATUS_DONE, $message);
+        $this->entityManager->flush();
+
+        return $run;
     }
 
     /**

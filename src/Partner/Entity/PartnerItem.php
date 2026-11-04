@@ -13,6 +13,7 @@ use Sylius\Resource\Model\ResourceInterface;
 #[ORM\Table(name: 'app_partner_item')]
 #[ORM\UniqueConstraint(name: 'UNIQ_partner_item_code', columns: ['partner_code', 'order_code'])]
 #[ORM\Index(name: 'IDX_partner_item_match', columns: ['partner_code', 'match_status'])]
+#[ORM\Index(name: 'IDX_partner_item_family_code', columns: ['partner_code', 'family_code'])]
 class PartnerItem implements ResourceInterface
 {
     public const MATCH_UNMATCHED = 'unmatched';

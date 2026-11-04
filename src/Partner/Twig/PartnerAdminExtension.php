@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Partner\Twig;
 
+use App\Partner\Entity\PartnerCategory;
 use App\Partner\Entity\PartnerFetchRun;
 use App\Partner\Entity\PartnerItem;
 use App\Partner\Fetch\PartnerDetailFetcher;
 use App\Partner\Fetch\PartnerFetchQueue;
 use App\Partner\Rules\PartnerRule;
 use App\Partner\Rules\PartnerRules;
+use App\Partner\Service\PartnerCategories;
 use App\Partner\Service\PartnerItemPreparer;
 use Sylius\Component\Product\Model\ProductOptionInterface;
 use Twig\Attribute\AsTwigFunction;
@@ -21,6 +23,7 @@ final readonly class PartnerAdminExtension
         private PartnerRules $rules,
         private PartnerFetchQueue $fetchQueue,
         private PartnerDetailFetcher $detailFetcher,
+        private PartnerCategories $categories,
     ) {
     }
 
@@ -64,11 +67,18 @@ final readonly class PartnerAdminExtension
         $pending = [];
         foreach (array_keys($this->rules->all()) as $partnerCode) {
             if ($this->detailFetcher->supports($partnerCode)) {
-                $pending[$partnerCode] = count($this->detailFetcher->pending($partnerCode));
+                $pending[$partnerCode] = $this->detailFetcher->countPending($partnerCode);
             }
         }
 
         return $pending;
+    }
+
+    /** @return array<string, list<PartnerCategory>> */
+    #[AsTwigFunction('partner_categories')]
+    public function categories(): array
+    {
+        return $this->categories->byPartner();
     }
 
     /** @return list<PartnerFetchRun> */

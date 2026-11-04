@@ -31,6 +31,16 @@ final readonly class PartnerDetailFetcher
             $this->parsers->get($partnerCode)->supportsAutomaticFetching();
     }
 
+    public function countPending(string $partnerCode): int
+    {
+        $count = $this->entityManager->getConnection()->fetchOne(
+            'SELECT COUNT(*) FROM app_partner_item WHERE partner_code = ? AND details_fetched_at IS NULL AND data_url IS NOT NULL',
+            [$partnerCode],
+        );
+
+        return is_numeric($count) ? (int) $count : 0;
+    }
+
     /** @return list<PartnerItem> items without fetched details, unmatched first */
     public function pending(string $partnerCode): array
     {

@@ -10,6 +10,9 @@ final readonly class PartnerRule
      * @param array<string, string> $options source parameter => Semaco option code
      * @param array<string, string> $extract source parameter => regex with named groups (group name = derived parameter)
      * @param list<string> $allowedHosts hosts the crawler may fetch
+     * @param string|null $sitemapUrl sitemap listing the partner's product pages
+     * @param string|null $listingUrlPattern regex a sitemap URL must match to be a product page
+     * @param string|null $titlePattern regex a page title must match for its items to be taken
      */
     public function __construct(
         public string $partnerCode,
@@ -20,6 +23,9 @@ final readonly class PartnerRule
         public array $extract,
         public string $variantNameTemplate,
         public array $allowedHosts,
+        public ?string $sitemapUrl = null,
+        public ?string $listingUrlPattern = null,
+        public ?string $titlePattern = null,
     ) {
     }
 
@@ -73,6 +79,16 @@ final readonly class PartnerRule
             rtrim($parts['path'] ?? '', '/'),
             $query === [] ? '' : '?' . http_build_query($query),
         );
+    }
+
+    public function isListingUrl(string $url): bool
+    {
+        return $this->listingUrlPattern === null || preg_match($this->listingUrlPattern, $url) === 1;
+    }
+
+    public function allowsTitle(?string $title): bool
+    {
+        return $this->titlePattern === null || ($title !== null && preg_match($this->titlePattern, $title) === 1);
     }
 
     public function isAllowedUrl(string $url): bool

@@ -85,7 +85,7 @@
                         <tr>
                             <td class="text-nowrap">{{ run.requestedAt|date('d. m. H:i') }}</td>
                             <td>{{ partner_rules()[run.partnerCode].label|default(run.partnerCode) }}</td>
-                            <td class="text-truncate" style="max-width: 18rem" title="{{ run.url }}">{{ run.kind == 'details' ? 'Detaily artiklů' : run.url }}</td>
+                            <td class="text-truncate" style="max-width: 18rem" title="{{ run.url }}">{{ run.kind == 'details' ? 'Detaily artiklů' : (run.kind == 'category' ? 'Kategorie: ' ~ run.url : run.url) }}</td>
                             <td class="text-nowrap">{{ status_labels[run.status]|default(run.status) }}</td>
                             <td class="text-nowrap">{{ run.pages }} str. · nové {{ run.itemsCreated }} · změněné {{ run.itemsChanged }}</td>
                             <td class="small text-secondary">
@@ -105,5 +105,81 @@
                 </table>
             </div>
         </div>
+    </div>
+</div>
+
+{% set category_states = {idle: 'Nenačteno', running: 'Načítá se', paused: 'Pozastaveno', done: 'Načteno'} %}
+{% set automatic_partners = partner_rules()|filter(rule => rule.allowedHosts is not empty) %}
+{% set categories_by_partner = partner_categories() %}
+
+<div class="card mb-3">
+    <div class="card-header"><h3 class="card-title">Sledované kategorie partnerů</h3></div>
+    <div class="card-body">
+        <form method="post" action="{{ path('app_admin_partner_category_selection') }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('partner_category') }}">
+            <div class="table-responsive">
+                <table class="table table-sm mb-3">
+                    <thead>
+                    <tr><th class="w-1">Vybrat</th><th>Partner</th><th>Kategorie</th><th>Zdroj</th><th>Stav</th><th class="w-1"></th></tr>
+                    </thead>
+                    <tbody>
+                    {% for code, rule in automatic_partners %}
+                        {% for category in categories_by_partner[code]|default([]) %}
+                            <tr>
+                                <td><input type="checkbox" class="form-check-input" name="enabled[]" value="{{ category.id }}"{% if category.enabled %} checked{% endif %} aria-label="Vybrat {{ category.name }}"></td>
+                                <td>{{ rule.label }}</td>
+                                <td>{{ category.name }}</td>
+                                <td class="text-secondary small">{{ category.urlKeywords ? 'adresa obsahuje: ' ~ category.urlKeywords : category.startUrl }}</td>
+                                <td class="text-nowrap">
+                                    {{ category_states[category.state] }}
+                                    {% if category.pendingUrls is not null %}· načteno {{ category.pagesFetched }}, zbývá {{ category.pendingUrls|length }} str.{% endif %}
+                                    {% if category.finishedAt %}· {{ category.finishedAt|date('d. m. H:i') }}{% endif %}
+                                </td>
+                                <td>{% if not category.enabled %}<button type="submit" form="partner-category-delete-{{ category.id }}" class="btn btn-sm btn-link p-0">Smazat</button>{% endif %}</td>
+                            </tr>
+                        {% endfor %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <button type="submit" class="btn btn-primary">{{ ux_icon('tabler:device-floppy', {class: 'icon'}) }} Uložit výběr</button>
+        </form>
+        {% for categories in categories_by_partner %}
+            {% for category in categories|filter(category => not category.enabled) %}
+                <form id="partner-category-delete-{{ category.id }}" method="post" action="{{ path('app_admin_partner_category_delete', {id: category.id}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('partner_category') }}">
+                </form>
+            {% endfor %}
+        {% endfor %}
+        <div class="d-flex flex-wrap gap-2 mt-3">
+            {% for code, rule in automatic_partners %}
+                <form method="post" action="{{ path('app_admin_partner_fetch_run_categories') }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('partner_fetch') }}">
+                    <input type="hidden" name="partner" value="{{ code }}">
+                    <button type="submit" class="btn">{{ ux_icon('tabler:download', {class: 'icon'}) }} Načíst vybrané: {{ rule.label }}</button>
+                </form>
+            {% endfor %}
+        </div>
+        <p class="text-secondary small mt-2 mb-0">
+            Načítání běží po částech: nejvýš 30 stránek za hodinu s odstupem nejméně 10 s. Odškrtnutím a uložením se pozastaví.
+            U BRW se berou jen rodiny s FUTURO nebo NERIOX v názvu, ostatní se přeskočí. POKOLM se načítá jen nahráním uložené stránky.
+        </p>
+        <hr class="my-3">
+        <form method="post" action="{{ path('app_admin_partner_category_create') }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('partner_category') }}">
+            <div class="row g-2">
+                <div class="col-6 col-xl-2">
+                    <select name="partner" class="form-select" required aria-label="Partner">
+                        {% for code, rule in automatic_partners %}
+                            <option value="{{ code }}">{{ rule.label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-6 col-xl-3"><input type="text" name="name" class="form-control" maxlength="255" required placeholder="Název kategorie" aria-label="Název kategorie"></div>
+                <div class="col-6 col-xl-2"><input type="text" name="url_keywords" class="form-control" maxlength="255" placeholder="Slova v adrese (BRW)" aria-label="Slova v adrese produktu"></div>
+                <div class="col-6 col-xl-3"><input type="url" name="start_url" class="form-control" placeholder="https://… adresa výpisu" aria-label="Adresa výpisu kategorie"></div>
+                <div class="col-12 col-xl-2"><button type="submit" class="btn w-100">{{ ux_icon('tabler:plus', {class: 'icon'}) }} Přidat kategorii</button></div>
+            </div>
+        </form>
     </div>
 </div>

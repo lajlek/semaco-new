@@ -46,8 +46,8 @@ final readonly class PartnerExporter
             $this->matcher->match($item);
         }
         $this->entityManager->flush();
-        foreach (array_keys($partners) as $partnerCode) {
-            $this->preparer->prepare($partnerCode);
+        foreach ($partners as $partnerCode => $families) {
+            $this->preparer->prepareFamilies($partnerCode, array_map(strval(...), array_keys($families)));
         }
 
         $ready = array_values(array_filter($selected, static fn (PartnerItem $item): bool => $item->isExportable()));

@@ -24,7 +24,7 @@ final readonly class PartnerListingCrawler
     /**
      * @param callable(string, int, array{created: int, changed: int, unchanged: int}): void|null $onPage
      *
-     * @return array{pages: int, created: int, changed: int, unchanged: int, reported: int|null, queued: int, stopped: string|null}
+     * @return array{pages: int, created: int, changed: int, unchanged: int, skipped: int, reported: int|null, queued: int, stopped: string|null}
      */
     public function crawl(string $partnerCode, string $startUrl, int $maxPages, bool $dryRun = false, ?callable $onPage = null): array
     {
@@ -41,7 +41,7 @@ final readonly class PartnerListingCrawler
 
         $queue = [self::normalize($startUrl)];
         $visited = [];
-        $result = ['pages' => 0, 'created' => 0, 'changed' => 0, 'unchanged' => 0, 'reported' => null, 'queued' => 0, 'stopped' => null];
+        $result = ['pages' => 0, 'created' => 0, 'changed' => 0, 'unchanged' => 0, 'skipped' => 0, 'reported' => null, 'queued' => 0, 'stopped' => null];
 
         while ($queue !== [] && count($visited) < $maxPages) {
             $url = array_shift($queue);
@@ -56,6 +56,13 @@ final readonly class PartnerListingCrawler
                 $result['stopped'] = $exception->getMessage();
 
                 break;
+            }
+
+            if (!$rule->allowsTitle($page->title)) {
+                ++$result['pages'];
+                ++$result['skipped'];
+
+                continue;
             }
 
             $result['reported'] ??= $page->totalCount;
@@ -79,7 +86,7 @@ final readonly class PartnerListingCrawler
         return $result;
     }
 
-    private static function normalize(string $url): string
+    public static function normalize(string $url): string
     {
         $url = (string) preg_replace('/([?&])page=1(?=&|$)/', '$1', $url);
 

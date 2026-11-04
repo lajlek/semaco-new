@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Partner\Command;
 
+use App\Partner\Rules\PartnerRules;
 use App\Partner\Service\PartnerItemPreparer;
 use App\Partner\Service\PartnerItemStore;
 use App\Partner\Service\PartnerParserRegistry;
@@ -22,6 +23,7 @@ final class ImportPartnerHtmlCommand extends Command
         private readonly PartnerParserRegistry $parsers,
         private readonly PartnerItemStore $store,
         private readonly PartnerItemPreparer $preparer,
+        private readonly PartnerRules $rules,
     ) {
         parent::__construct();
     }
@@ -53,6 +55,11 @@ final class ImportPartnerHtmlCommand extends Command
 
         $sourceUrl = $url !== '' ? $url : 'file://' . basename($file);
         $page = $this->parsers->get($partner)->parse((string) file_get_contents($file), $sourceUrl);
+        if (!$this->rules->get($partner)->allowsTitle($page->title)) {
+            $io->error(sprintf('Stránka „%s“ nepatří do povolených řad partnera.', (string) $page->title));
+
+            return Command::FAILURE;
+        }
         $dryRun = (bool) $input->getOption('dry-run');
         $summary = $this->store->store($partner, $page->items, $sourceUrl, $dryRun);
         if (!$dryRun) {

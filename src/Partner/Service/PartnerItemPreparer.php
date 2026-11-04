@@ -56,16 +56,35 @@ final class PartnerItemPreparer
         return $this->optionNames;
     }
 
-    public function prepare(string $partnerCode, ?string $onlyFamilyKey = null): int
+    /** @param list<string> $familyKeys */
+    public function prepareFamilies(string $partnerCode, array $familyKeys): int
+    {
+        if ($familyKeys === []) {
+            return 0;
+        }
+        $complete = array_filter($familyKeys, static fn (string $familyKey): bool => str_starts_with($familyKey, '#')) === [];
+
+        return $this->prepare($partnerCode, null, $complete ? $familyKeys : null);
+    }
+
+    /** @param list<string>|null $onlyFamilyCodes */
+    public function prepare(string $partnerCode, ?string $onlyFamilyKey = null, ?array $onlyFamilyCodes = null): int
     {
         $rule = $this->rules->get($partnerCode);
+        if ($onlyFamilyCodes === null && $onlyFamilyKey !== null && !str_starts_with($onlyFamilyKey, '#')) {
+            $onlyFamilyCodes = [$onlyFamilyKey];
+        }
+        if ($rule->familyPattern !== null) {
+            $onlyFamilyCodes = null;
+        }
+
         $families = [];
-        foreach ($this->partnerItemRepository->findForPreparation($partnerCode) as $item) {
+        foreach ($this->partnerItemRepository->findForPreparation($partnerCode, $onlyFamilyCodes) as $item) {
             $familyKey = $rule->familyKey($item->getOrderCode(), $item->getFamilyCode());
             $families[$familyKey ?? '#' . $item->getOrderCode()][] = $item;
         }
 
-        $knownFamilies = $this->knownFamilies($families);
+        $knownFamilies = $this->knownFamilies($onlyFamilyCodes === null ? $families : [$this->partnerItemRepository->findMatchedForPreparation($partnerCode)]);
         $count = 0;
         foreach ($families as $familyKey => $members) {
             if ($onlyFamilyKey !== null && (string) $familyKey !== $onlyFamilyKey) {
@@ -273,7 +292,7 @@ final class PartnerItemPreparer
     }
 
     /**
-     * @param array<string, list<PartnerItem>> $families
+     * @param array<array-key, list<PartnerItem>> $families
      *
      * @return array<string, array{name: string, product_name: string, taxon_code: ?string}> lowercased partner name => Semaco product
      */
