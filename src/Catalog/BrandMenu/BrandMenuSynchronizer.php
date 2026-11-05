@@ -104,7 +104,8 @@ final readonly class BrandMenuSynchronizer
         /** @var array<string, string|null> $logos */
         $logos = $connection->fetchAllKeyValue('SELECT UPPER(name), logo_path FROM app_brand');
         $priceHitsImage = $connection->fetchOne(
-            "SELECT i.path FROM sylius_taxon_image i JOIN sylius_taxon t ON t.id = i.owner_id WHERE t.code = 'cenove_hity' ORDER BY i.id ASC LIMIT 1",
+            'SELECT i.path FROM sylius_taxon_image i JOIN sylius_taxon t ON t.id = i.owner_id WHERE t.code = :code ORDER BY i.id ASC LIMIT 1',
+            ['code' => BrandMenuClassifier::PRICE_HITS_TAXON],
         );
 
         $paths = [

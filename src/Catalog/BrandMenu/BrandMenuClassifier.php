@@ -6,6 +6,8 @@ namespace App\Catalog\BrandMenu;
 
 final class BrandMenuClassifier
 {
+    public const PRICE_HITS_TAXON = 'cenove_hity';
+
     /** @var array<string, string> */
     private const MAKER_BY_BRAND = ['POKOLM' => BrandMenuTree::POKOLM, 'FRAISA' => BrandMenuTree::FRAISA, 'BRW' => BrandMenuTree::BRW];
 
@@ -78,7 +80,7 @@ final class BrandMenuClassifier
         '/pilník|frässtift/iu' => 'brw_frezovani_pilniky_hm',
         '/\bvbd\b|wendeplatten/iu' => 'brw_frezovani_vbd',
         '/(?:fréz|fräs).*hss|hss.*(?:fréz|fräs)/iu' => 'brw_frezovani_hss',
-        '/mikro/iu' => 'brw_frezovani_mikro',
+        '/mikrofréz|mikrofräs/iu' => 'brw_frezovani_mikro',
         '/diamant/iu' => 'brw_frezovani_diamant',
         '/hrubovac|schrupp/iu' => 'brw_frezovani_hrubovaci',
         '/srážec|gravír|tvarov|fasfräs|gravier|formfräs/iu' => 'brw_frezovani_tvarove',
@@ -110,7 +112,7 @@ final class BrandMenuClassifier
      */
     public static function classify(?string $brandName, ?string $goodsGroup, array $taxonCodes, string $name): array
     {
-        $priceHit = in_array('cenove_hity', $taxonCodes, true);
+        $priceHit = in_array(self::PRICE_HITS_TAXON, $taxonCodes, true);
         $leaf = match (self::maker($brandName, $goodsGroup)) {
             BrandMenuTree::POKOLM => self::pokolm($taxonCodes, $name),
             BrandMenuTree::FRAISA => self::fraisa($taxonCodes, $name),

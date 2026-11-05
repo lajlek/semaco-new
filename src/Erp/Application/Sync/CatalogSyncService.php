@@ -88,7 +88,6 @@ final readonly class CatalogSyncService
             );
             $this->watermarks->recordPullSuccess(ErpSyncWatermark::DOMAIN_PRODUCT, $maxModifiedAt, $runStartedAt, $since);
             $onStepFinished($result);
-            $onStepFinished($this->brandMenu->sync());
         }
 
         if (in_array(self::STEP_ASSOCIATIONS, $steps, true)) {
@@ -142,6 +141,10 @@ final readonly class CatalogSyncService
         if (in_array(self::STEP_SALES_REPRESENTATIVES, $steps, true)) {
             $onStepFinished($this->salesRepresentativeImporter->import());
         }
+
+        if (in_array(self::STEP_PRODUCTS, $steps, true)) {
+            $onStepFinished($this->brandMenu->sync());
+        }
     }
 
     /**
@@ -160,12 +163,12 @@ final readonly class CatalogSyncService
             },
         ));
 
-        $onStepFinished($this->brandMenu->sync());
-
         if ($touchedVariants !== []) {
             $onStepFinished($this->priceImporter->importForVariants($touchedVariants));
             $onStepFinished($this->stockImporter->importForVariants($touchedVariants));
         }
+
+        $onStepFinished($this->brandMenu->sync());
     }
 
     private function since(string $domain, bool $full): \DateTimeImmutable

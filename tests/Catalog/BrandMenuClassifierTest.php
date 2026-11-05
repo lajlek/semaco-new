@@ -45,6 +45,8 @@ final class BrandMenuClassifierTest extends TestCase
         yield 'BRW destičky' => ['BRW', '117', [], 'FUTURO Wendeplatten', 'brw_vystruzovani_desticky'];
         yield 'BRW vyvrtávání není soustružení' => ['BRW', '117', [], 'FUTURO Ausdrehwerkzeuge', 'brw_vystruzovani_vyvrtavaci'];
         yield 'BRW pilník VHM' => ['BRW', '117', [], 'FUTURO Frässtifte VHM', 'brw_frezovani_pilniky_vhm'];
+        yield 'BRW mikrofréza' => ['BRW', '117', [], 'FUTURO VHM-Mikrofräser', 'brw_frezovani_mikro'];
+        yield 'BRW mikroskop není mikrofréza' => ['BRW', '117', [], 'Videomikroskop FUTURO', 'brw_frezovani'];
         yield 'BRW neznámá fréza zůstane nad podkategoriemi' => ['BRW', '117', ['frezovani'], 'Fréza FUTURO', 'brw_frezovani'];
         yield 'BRW neznámé vystružování zůstane nad podkategoriemi' => ['BRW', '117', ['vystruzovani'], 'Nástroj FUTURO', 'brw_vystruzovani'];
         yield 'NERIOX fréza HSS' => ['BRW', '117', [], 'NERIOX Fräsen HSS', 'brw_neriox_frezy_hss'];
@@ -62,6 +64,15 @@ final class BrandMenuClassifierTest extends TestCase
     }
 
     public function testEveryRuleTargetExistsInTheTree(): void
+    {
+        foreach ((new \ReflectionClass(BrandMenuClassifier::class))->getConstants() as $rules) {
+            foreach (is_array($rules) ? $rules : [] as $target) {
+                self::assertArrayHasKey($target, BrandMenuTree::nodes());
+            }
+        }
+    }
+
+    public function testTreeHasValidParentsAndSlugs(): void
     {
         foreach (BrandMenuTree::nodes() as $key => $node) {
             self::assertSame(1, preg_match('#^[a-z0-9/-]+$#', BrandMenuTree::slug($key)));

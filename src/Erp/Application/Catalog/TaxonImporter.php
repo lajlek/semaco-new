@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Erp\Application\Catalog;
 
+use App\Catalog\BrandMenu\BrandMenuTree;
 use App\Entity\Taxonomy\Taxon;
 use App\Erp\Application\ImportResult;
 use App\Erp\Port\Catalog\Dto\TaxonSnapshot;
@@ -102,7 +103,8 @@ final readonly class TaxonImporter
     {
         $channel = $this->channelRepository->findOneByCode($this->channelCode);
         $root = $this->taxonRepository->findOneBy(['code' => self::ROOT_CODE]);
-        $root ??= $channel instanceof ChannelInterface ? $channel->getMenuTaxon() : null;
+        $menuTaxon = $channel instanceof ChannelInterface ? $channel->getMenuTaxon() : null;
+        $root ??= BrandMenuTree::isMenuTaxon($menuTaxon?->getCode()) ? null : $menuTaxon;
 
         if (!$root instanceof TaxonInterface) {
             $root = $this->taxonFactory->createNew();

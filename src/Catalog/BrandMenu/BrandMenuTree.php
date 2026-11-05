@@ -20,7 +20,7 @@ final class BrandMenuTree
 
     public const OTHER = 'ostatni';
 
-    private const CODE_PREFIX = 'vyrobci_';
+    public const CODE_PREFIX = 'vyrobci_';
 
     /** @var array<string, array{name: string, segment: string, parent: string|null}> */
     private const NODES = [

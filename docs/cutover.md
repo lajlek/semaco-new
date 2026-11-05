@@ -12,7 +12,7 @@ Postup přechodu ze starého e-shopu (Sylius 1.9) na nový. Kroky jdou v tomto p
 - `composer install --no-dev`, `yarn install && yarn build`, `bin/console doctrine:migrations:migrate`,
   `bin/console cache:clear`.
 - První úplná synchronizace katalogu a firem: `bin/console app:erp:sync --no-debug`. Kategorie podle výrobců vzniknou
-  při ní a každá další synchronizace do nich zařadí nové produkty; ručně `bin/console app:catalog:brand-menu`.
+  při ní a každá další synchronizace do nich zařadí nové produkty.
 
 ## Přepnutí
 

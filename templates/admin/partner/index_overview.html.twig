@@ -1,6 +1,6 @@
 {% set criteria = app.request.query.all('criteria') %}
-{% set active_partner = criteria.partnerCode|default('') %}
-{% set active_state = criteria.workflowState|default('') %}
+{% set active_partner = criteria.partnerCode is defined and criteria.partnerCode is not iterable ? criteria.partnerCode : '' %}
+{% set active_state = criteria.workflowState is defined and criteria.workflowState is not iterable ? criteria.workflowState : '' %}
 {% set partner_criteria = active_partner ? {partnerCode: active_partner} : {} %}
 {% set state_criteria = active_state ? {workflowState: active_state} : {} %}
 {% set counts = partner_overview_counts(active_partner) %}
