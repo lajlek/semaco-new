@@ -1,0 +1,53 @@
+{% set criteria = app.request.query.all('criteria') %}
+{% set active_partner = criteria.partnerCode|default('') %}
+{% set active_state = criteria.workflowState|default('') %}
+{% set partner_criteria = active_partner ? {partnerCode: active_partner} : {} %}
+{% set state_criteria = active_state ? {workflowState: active_state} : {} %}
+{% set counts = partner_overview_counts(active_partner) %}
+{% set states = {new: 'Ke schválení', needs_review: 'Ke kontrole', ready: 'Připraveno', exported: 'Exportováno', paired: 'Spárováno'} %}
+{% set runs = partner_recent_fetch_runs() %}
+{% set status_labels = {queued: 'Čeká', running: 'Běží', done: 'Hotovo', stopped: 'Zastaveno', failed: 'Chyba', cancelled: 'Zrušeno'} %}
+{% set last_run = runs|first %}
+
+<div class="d-flex flex-wrap align-items-center gap-2 mt-3 mb-3">
+    <div class="btn-group" role="group" aria-label="Partner">
+        <a href="{{ path('app_admin_partner_item_index', {criteria: state_criteria}) }}" class="btn{{ active_partner == '' ? ' btn-primary' }}">Všichni partneři</a>
+        {% for code, rule in partner_rules() %}
+            <a href="{{ path('app_admin_partner_item_index', {criteria: state_criteria|merge({partnerCode: code})}) }}" class="btn{{ active_partner == code ? ' btn-primary' }}">{{ rule.label }} ({{ counts.partners[code]|default(0) }})</a>
+        {% endfor %}
+    </div>
+    <a href="{{ path('app_admin_partner_export_batch_index') }}" class="btn ms-auto">{{ ux_icon('tabler:file-export', {class: 'icon'}) }} Exportní dávky</a>
+</div>
+
+<div class="row row-cols-2 row-cols-md-3 row-cols-xl-6 g-2 mb-3">
+    <div class="col">
+        <a href="{{ path('app_admin_partner_item_index', {criteria: partner_criteria}) }}" class="card card-sm h-100 text-decoration-none{{ active_state == '' ? ' border-primary' }}"{% if active_state == '' %} aria-current="true"{% endif %}>
+            <div class="card-body">
+                <div class="text-secondary">Všechny</div>
+                <div class="h2 m-0">{{ counts.states|reduce((total, count) => total + count, 0) }}</div>
+            </div>
+        </a>
+    </div>
+    {% for state, label in states %}
+        <div class="col">
+            <a href="{{ path('app_admin_partner_item_index', {criteria: partner_criteria|merge({workflowState: state})}) }}" class="card card-sm h-100 text-decoration-none{{ active_state == state ? ' border-primary' }}"{% if active_state == state %} aria-current="true"{% endif %}>
+                <div class="card-body">
+                    <div class="text-secondary">{{ label }}</div>
+                    <div class="h2 m-0">{{ counts.states[state]|default(0) }}</div>
+                </div>
+            </a>
+        </div>
+    {% endfor %}
+</div>
+
+<details class="card mb-3"{% if last_run and last_run.status in ['queued', 'running'] %} open{% endif %}>
+    <summary class="card-header" style="cursor: pointer">
+        <h3 class="card-title">Načítání a kategorie partnerů</h3>
+        {% if last_run %}
+            <span class="text-secondary small ms-3">Poslední načítání {{ last_run.requestedAt|date('d. m. H:i') }} · {{ partner_rules()[last_run.partnerCode].label|default(last_run.partnerCode) }} · {{ status_labels[last_run.status]|default(last_run.status) }}</span>
+        {% endif %}
+    </summary>
+    <div class="card-body">
+        {% include 'admin/partner/index_tools.html.twig' %}
+    </div>
+</details>

@@ -9,11 +9,13 @@ use App\Partner\Entity\PartnerFetchRun;
 use App\Partner\Entity\PartnerItem;
 use App\Partner\Fetch\PartnerDetailFetcher;
 use App\Partner\Fetch\PartnerFetchQueue;
+use App\Partner\Repository\PartnerItemRepository;
 use App\Partner\Rules\PartnerRule;
 use App\Partner\Rules\PartnerRules;
 use App\Partner\Service\PartnerCategories;
 use App\Partner\Service\PartnerItemPreparer;
 use Sylius\Component\Product\Model\ProductOptionInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Twig\Attribute\AsTwigFunction;
 
 final readonly class PartnerAdminExtension
@@ -24,6 +26,8 @@ final readonly class PartnerAdminExtension
         private PartnerFetchQueue $fetchQueue,
         private PartnerDetailFetcher $detailFetcher,
         private PartnerCategories $categories,
+        #[Autowire(service: 'app.repository.partner_item')]
+        private PartnerItemRepository $itemRepository,
     ) {
     }
 
@@ -58,6 +62,24 @@ final readonly class PartnerAdminExtension
     public function rules(): array
     {
         return $this->rules->all();
+    }
+
+    /** @return array{partners: array<string, int>, states: array<string, int>} */
+    #[AsTwigFunction('partner_overview_counts')]
+    public function overviewCounts(string $partnerCode): array
+    {
+        $counts = $this->itemRepository->countByPartnerAndState();
+        $states = [];
+        foreach ($counts as $partner => $partnerCounts) {
+            if ($partnerCode !== '' && $partner !== $partnerCode) {
+                continue;
+            }
+            foreach ($partnerCounts as $state => $count) {
+                $states[$state] = ($states[$state] ?? 0) + $count;
+            }
+        }
+
+        return ['partners' => array_map(array_sum(...), $counts), 'states' => $states];
     }
 
     /** @return array<string, int> partner => items without fetched article details */

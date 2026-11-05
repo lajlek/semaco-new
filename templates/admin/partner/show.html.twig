@@ -1,6 +1,6 @@
 {% set item = hookable_metadata.context.resource %}
 {% set rule = partner_rules()[item.partnerCode] %}
-{% set state_labels = {new: 'Ke schválení', needs_review: 'Vyžaduje kontrolu', ready: 'Připraveno', exported: 'Exportováno, čeká na Helios', paired: 'Spárováno'} %}
+{% set state_labels = {new: 'Ke schválení', needs_review: 'Ke kontrole', ready: 'Připraveno', exported: 'Exportováno, čeká na Helios', paired: 'Spárováno'} %}
 {% set match_labels = {matched: 'Existuje v Semaco', unmatched: 'V Semaco nenalezeno', ambiguous: 'Nejednoznačné'} %}
 {% set grouping_labels = {existing: 'Další varianta existujícího produktu', new: 'Nový hlavní produkt', ambiguous: 'Nejasné – rodina u více produktů'} %}
 {% set source_labels = {partner: 'od partnera', family: 'společné pro rodinu', manual: 'ručně'} %}

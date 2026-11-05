@@ -1,3 +1,8 @@
-{% for issue in data.issues %}
-    <div class="small {{ issue.blocking ? 'text-danger' : 'text-secondary' }}">{{ issue.message }}</div>
-{% endfor %}
+{% set blocking = data.issues|filter(issue => issue.blocking) %}
+{% set notes = data.issues|filter(issue => not issue.blocking) %}
+{% if blocking is not empty %}
+    <span class="badge bg-red-lt" title="{{ blocking|map(issue => issue.message)|join("\n") }}">K řešení: {{ blocking|length }}</span>
+{% endif %}
+{% if notes is not empty %}
+    <span class="badge bg-secondary-lt" title="{{ notes|map(issue => issue.message)|join("\n") }}">K informaci: {{ notes|length }}</span>
+{% endif %}

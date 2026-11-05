@@ -30,7 +30,7 @@ sylius_grid:
                     label: Název u partnera
                 preparedName:
                     type: string
-                    label: Návrh názvu varianty
+                    label: Návrh názvu
                 familyKey:
                     type: string
                     label: Rodina
@@ -43,15 +43,6 @@ sylius_grid:
                         vars:
                             labels: { existing: 'Existující produkt', new: 'Nový produkt', ambiguous: 'Nejasné' }
                             colors: { existing: 'green', new: 'blue', ambiguous: 'red' }
-                matchStatus:
-                    type: twig
-                    label: Párování
-                    sortable: matchStatus
-                    options:
-                        template: 'admin/partner/grid/label.html.twig'
-                        vars:
-                            labels: { matched: 'Existuje', unmatched: 'Nenalezeno', ambiguous: 'Nejednoznačné' }
-                            colors: { matched: 'green', unmatched: 'yellow', ambiguous: 'red' }
                 workflowState:
                     type: twig
                     label: Stav
@@ -59,7 +50,7 @@ sylius_grid:
                     options:
                         template: 'admin/partner/grid/label.html.twig'
                         vars:
-                            labels: { new: 'Ke schválení', needs_review: 'Vyžaduje kontrolu', ready: 'Připraveno', exported: 'Exportováno, čeká na Helios', paired: 'Spárováno' }
+                            labels: { new: 'Ke schválení', needs_review: 'Ke kontrole', ready: 'Připraveno', exported: 'Exportováno', paired: 'Spárováno' }
                             colors: { new: 'blue', needs_review: 'red', ready: 'green', exported: 'purple', paired: 'secondary' }
                 issues:
                     type: twig
@@ -67,12 +58,6 @@ sylius_grid:
                     path: .
                     options:
                         template: 'admin/partner/grid/issues.html.twig'
-                lastSeenAt:
-                    type: datetime
-                    label: Načteno
-                    sortable: lastSeenAt
-                    options:
-                        format: 'd. m. Y'
             filters:
                 search:
                     type: string
@@ -88,7 +73,7 @@ sylius_grid:
                     type: select
                     label: Stav
                     form_options:
-                        choices: { 'Ke schválení': new, 'Vyžaduje kontrolu': needs_review, 'Připraveno': ready, 'Exportováno, čeká na Helios': exported, 'Spárováno': paired }
+                        choices: { 'Ke schválení': new, 'Ke kontrole': needs_review, 'Připraveno': ready, 'Exportováno': exported, 'Spárováno': paired }
                 matchStatus:
                     type: select
                     label: Párování

@@ -1,6 +1,3 @@
-{% set runs = partner_recent_fetch_runs() %}
-{% set status_labels = {queued: 'Čeká', running: 'Běží', done: 'Hotovo', stopped: 'Zastaveno', failed: 'Chyba', cancelled: 'Zrušeno'} %}
-
 <div class="row g-3 mb-3">
     <div class="col-12 col-xl-5">
         <div class="card h-100">
@@ -75,7 +72,6 @@
                             </form>
                         {% endif %}
                     {% endfor %}
-                    <a href="{{ path('app_admin_partner_export_batch_index') }}" class="btn btn-sm">{{ ux_icon('tabler:file-export', {class: 'icon'}) }} Exportní dávky</a>
                 </div>
             </div>
             <div class="table-responsive">

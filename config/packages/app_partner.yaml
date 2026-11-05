@@ -21,9 +21,14 @@ sylius_resource:
 sylius_twig_hooks:
     hooks:
         'sylius_admin.partner_item.index.content.header':
-            partner_tools:
-                template: 'admin/partner/index_tools.html.twig'
+            partner_overview:
+                template: 'admin/partner/index_overview.html.twig'
                 priority: -100
+
+        'sylius_admin.partner_item.index.content.grid':
+            filters:
+                template: 'admin/partner/grid/filters.html.twig'
+                priority: 200
 
         'sylius_admin.partner_item.show.content':
             detail:

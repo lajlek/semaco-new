@@ -37,6 +37,25 @@ class PartnerItemRepository extends EntityRepository
         return $items;
     }
 
+    /** @return array<string, array<string, int>> partner => workflow state => items */
+    public function countByPartnerAndState(): array
+    {
+        /** @var list<array{partner: string, state: string, items: int|string}> $rows */
+        $rows = $this->createQueryBuilder('item')
+            ->select('item.partnerCode AS partner', 'item.workflowState AS state', 'COUNT(item.id) AS items')
+            ->groupBy('item.partnerCode')
+            ->addGroupBy('item.workflowState')
+            ->getQuery()
+            ->getArrayResult();
+
+        $counts = [];
+        foreach ($rows as $row) {
+            $counts[$row['partner']][$row['state']] = (int) $row['items'];
+        }
+
+        return $counts;
+    }
+
     private function preparationQuery(string $partnerCode): QueryBuilder
     {
         return $this->createQueryBuilder('item')
