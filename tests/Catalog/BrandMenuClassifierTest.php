@@ -16,6 +16,7 @@ final class BrandMenuClassifierTest extends TestCase
     public function testProductGoesToTheMakersCategory(?string $brand, ?string $group, array $taxons, string $name, string $expected): void
     {
         self::assertSame([$expected], BrandMenuClassifier::classify($brand, $group, $taxons, $name));
+        self::assertArrayHasKey($expected, BrandMenuTree::nodes());
     }
 
     /** @return iterable<string, array{string|null, string|null, list<string>, string, string}> */
@@ -34,7 +35,21 @@ final class BrandMenuClassifierTest extends TestCase
         yield 'FRAISA Microdrill zůstane u vrtání' => ['FRAISA', '120', ['vrtani'], 'Mikrovrták Microdrill NX', 'fraisa_vrtani_dalsi'];
         yield 'FRAISA bez řady' => ['FRAISA', '120', ['valcove'], 'Válcová fréza', 'fraisa_stopkove_dalsi'];
         yield 'bez značky podle skupiny FRAISA' => [null, '120', ['rezne'], 'Závitník Xtap', 'fraisa_zavity_xtap'];
-        yield 'bez značky podle skupiny BRW' => [null, '117', ['vystruzovani'], 'Strojní výstružník D 1,51 - 2,0', 'brw_vystruzovani'];
+        yield 'bez značky podle skupiny BRW' => [null, '117', ['vystruzovani'], 'Strojní výstružník D 1,51 - 2,0', 'brw_vystruzovani_vhm'];
+        yield 'BRW kulová fréza' => ['BRW', '117', ['frezovani', 'kulove'], 'Kulová fréza FUTURO', 'brw_frezovani_dokoncovaci'];
+        yield 'BRW výstružník HSS' => ['BRW', '117', [], 'Výstružník HSS FUTURO', 'brw_vystruzovani_hss'];
+        yield 'BRW závitník před vrtákem' => ['BRW', '117', [], 'FUTURO Gewindebohrer HSS', 'brw_frezovani_zavitniky'];
+        yield 'BRW vrták DIN' => ['BRW', '117', [], 'Spirálový vrták HSS DIN 338', 'brw_frezovani_din338'];
+        yield 'BRW vrták s VBD před frézou s VBD' => ['BRW', '117', [], 'FUTURO Wendeplattenbohrer', 'brw_frezovani_vrtaky_vbd'];
+        yield 'BRW fréza s VBD není destička' => ['BRW', '117', [], 'FUTURO Wendeplattenfräser', 'brw_frezovani_vbd'];
+        yield 'BRW destičky' => ['BRW', '117', [], 'FUTURO Wendeplatten', 'brw_vystruzovani_desticky'];
+        yield 'BRW vyvrtávání není soustružení' => ['BRW', '117', [], 'FUTURO Ausdrehwerkzeuge', 'brw_vystruzovani_vyvrtavaci'];
+        yield 'BRW pilník VHM' => ['BRW', '117', [], 'FUTURO Frässtifte VHM', 'brw_frezovani_pilniky_vhm'];
+        yield 'BRW neznámá fréza zůstane nad podkategoriemi' => ['BRW', '117', ['frezovani'], 'Fréza FUTURO', 'brw_frezovani'];
+        yield 'BRW neznámé vystružování zůstane nad podkategoriemi' => ['BRW', '117', ['vystruzovani'], 'Nástroj FUTURO', 'brw_vystruzovani'];
+        yield 'NERIOX fréza HSS' => ['BRW', '117', [], 'NERIOX Fräsen HSS', 'brw_neriox_frezy_hss'];
+        yield 'NERIOX závitník před vrtákem' => ['BRW', '117', [], 'NERIOX Gewindenbohrer HSS', 'brw_neriox_zavitniky'];
+        yield 'NERIOX bez podkategorie' => ['BRW', '117', [], 'Měřidlo NERIOX', 'brw_neriox'];
         yield 'jiný výrobce' => ['Premio', '299', ['vrtani'], 'Vrták', 'ostatni_dalsi'];
         yield 'jiná značka nepřebije skupina' => ['Premio', '120', ['vrtani'], 'Vrták', 'ostatni_dalsi'];
         yield 'bez značky a neznámá skupina' => [null, '999', [], 'Něco', 'ostatni_dalsi'];
@@ -42,7 +57,7 @@ final class BrandMenuClassifierTest extends TestCase
 
     public function testPriceHitStaysInItsOwnCategoryNextToTheMaker(): void
     {
-        self::assertSame(['brw_frezovani', 'ostatni_hity'], BrandMenuClassifier::classify('BRW', '117', ['frezovani', 'kulove', 'cenove_hity', 'frezy'], 'Kulová fréza FUTURO'));
+        self::assertSame(['brw_frezovani_dokoncovaci', 'ostatni_hity'], BrandMenuClassifier::classify('BRW', '117', ['frezovani', 'kulove', 'cenove_hity', 'frezy'], 'Kulová fréza FUTURO'));
         self::assertSame(['ostatni_hity'], BrandMenuClassifier::classify('Premio', '299', ['cenove_hity', 'vrtaky'], 'Vrták'));
     }
 
