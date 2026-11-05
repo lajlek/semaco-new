@@ -1,14 +1,14 @@
 {# Rendered with \Sylius\Bundle\ShopBundle\Twig\Component\Common\TaxonMenuComponent #}
 <section {{ attributes }}>
     <div class="row">
-        {% for taxon in taxons %}
+        {% for taxon in taxons|filter(taxon => app_taxon_has_products(taxon)) %}
             <div class="col-sm-6 col-lg-4 mb-4">
                 <div class="category category-absolute category-classic">
                     <a href="{{ path('semaco_shop_product_list', {'slug': taxon.slug, '_locale': taxon.translation.locale}) }}">
                         <figure class="category-media">
                             {% set taxon_image = taxon.images.first %}
                             {% if taxon_image %}
-                                <img src="{{ taxon_image.path|imagine_filter('semaco_taxon_thumbnail') }}" alt="{{ taxon.name }}" />
+                                <img src="{{ taxon_image.path|imagine_filter(taxon.code starts with 'vyrobci_' ? 'semaco_brand_thumbnail' : 'semaco_taxon_thumbnail') }}" alt="{{ taxon.name }}" />
                             {% else %}
                                 <img src="{{ asset('bundles/syliusui/images/400x300.png') }}" alt="{{ taxon.name }}" />
                             {% endif %}

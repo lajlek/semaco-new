@@ -8,6 +8,7 @@ Cíl: všechny veřejné URL zůstanou 1:1. Co se změnit musí, dostane 301 př
 | Detail produktu | `/cs_CZ/products/{slug}` | stejné | Sylius route; slug se při migraci převezme ze staré DB, sync ho po založení nemění |
 | Výpis kategorie | `/cs_CZ/products-list/{slug}` | stejné | vlastní route na výpis produktů Sylia |
 | Kategorie Sylius | `/cs_CZ/taxons/{slug}` → 301 na products-list | stejné | redirect route jako ve starém `config/routes/sylius_shop.yaml` |
+| Kategorie výrobce | není | `/cs_CZ/products-list/pokolm`, `/cs_CZ/products-list/fraisa/stopkove-frezy/ax` | nové menu; staré kategorie zůstávají dostupné na svých adresách, jen nejsou v menu |
 | Vyhledávání | `/cs_CZ/search` | stejné | vyhledávání v MySQL, přijímá i starý parametr `bitbag_elasticsearch_search[box][query]` |
 | Našeptávač | `/cs_CZ/auto-complete/product`, `/cs_CZ/auto-complete/product-all` | stejné | vlastní akce (hledání i v obj. číslech) |
 | Značka | `/cs_CZ/brand/{code}` (jen název značky, nikde neodkazovaná) | 301 na úvod | redirect route |

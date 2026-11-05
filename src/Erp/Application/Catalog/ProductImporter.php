@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Erp\Application\Catalog;
 
+use App\Catalog\BrandMenu\BrandMenuTree;
 use App\Entity\Channel\Channel;
 use App\Entity\Product\Brand;
 use App\Entity\Product\Product;
@@ -229,6 +230,10 @@ final class ProductImporter
         }
 
         foreach ($product->getProductTaxons() as $productTaxon) {
+            if (BrandMenuTree::isMenuTaxon($productTaxon->getTaxon()?->getCode())) {
+                continue;
+            }
+
             $taxonId = (int) $productTaxon->getTaxon()?->getId();
             if (!isset($desired[$taxonId])) {
                 $product->removeProductTaxon($productTaxon);

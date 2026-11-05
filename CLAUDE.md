@@ -3,7 +3,8 @@
 ## Reference
 - Funkčnost a vzhled 1:1 se starým e-shopem https://eshop.semaco.cz/cs_CZ/ (kód `../semaco`,
   Sylius 1.9 + `vendor/mergocz/sylius-helios-plugin`). Chování NEW ≠ OLD je bug; chyby OLD
-  se nekopírují, opravují.
+  se nekopírují, opravují. Vědomá odchylka: menu kategorií je podle výrobců POKOLM, FRAISA, BRW
+  a kategorií z jejich webů, jen ty s produkty (`src/Catalog/BrandMenu`).
 - Rozsah a funkce: `../semaco/nabidka/finalni/semaco-nabidka.md`, ceníky a firemní funkce:
   `../semaco/nabidka/06-overeni-ceniku-a-firemnich-funkci.md`.
 - ERP vrstva je port z `../otavan/src/Erp` (porty/adaptéry, outbox, inkrementální sync).

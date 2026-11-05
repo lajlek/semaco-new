@@ -101,8 +101,8 @@ final readonly class TaxonImporter
     private function findOrCreateRoot(): TaxonInterface
     {
         $channel = $this->channelRepository->findOneByCode($this->channelCode);
-        $root = $channel instanceof ChannelInterface ? $channel->getMenuTaxon() : null;
-        $root ??= $this->taxonRepository->findOneBy(['code' => self::ROOT_CODE]);
+        $root = $this->taxonRepository->findOneBy(['code' => self::ROOT_CODE]);
+        $root ??= $channel instanceof ChannelInterface ? $channel->getMenuTaxon() : null;
 
         if (!$root instanceof TaxonInterface) {
             $root = $this->taxonFactory->createNew();

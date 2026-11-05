@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Erp\Application\Sync;
 
+use App\Catalog\BrandMenu\BrandMenuSynchronizer;
 use App\Erp\Application\Catalog\AttributeGroupImporter;
 use App\Erp\Application\Catalog\ProductAssociationImporter;
 use App\Erp\Application\Catalog\ProductImporter;
@@ -49,6 +50,7 @@ final readonly class CatalogSyncService
         private ProductAssociationImporter $associationImporter,
         private SalesRepresentativeImporter $salesRepresentativeImporter,
         private SyncWatermarkRecorder $watermarks,
+        private BrandMenuSynchronizer $brandMenu,
     ) {
     }
 
@@ -86,6 +88,7 @@ final readonly class CatalogSyncService
             );
             $this->watermarks->recordPullSuccess(ErpSyncWatermark::DOMAIN_PRODUCT, $maxModifiedAt, $runStartedAt, $since);
             $onStepFinished($result);
+            $onStepFinished($this->brandMenu->sync());
         }
 
         if (in_array(self::STEP_ASSOCIATIONS, $steps, true)) {
@@ -156,6 +159,8 @@ final readonly class CatalogSyncService
                 }
             },
         ));
+
+        $onStepFinished($this->brandMenu->sync());
 
         if ($touchedVariants !== []) {
             $onStepFinished($this->priceImporter->importForVariants($touchedVariants));

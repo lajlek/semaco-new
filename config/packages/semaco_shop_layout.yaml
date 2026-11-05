@@ -325,6 +325,10 @@ liip_imagine:
             filters:
                 thumbnail: { size: [400, 400], mode: outbound }
                 background: { size: [400, 400], position: center, color: '#000000' }
+        semaco_brand_thumbnail:
+            filters:
+                thumbnail: { size: [340, 240], mode: inset, allow_upscale: true }
+                background: { size: [400, 400], position: center, color: '#ffffff' }
 
 sylius_grid:
     grids:

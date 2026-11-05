@@ -1,19 +1,23 @@
 {# Rendered with \Sylius\Bundle\ShopBundle\Twig\Component\Common\TaxonMenuComponent #}
+{% macro node(taxon) %}
+    {% set children = taxon.enabledChildren|filter(child => app_taxon_has_products(child)) %}
+    <li{% if children|length > 0 %} class="deeper parent"{% endif %}>
+        <a href="{{ path('semaco_shop_product_list', {'slug': taxon.slug, '_locale': taxon.translation.locale}) }}">{{ taxon.name }}</a>
+        {% if children|length > 0 %}
+            <ul class="nav-child unstyled small">
+                {% for child in children %}
+                    {{ _self.node(child) }}
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </li>
+{% endmacro %}
 <div {{ attributes }}>
-    {% if taxons|length > 0 %}
+    {% set visible_taxons = taxons|filter(taxon => app_taxon_has_products(taxon)) %}
+    {% if visible_taxons|length > 0 %}
         <ul class="nav menu mod-list">
-            {% for taxon in taxons %}
-                {% set children = taxon.enabledChildren %}
-                <li{% if children|length > 0 %} class="deeper parent"{% endif %}>
-                    <a href="{{ path('semaco_shop_product_list', {'slug': taxon.slug, '_locale': taxon.translation.locale}) }}">{{ taxon.name }}</a>
-                    {% if children|length > 0 %}
-                        <ul class="nav-child unstyled small">
-                            {% for child in children %}
-                                <li><a href="{{ path('semaco_shop_product_list', {'slug': child.slug, '_locale': child.translation.locale}) }}">{{ child.name }}</a></li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                </li>
+            {% for taxon in visible_taxons %}
+                {{ _self.node(taxon) }}
             {% endfor %}
         </ul>
     {% endif %}

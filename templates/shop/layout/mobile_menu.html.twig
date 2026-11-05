@@ -1,4 +1,17 @@
 {# Rendered with \Sylius\Bundle\ShopBundle\Twig\Component\Common\TaxonMenuComponent #}
+{% macro node(taxon) %}
+    {% set children = taxon.enabledChildren|filter(child => app_taxon_has_products(child)) %}
+    <li>
+        <a href="{{ path('semaco_shop_product_list', {'slug': taxon.slug, '_locale': taxon.translation.locale}) }}">{{ taxon.name }}</a>
+        {% if children|length > 0 %}
+            <ul>
+                {% for child in children %}
+                    {{ _self.node(child) }}
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </li>
+{% endmacro %}
 <div class="mobile-menu-wrapper" {{ attributes }}>
     <div class="mobile-menu-overlay"></div>
     <a class="mobile-menu-close" href="#" aria-label="{{ 'app.shop.cart.close'|trans }}"><i class="d-icon-times" aria-hidden="true"></i></a>
@@ -8,18 +21,8 @@
             <button class="btn btn-search" type="submit" aria-label="{{ 'app.shop.header.search'|trans }}"><i class="d-icon-search" aria-hidden="true"></i></button>
         </form>
         <ul class="mobile-menu mmenu-anim">
-            {% for taxon in taxons %}
-                {% set children = taxon.enabledChildren %}
-                <li>
-                    <a href="{{ path('semaco_shop_product_list', {'slug': taxon.slug, '_locale': taxon.translation.locale}) }}">{{ taxon.name }}</a>
-                    {% if children|length > 0 %}
-                        <ul>
-                            {% for child in children %}
-                                <li><a href="{{ path('semaco_shop_product_list', {'slug': child.slug, '_locale': child.translation.locale}) }}">{{ child.name }}</a></li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                </li>
+            {% for taxon in taxons|filter(taxon => app_taxon_has_products(taxon)) %}
+                {{ _self.node(taxon) }}
             {% endfor %}
             {% include 'shop/layout/information_links.html.twig' %}
         </ul>
