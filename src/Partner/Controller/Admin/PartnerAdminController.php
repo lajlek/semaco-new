@@ -53,6 +53,12 @@ final class PartnerAdminController extends AbstractController
     ) {
     }
 
+    #[Route('/admin/partner-loading', name: 'app_admin_partner_loading', methods: ['GET'])]
+    public function loading(): Response
+    {
+        return $this->render('admin/partner/loading/page.html.twig');
+    }
+
     #[Route('/admin/partner-items/bulk-approve', name: 'app_admin_partner_item_bulk_approve', methods: ['POST'])]
     public function bulkApprove(Request $request): Response
     {
@@ -201,7 +207,7 @@ final class PartnerAdminController extends AbstractController
         }
         $this->addFlash('success', sprintf('Párování a návrhy přepočítány u %d položek.', $count));
 
-        return $this->redirectToRoute('app_admin_partner_item_index');
+        return $this->redirectToRoute('app_admin_partner_loading');
     }
 
     #[Route('/admin/partner-fetch-runs', name: 'app_admin_partner_fetch_run_queue', methods: ['POST'])]
@@ -221,7 +227,7 @@ final class PartnerAdminController extends AbstractController
             $this->addFlash('error', $exception->getMessage());
         }
 
-        return $this->redirectToRoute('app_admin_partner_item_index');
+        return $this->redirectToRoute('app_admin_partner_loading');
     }
 
     #[Route('/admin/partner-fetch-runs/categories', name: 'app_admin_partner_fetch_run_categories', methods: ['POST'])]
@@ -236,7 +242,7 @@ final class PartnerAdminController extends AbstractController
             $this->addFlash('error', $exception->getMessage());
         }
 
-        return $this->redirectToRoute('app_admin_partner_item_index');
+        return $this->redirectToRoute('app_admin_partner_loading');
     }
 
     #[Route('/admin/partner-categories/selection', name: 'app_admin_partner_category_selection', methods: ['POST'])]
@@ -246,7 +252,7 @@ final class PartnerAdminController extends AbstractController
         $this->categories->select(array_values(array_map(intval(...), array_filter($request->request->all('enabled'), is_numeric(...)))));
         $this->addFlash('success', 'Výběr kategorií je uložený. Odškrtnutá kategorie se přestane načítat.');
 
-        return $this->redirectToRoute('app_admin_partner_item_index');
+        return $this->redirectToRoute('app_admin_partner_loading');
     }
 
     #[Route('/admin/partner-categories', name: 'app_admin_partner_category_create', methods: ['POST'])]
@@ -266,7 +272,7 @@ final class PartnerAdminController extends AbstractController
             $this->addFlash('error', $exception->getMessage());
         }
 
-        return $this->redirectToRoute('app_admin_partner_item_index');
+        return $this->redirectToRoute('app_admin_partner_loading');
     }
 
     #[Route('/admin/partner-categories/{id}/delete', name: 'app_admin_partner_category_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
@@ -280,7 +286,7 @@ final class PartnerAdminController extends AbstractController
             $this->addFlash('error', $exception->getMessage());
         }
 
-        return $this->redirectToRoute('app_admin_partner_item_index');
+        return $this->redirectToRoute('app_admin_partner_loading');
     }
 
     #[Route('/admin/partner-items/import-html', name: 'app_admin_partner_item_import_html', methods: ['POST'])]
@@ -293,12 +299,12 @@ final class PartnerAdminController extends AbstractController
         if (!$file instanceof UploadedFile || !$file->isValid() || $file->getSize() > 20 * 1024 * 1024 || !in_array(strtolower($file->getClientOriginalExtension()), ['html', 'htm'], true)) {
             $this->addFlash('error', 'Nahrajte stránku uloženou z prohlížeče jako soubor .html (nejvýš 20 MB).');
 
-            return $this->redirectToRoute('app_admin_partner_item_index');
+            return $this->redirectToRoute('app_admin_partner_loading');
         }
         if ($url !== '' && !str_starts_with($url, 'https://')) {
             $this->addFlash('error', 'Adresa stránky musí začínat https://');
 
-            return $this->redirectToRoute('app_admin_partner_item_index');
+            return $this->redirectToRoute('app_admin_partner_loading');
         }
 
         try {
@@ -306,7 +312,7 @@ final class PartnerAdminController extends AbstractController
         } catch (\InvalidArgumentException $exception) {
             $this->addFlash('error', $exception->getMessage());
 
-            return $this->redirectToRoute('app_admin_partner_item_index');
+            return $this->redirectToRoute('app_admin_partner_loading');
         }
 
         $html = (string) file_get_contents($file->getPathname());
@@ -315,12 +321,12 @@ final class PartnerAdminController extends AbstractController
         if (!$this->rules->get($partnerCode)->allowsTitle($page->title)) {
             $this->addFlash('error', sprintf('Stránka „%s“ nepatří do povolených řad partnera %s, položky se nenačetly.', (string) $page->title, $this->rules->get($partnerCode)->label));
 
-            return $this->redirectToRoute('app_admin_partner_item_index');
+            return $this->redirectToRoute('app_admin_partner_loading');
         }
         if ($page->items === []) {
             $this->addFlash('warning', sprintf('Ve stránce nebyly nalezeny položky %s. Uložte celou stránku výpisu (Ctrl+S, „Webová stránka, kompletní“ nebo „jen HTML“).', $this->rules->get($partnerCode)->label));
 
-            return $this->redirectToRoute('app_admin_partner_item_index');
+            return $this->redirectToRoute('app_admin_partner_loading');
         }
 
         (new Filesystem())->dumpFile(
@@ -346,7 +352,7 @@ final class PartnerAdminController extends AbstractController
             $this->addFlash('error', $exception->getMessage());
         }
 
-        return $this->redirectToRoute('app_admin_partner_item_index');
+        return $this->redirectToRoute('app_admin_partner_loading');
     }
 
     #[Route('/admin/partner-fetch-runs/{id}/cancel', name: 'app_admin_partner_fetch_run_cancel', requirements: ['id' => '\d+'], methods: ['POST'])]
@@ -359,7 +365,7 @@ final class PartnerAdminController extends AbstractController
             $this->addFlash('warning', 'Načítání už běží nebo skončilo.');
         }
 
-        return $this->redirectToRoute('app_admin_partner_item_index');
+        return $this->redirectToRoute('app_admin_partner_loading');
     }
 
     #[Route('/admin/partner-export-batches/{id}/download', name: 'app_admin_partner_export_batch_download', requirements: ['id' => '\d+'], methods: ['GET'])]

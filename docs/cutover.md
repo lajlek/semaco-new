@@ -46,6 +46,6 @@ Po nasazení nové verze workery restartovat (`messenger:stop-workers`).
 ## Po spuštění
 
 - Admin: přihlášení převedených administrátorů, objednávka zkušebním účtem, e-maily (potvrzení, reset hesla).
-- Partneři: v administraci Katalog → Partnerský sortiment. Sledované kategorie se vybírají zaškrtnutím, načítání spustí
+- Partneři: v administraci Katalog → Partnerský sortiment → Načítání dat. Sledované kategorie se vybírají zaškrtnutím, načítání spustí
   tlačítko a pokračuje plánovač (nejvýš 30 stránek za hodinu, odstup ≥ 10 s, robots.txt, po odmítnutí 6 h pauza).
   BRW se bere jen z řad FUTURO a NERIOX.

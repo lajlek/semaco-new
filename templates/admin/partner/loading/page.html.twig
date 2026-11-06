@@ -1,0 +1,7 @@
+{% extends '@SyliusAdmin/shared/layout/base.html.twig' %}
+
+{% block title %}Načítání dat partnerů | {{ parent() }}{% endblock %}
+
+{% block body %}
+    {% hook ['sylius_admin.partner_loading.index', 'sylius_admin.common.index'] %}
+{% endblock %}

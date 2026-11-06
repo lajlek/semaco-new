@@ -20,15 +20,34 @@ sylius_resource:
 
 sylius_twig_hooks:
     hooks:
-        'sylius_admin.partner_item.index.content.header':
+        'sylius_admin.partner_item.index.content.grid':
             partner_overview:
                 template: 'admin/partner/index_overview.html.twig'
-                priority: -100
-
-        'sylius_admin.partner_item.index.content.grid':
+                priority: 300
             filters:
                 template: 'admin/partner/grid/filters.html.twig'
                 priority: 200
+
+        'sylius_admin.partner_loading.index.content':
+            grid:
+                enabled: false
+            tools:
+                template: 'admin/partner/loading/content.html.twig'
+                priority: 100
+
+        'sylius_admin.partner_loading.index.content.header':
+            breadcrumbs:
+                template: '@SyliusAdmin/shared/crud/index/content/header/breadcrumbs.html.twig'
+                configuration:
+                    title: 'Načítání dat partnerů'
+
+        'sylius_admin.partner_loading.index.content.header.title_block':
+            title:
+                template: '@SyliusAdmin/shared/crud/common/content/header/title_block/title.html.twig'
+                configuration:
+                    title: 'Načítání dat partnerů'
+            actions:
+                template: 'admin/partner/loading/actions.html.twig'
 
         'sylius_admin.partner_item.show.content':
             detail:

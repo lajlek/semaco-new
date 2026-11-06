@@ -24,6 +24,7 @@ final class AdminMenuListener
                     ['route' => 'app_admin_partner_item_index'],
                     ['route' => 'app_admin_partner_item_show'],
                     ['route' => 'app_admin_partner_export_batch_index'],
+                    ['route' => 'app_admin_partner_loading'],
                 ]],
             ])
             ->setLabel('Partnerský sortiment')

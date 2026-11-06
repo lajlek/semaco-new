@@ -81,7 +81,7 @@
                         <tr>
                             <td class="text-nowrap">{{ run.requestedAt|date('d. m. H:i') }}</td>
                             <td>{{ partner_rules()[run.partnerCode].label|default(run.partnerCode) }}</td>
-                            <td class="text-truncate" style="max-width: 18rem" title="{{ run.url }}">{{ run.kind == 'details' ? 'Detaily artiklů' : (run.kind == 'category' ? 'Kategorie: ' ~ run.url : run.url) }}</td>
+                            <td class="text-truncate" style="max-width: 12rem" title="{{ run.url }}">{{ run.kind == 'details' ? 'Detaily artiklů' : (run.kind == 'category' ? 'Kategorie: ' ~ run.url : run.url) }}</td>
                             <td class="text-nowrap">{{ status_labels[run.status]|default(run.status) }}</td>
                             <td class="text-nowrap">{{ run.pages }} str. · nové {{ run.itemsCreated }} · změněné {{ run.itemsChanged }}</td>
                             <td class="small text-secondary">

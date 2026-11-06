@@ -5,18 +5,21 @@
 {% set state_criteria = active_state ? {workflowState: active_state} : {} %}
 {% set counts = partner_overview_counts(active_partner) %}
 {% set states = {new: 'Ke schválení', needs_review: 'Ke kontrole', ready: 'Připraveno', exported: 'Exportováno', paired: 'Spárováno'} %}
-{% set runs = partner_recent_fetch_runs() %}
-{% set status_labels = {queued: 'Čeká', running: 'Běží', done: 'Hotovo', stopped: 'Zastaveno', failed: 'Chyba', cancelled: 'Zrušeno'} %}
-{% set last_run = runs|first %}
+{% set active_run_labels = {queued: 'Čeká', running: 'Běží'} %}
+{% set last_run = partner_recent_fetch_runs()|first %}
 
-<div class="d-flex flex-wrap align-items-center gap-2 mt-3 mb-3">
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3">
     <div class="btn-group" role="group" aria-label="Partner">
         <a href="{{ path('app_admin_partner_item_index', {criteria: state_criteria}) }}" class="btn{{ active_partner == '' ? ' btn-primary' }}">Všichni partneři</a>
         {% for code, rule in partner_rules() %}
             <a href="{{ path('app_admin_partner_item_index', {criteria: state_criteria|merge({partnerCode: code})}) }}" class="btn{{ active_partner == code ? ' btn-primary' }}">{{ rule.label }} ({{ counts.partners[code]|default(0) }})</a>
         {% endfor %}
     </div>
-    <a href="{{ path('app_admin_partner_export_batch_index') }}" class="btn ms-auto">{{ ux_icon('tabler:file-export', {class: 'icon'}) }} Exportní dávky</a>
+    <a href="{{ path('app_admin_partner_loading') }}" class="btn ms-auto">
+        {{ ux_icon('tabler:download', {class: 'icon'}) }} Načítání dat
+        {% if last_run and active_run_labels[last_run.status] is defined %}<span class="badge bg-yellow-lt ms-2">{{ active_run_labels[last_run.status] }}</span>{% endif %}
+    </a>
+    <a href="{{ path('app_admin_partner_export_batch_index') }}" class="btn">{{ ux_icon('tabler:file-export', {class: 'icon'}) }} Exportní dávky</a>
 </div>
 
 <div class="row row-cols-2 row-cols-md-3 row-cols-xl-6 g-2 mb-3">
@@ -39,15 +42,3 @@
         </div>
     {% endfor %}
 </div>
-
-<details class="card mb-3"{% if last_run and last_run.status in ['queued', 'running'] %} open{% endif %}>
-    <summary class="card-header" style="cursor: pointer">
-        <h3 class="card-title">Načítání a kategorie partnerů</h3>
-        {% if last_run %}
-            <span class="text-secondary small ms-3">Poslední načítání {{ last_run.requestedAt|date('d. m. H:i') }} · {{ partner_rules()[last_run.partnerCode].label|default(last_run.partnerCode) }} · {{ status_labels[last_run.status]|default(last_run.status) }}</span>
-        {% endif %}
-    </summary>
-    <div class="card-body">
-        {% include 'admin/partner/index_tools.html.twig' %}
-    </div>
-</details>

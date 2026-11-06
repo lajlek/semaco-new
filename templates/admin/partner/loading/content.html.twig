@@ -1,0 +1,8 @@
+{% set runs = partner_recent_fetch_runs() %}
+{% set status_labels = {queued: 'Čeká', running: 'Běží', done: 'Hotovo', stopped: 'Zastaveno', failed: 'Chyba', cancelled: 'Zrušeno'} %}
+
+<div class="page-body">
+    <div class="container-xl">
+        {% include 'admin/partner/loading/tools.html.twig' %}
+    </div>
+</div>
