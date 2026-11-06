@@ -6,6 +6,7 @@ namespace App\Tests\Partner;
 
 use App\Partner\Parser\BrwFamilyParser;
 use App\Partner\Parser\FraisaListingParser;
+use App\Partner\Parser\HtmlDocument;
 use App\Partner\Parser\PokolmListingParser;
 use PHPUnit\Framework\TestCase;
 
@@ -29,7 +30,23 @@ final class PartnerParsersTest extends TestCase
         self::assertSame('Smooth-edged, short-shank version', $item->subtitle);
         self::assertSame(['spec' => 'ø3/6x38/4 z4', 'd1' => '3', 'd2' => '6', 'l1' => '38', 'l2' => '4', 'z' => '4'], $item->parameters);
         self::assertSame('https://webshop.fraisa.com/CH/en/x-prdP5337180-ctg1', $item->detailUrl);
+        self::assertSame(['https://cdn.example/4946.png'], $item->imageUrls);
         self::assertSame(['https://webshop.fraisa.com/CH/en/x-ctg1?view=list&page=2'], $page->pageUrls);
+    }
+
+    public function testImageFromSavedPageFolderIsIgnored(): void
+    {
+        $fraisa = '<div data-testing-sku="P5337180"><a class="product-title" href="/x">Mill</a><img class="product-image" src="./Fraisa Webshop_files/4946.png"></div>';
+        self::assertSame([], (new FraisaListingParser())->parse($fraisa, 'https://webshop.fraisa.com/CH/en/x')->items[0]->imageUrls);
+
+        $pokolm = '<table><tbody id="productsForm:productsTable_data"><tr data-rk="8 80 331"><td><img src="./Product selection • Pokolm Portal 2.1.4_files/8 80 331.png"></td></tr></tbody></table>';
+        self::assertSame([], (new PokolmListingParser())->parse($pokolm, 'https://www.pokolm.com/portal/pp25/products.xhtml')->items[0]->imageUrls);
+
+        $base = 'https://www.pokolm.com/portal/pp25/products.xhtml';
+        self::assertNull(HtmlDocument::imageUrl('Stranka_soubory/a.png', $base));
+        self::assertSame('https://cdn.example/a_files/b.png', HtmlDocument::imageUrl('https://cdn.example/a_files/b.png', $base));
+        self::assertSame('https://www.pokolm.com/img/a.png', HtmlDocument::imageUrl('/img/a.png', $base));
+        self::assertNull(HtmlDocument::imageUrl(null, $base));
     }
 
     public function testFraisaSpecWithRadius(): void

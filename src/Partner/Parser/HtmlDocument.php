@@ -41,6 +41,11 @@ final class HtmlDocument
         return str_starts_with($url, '/') ? $origin . $url : $origin . '/' . ltrim($url, './');
     }
 
+    public static function imageUrl(?string $source, string $pageUrl): ?string
+    {
+        return preg_match('~^(?:\./)?[^/]+_(?:files|soubory)/~iu', (string) $source) === 1 ? null : self::absoluteUrl($source, $pageUrl);
+    }
+
     public static function withoutFragment(string $url): string
     {
         return explode('#', $url, 2)[0];

@@ -60,7 +60,7 @@ final class PokolmListingParser implements PartnerParserInterface
                 }
             }
 
-            $image = HtmlDocument::absoluteUrl($row->querySelector('img')?->getAttribute('src'), $pageUrl);
+            $image = HtmlDocument::imageUrl($row->querySelector('img')?->getAttribute('src'), $pageUrl);
 
             $items[] = new ParsedItem(
                 orderCode: $code,

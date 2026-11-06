@@ -43,7 +43,7 @@ final class FraisaListingParser implements PartnerParserInterface
 
             $spec = HtmlDocument::text($row->querySelector('.product-description'));
             $detailUrl = HtmlDocument::absoluteUrl($title?->getAttribute('href') ?? $row->querySelector('a[data-testing-id="product-image-link"]')?->getAttribute('href'), $pageUrl);
-            $image = HtmlDocument::absoluteUrl($row->querySelector('img.product-image')?->getAttribute('src'), $pageUrl);
+            $image = HtmlDocument::imageUrl($row->querySelector('img.product-image')?->getAttribute('src'), $pageUrl);
 
             $items[] = new ParsedItem(
                 orderCode: $code,
