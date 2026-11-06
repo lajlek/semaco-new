@@ -65,7 +65,7 @@ final readonly class PartnerCategoryCrawler
             }
 
             ++$result['pages'];
-            if (!$rule->allowsTitle($page->title)) {
+            if (!$rule->allowsPage($page)) {
                 ++$result['skipped'];
                 $category->markVisited($url);
                 $this->entityManager->flush();

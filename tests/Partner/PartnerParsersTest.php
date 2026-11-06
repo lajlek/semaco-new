@@ -61,6 +61,15 @@ final class PartnerParsersTest extends TestCase
         self::assertSame('Ø0.1 x r0.05 x 0.3', $page->items[0]->parameters['spec']);
     }
 
+    public function testBrwReadsCategoryPathFromBreadcrumb(): void
+    {
+        $html = '<script type="application/ld+json">{"@type":"WebSite"}</script><script type="application/ld+json">{"@type":"BreadcrumbList","itemListElement":[{"position":1,"item":{"@id":"https:\/\/www.brw.ch\/de-CH","name":"Startseite"}},{"position":2,"item":{"name":"Fräsen"}}]}</script>';
+        $parser = new BrwFamilyParser();
+
+        self::assertSame(['Startseite', 'Fräsen'], $parser->parse($html, 'https://www.brw.ch/de-CH/a-123456')->categoryPath);
+        self::assertSame([], $parser->parse('<div></div>', 'https://www.brw.ch/de-CH/a-123456')->categoryPath);
+    }
+
     public function testPokolmTableUsesColumnHeaders(): void
     {
         $html = <<<'HTML'

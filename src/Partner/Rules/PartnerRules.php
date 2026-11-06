@@ -73,6 +73,13 @@ final class PartnerRules
                 sitemapUrl: 'https://www.brw.ch/storage/sitemap.xml',
                 listingUrlPattern: '#/de-CH/[^/?]+-\d{4,}$#',
                 titlePattern: '/\b(?:FUTURO|NERIOX)\b/iu',
+                allowedCategories: [
+                    'Fertigungstechnik',
+                    'Maschinenwerkzeuge',
+                    'FUTURO Fräsen, Bohren, Gewinden',
+                    'FUTURO Senken, Reiben, Drehen, Sägen und Trennen',
+                    'NERIOX Fertigungstechnik',
+                ],
             ),
         ];
     }

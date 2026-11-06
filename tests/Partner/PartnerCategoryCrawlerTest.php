@@ -95,6 +95,33 @@ final class PartnerCategoryCrawlerTest extends TestCase
         self::assertNotContains(self::BASE . 'product/9?page=2', $this->requests);
     }
 
+    public function testFamilyOutsideAllowedCategoriesIsSkippedAndNotFollowed(): void
+    {
+        $category = new PartnerCategory('brw', 'FUTURO', null, 'futuro');
+        $stored = [];
+        $result = $this->crawler([
+            self::BASE . 'futuro-a-111111' => self::family('111111', 'FUTURO A', '111111.0010', self::BASE . 'product/1?page=2', 'FUTURO Messtechnik'),
+        ], $stored)->crawl($category, 30);
+
+        self::assertSame(1, $result['skipped']);
+        self::assertSame([], $result['families']);
+        self::assertSame([], $stored);
+        self::assertNotContains(self::BASE . 'product/1?page=2', $this->requests);
+    }
+
+    public function testFamilyFromAllowedCategoryIsStored(): void
+    {
+        $category = new PartnerCategory('brw', 'FUTURO', null, 'futuro');
+        $stored = [];
+        $result = $this->crawler([
+            self::BASE . 'futuro-a-111111' => self::family('111111', 'FUTURO A', '111111.0010', null, 'Maschinenwerkzeuge'),
+        ], $stored)->crawl($category, 30);
+
+        self::assertSame(0, $result['skipped']);
+        self::assertSame(['111111'], $result['families']);
+        self::assertCount(1, $stored);
+    }
+
     public function testFollowsPaginationWithinPartnerAndNotOutside(): void
     {
         $category = new PartnerCategory('brw', 'FUTURO', self::BASE . 'futuro-a-111111', null);
@@ -127,12 +154,14 @@ final class PartnerCategoryCrawlerTest extends TestCase
         self::assertTrue($result['finished']);
     }
 
-    private static function family(string $code, string $title, string $orderCode, ?string $nextPage = null): MockResponse
+    private static function family(string $code, string $title, string $orderCode, ?string $nextPage = null, ?string $category = null): MockResponse
     {
         $pagination = $nextPage === null ? '' : sprintf('<div class="brw_product_page_article_list_footer_pagination_box"><a href="%s">2</a></div>', $nextPage);
+        $breadcrumb = $category === null ? '' : sprintf('<script type="application/ld+json">{"@type":"BreadcrumbList","itemListElement":[{"item":{"name":"%s"}}]}</script>', $category);
 
         return new MockResponse(sprintf(
-            '<div class="brw-product-detail-top-box-description"><p>%s</p><h1>%s</h1></div>%s<div id="product-variants"><div class="brw_product_page_article_list_row"><div><div class="brw_product_page_label_container">%s</div><a class="product_link_show_tab">%s</a></div></div></div>',
+            '%s<div class="brw-product-detail-top-box-description"><p>%s</p><h1>%s</h1></div>%s<div id="product-variants"><div class="brw_product_page_article_list_row"><div><div class="brw_product_page_label_container">%s</div><a class="product_link_show_tab">%s</a></div></div></div>',
+            $breadcrumb,
             $code,
             $title,
             $pagination,

@@ -318,8 +318,8 @@ final class PartnerAdminController extends AbstractController
         $html = (string) file_get_contents($file->getPathname());
         $sourceUrl = $url !== '' ? $url : 'soubor ' . mb_substr($file->getClientOriginalName(), 0, 200);
         $page = $parser->parse($html, $sourceUrl);
-        if (!$this->rules->get($partnerCode)->allowsTitle($page->title)) {
-            $this->addFlash('error', sprintf('Stránka „%s“ nepatří do povolených řad partnera %s, položky se nenačetly.', (string) $page->title, $this->rules->get($partnerCode)->label));
+        if (!$this->rules->get($partnerCode)->allowsPage($page)) {
+            $this->addFlash('error', sprintf('Stránka „%s“ nepatří do povolených řad a kategorií partnera %s, položky se nenačetly.', (string) $page->title, $this->rules->get($partnerCode)->label));
 
             return $this->redirectToRoute('app_admin_partner_loading');
         }

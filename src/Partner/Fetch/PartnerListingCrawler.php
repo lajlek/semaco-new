@@ -58,7 +58,7 @@ final readonly class PartnerListingCrawler
                 break;
             }
 
-            if (!$rule->allowsTitle($page->title)) {
+            if (!$rule->allowsPage($page)) {
                 ++$result['pages'];
                 ++$result['skipped'];
 

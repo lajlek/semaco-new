@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Partner\Rules;
 
+use App\Partner\Dto\ParsedPage;
+
 final readonly class PartnerRule
 {
     /**
@@ -13,6 +15,7 @@ final readonly class PartnerRule
      * @param string|null $sitemapUrl sitemap listing the partner's product pages
      * @param string|null $listingUrlPattern regex a sitemap URL must match to be a product page
      * @param string|null $titlePattern regex a page title must match for its items to be taken
+     * @param list<string> $allowedCategories category names of which a page breadcrumb must contain one; empty = no limit
      */
     public function __construct(
         public string $partnerCode,
@@ -26,6 +29,7 @@ final readonly class PartnerRule
         public ?string $sitemapUrl = null,
         public ?string $listingUrlPattern = null,
         public ?string $titlePattern = null,
+        public array $allowedCategories = [],
     ) {
     }
 
@@ -89,6 +93,17 @@ final readonly class PartnerRule
     public function allowsTitle(?string $title): bool
     {
         return $this->titlePattern === null || ($title !== null && preg_match($this->titlePattern, $title) === 1);
+    }
+
+    /** @param list<string> $path */
+    public function allowsCategoryPath(array $path): bool
+    {
+        return $this->allowedCategories === [] || $path === [] || array_intersect($path, $this->allowedCategories) !== [];
+    }
+
+    public function allowsPage(ParsedPage $page): bool
+    {
+        return $this->allowsTitle($page->title) && $this->allowsCategoryPath($page->categoryPath);
     }
 
     public function isAllowedUrl(string $url): bool

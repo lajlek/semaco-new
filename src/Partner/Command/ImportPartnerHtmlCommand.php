@@ -55,8 +55,8 @@ final class ImportPartnerHtmlCommand extends Command
 
         $sourceUrl = $url !== '' ? $url : 'file://' . basename($file);
         $page = $this->parsers->get($partner)->parse((string) file_get_contents($file), $sourceUrl);
-        if (!$this->rules->get($partner)->allowsTitle($page->title)) {
-            $io->error(sprintf('Stránka „%s“ nepatří do povolených řad partnera.', (string) $page->title));
+        if (!$this->rules->get($partner)->allowsPage($page)) {
+            $io->error(sprintf('Stránka „%s“ nepatří do povolených řad a kategorií partnera.', (string) $page->title));
 
             return Command::FAILURE;
         }

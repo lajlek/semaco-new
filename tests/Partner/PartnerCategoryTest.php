@@ -69,8 +69,23 @@ final class PartnerCategoryTest extends TestCase
         self::assertFalse($rule->isListingUrl('https://www.brw.ch/de-CH/futuro-werkzeuge-ts_220433'));
     }
 
+    public function testBrwTakesOnlyPagesFromAllowedCategories(): void
+    {
+        $rule = (new PartnerRules())->get('brw');
+
+        self::assertTrue($rule->allowsCategoryPath(['Startseite', 'BRW ToolShop', 'Fertigungstechnik', 'Fräsen', 'Fräsen VHM']));
+        self::assertTrue($rule->allowsCategoryPath(['Startseite', 'BRW ToolShop', 'Maschinenwerkzeuge', 'Bohren Metal']));
+        self::assertTrue($rule->allowsCategoryPath(['Startseite', 'BRW ToolShop', 'FUTURO Werkzeuge', 'FUTURO Senken, Reiben, Drehen, Sägen und Trennen']));
+        self::assertTrue($rule->allowsCategoryPath(['Startseite', 'BRW ToolShop', 'NERIOX Werkzeuge', 'NERIOX Fertigungstechnik', 'NERIOX Fräsen HSS']));
+        self::assertFalse($rule->allowsCategoryPath(['Startseite', 'BRW ToolShop', 'FUTURO Werkzeuge', 'FUTURO Messtechnik']));
+        self::assertFalse($rule->allowsCategoryPath(['Startseite', 'BRW ToolShop', 'FUTURO Werkzeuge', 'FUTURO Spanntechnik']));
+        self::assertFalse($rule->allowsCategoryPath(['Startseite', 'BRW ToolShop', 'Messwerkzeuge', 'Signieren und Markieren']));
+        self::assertTrue($rule->allowsCategoryPath([]));
+    }
+
     public function testOtherPartnersHaveNoBrandLimit(): void
     {
         self::assertTrue((new PartnerRules())->get('fraisa')->allowsTitle(null));
+        self::assertTrue((new PartnerRules())->get('fraisa')->allowsCategoryPath(['Messtechnik']));
     }
 }

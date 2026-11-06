@@ -98,7 +98,30 @@ final class BrwFamilyParser implements PartnerParserInterface, ArticleDetailPars
             $total = (int) $m[1];
         }
 
-        return new ParsedPage($items, array_keys($pageUrls), $total, $familyName);
+        return new ParsedPage($items, array_keys($pageUrls), $total, $familyName, self::categoryPath($document));
+    }
+
+    /** @return list<string> */
+    private static function categoryPath(\Dom\HTMLDocument $document): array
+    {
+        foreach ($document->querySelectorAll('script[type="application/ld+json"]') as $script) {
+            $data = json_decode((string) $script->textContent, true);
+            if (!is_array($data) || ($data['@type'] ?? null) !== 'BreadcrumbList' || !is_array($data['itemListElement'] ?? null)) {
+                continue;
+            }
+
+            $path = [];
+            foreach ($data['itemListElement'] as $entry) {
+                $name = is_array($entry) && is_array($entry['item'] ?? null) ? ($entry['item']['name'] ?? null) : null;
+                if (is_string($name)) {
+                    $path[] = $name;
+                }
+            }
+
+            return $path;
+        }
+
+        return [];
     }
 
     public function parseArticleDetails(string $html): array
